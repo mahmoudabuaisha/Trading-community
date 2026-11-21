@@ -1,0 +1,29 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc --noEmit && vite build",
+        "typecheck": "vue-tsc --noEmit",
+        "test": "vitest run",
+        "format": "prettier --write resources/js resources/css"
+    },
+    "dependencies": {
+        "@fontsource/alexandria": "^5.3.0",
+        "chart.js": "^4.6.1",
+        "lucide-vue-next": "^1.0.0",
+        "pinia": "^4.1.0",
+        "vue": "^3.5.46",
+        "vue-router": "^5.5.1"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^6.0.11",
+        "laravel-vite-plugin": "^3.2.1",
+        "prettier": "^3.10.1",
+        "typescript": "^6.0.3",
+        "vite": "^8.3.8",
+        "vitest": "^5.1.1",
+        "vue-tsc": "^3.3.14"
+    }
+}
