@@ -82,8 +82,10 @@ sed -e "s|__SITE_HOST__|${SITE_HOST}|g" -e "s|__APP_DIR__|${APP_DIR}|g" -e "s|__
 ln -sf /etc/nginx/sites-available/trading-community /etc/nginx/sites-enabled/trading-community
 rm -f /etc/nginx/sites-enabled/default
 nginx -t
-systemctl reload nginx
-systemctl enable --now "php${PHP_VERSION}-fpm" nginx mysql
+systemctl enable --now "php${PHP_VERSION}-fpm" mysql
+# nginx may be installed but stopped (e.g. another service held port 80 at install time).
+systemctl enable nginx
+systemctl reload-or-restart nginx
 
 echo
 echo "Installed. Open http://${SITE_HOST} and sign in with ${ADMIN_EMAIL}."
