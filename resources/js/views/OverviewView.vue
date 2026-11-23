@@ -64,7 +64,7 @@ const quickLinks = [
     <section class="stack">
         <div class="banner">
             <div>
-                <span class="eyebrow">YOUR PERSONAL COMMAND CENTER</span>
+                <span class="eyebrow">SN TASKS / YOUR PERSONAL SPACE</span>
                 <h2>{{ greeting }}{{ isRtl ? '،' : ',' }} {{ firstName }} <span class="gold">✦</span></h2>
                 <p>{{ t('overview.bannerSub') }}</p>
                 <div class="banner__quote"><Sparkles :size="15" aria-hidden="true" />{{ quote }}</div>

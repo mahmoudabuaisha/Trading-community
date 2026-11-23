@@ -203,7 +203,7 @@ const languages: Locale[] = ['ar', 'en']
     <section class="stack">
         <div class="section-head">
             <div>
-                <span class="eyebrow">PERSONAL IDENTITY / SN DAILY</span>
+                <span class="eyebrow">SN TASKS / PERSONAL IDENTITY</span>
                 <h2>{{ t('profile.head') }}</h2>
                 <p>{{ t('profile.sub') }}</p>
             </div>

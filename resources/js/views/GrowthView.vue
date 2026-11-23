@@ -10,7 +10,7 @@ const workspace = useWorkspaceStore()
 <template>
     <section class="stack">
         <div class="growth-hero">
-            <span class="eyebrow">SN / PERSONAL GROWTH</span>
+            <span class="eyebrow">SN TASKS / PERSONAL GROWTH</span>
             <div class="growth-hero__icon"><Sparkles :size="26" aria-hidden="true" /></div>
             <h2>{{ t('growth.head') }}</h2>
             <p>{{ t('growth.sub') }}</p>

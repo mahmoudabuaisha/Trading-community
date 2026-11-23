@@ -176,7 +176,7 @@ function auditDetail(entry: AuditEntry): string {
     <section class="stack">
         <div class="section-head">
             <div>
-                <span class="eyebrow">SN COMMAND VAULT / ROOT ACCESS</span>
+                <span class="eyebrow">SN TASKS / ROOT ACCESS</span>
                 <h2>{{ t('admin.head') }}</h2>
                 <p>{{ t('admin.sub') }}</p>
             </div>

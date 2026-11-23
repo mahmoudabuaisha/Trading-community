@@ -4,7 +4,6 @@ import {
     BarChart3,
     CalendarDays,
     Clock3,
-    Command,
     Flag,
     LayoutGrid,
     LogOut,
@@ -103,8 +102,8 @@ async function signOut(): Promise<void> {
             <aside class="nav-drawer" :aria-label="t('nav.main')">
                 <div class="nav-drawer__head">
                     <div class="brand">
-                        <span class="brand__mark"><Command :size="20" aria-hidden="true" /></span>
-                        <span><b>SN</b><small>DAILY COMMAND CENTER</small></span>
+                        <img class="brand__mark" src="/images/icon-192.png" width="46" height="46" alt="" />
+                        <span><b>SN TASKS</b><small>PLAN · ORGANIZE · ACHIEVE</small></span>
                     </div>
                     <button type="button" class="icon-btn" :aria-label="t('common.close')" @click="navOpen = false">
                         <X :size="18" />
@@ -167,7 +166,7 @@ async function signOut(): Promise<void> {
         <section class="main-area">
             <header class="topbar">
                 <div>
-                    <span class="topbar__kicker">SN WORKSPACE / 01</span>
+                    <span class="topbar__kicker">SN TASKS</span>
                     <h1>{{ pageTitle }}</h1>
                 </div>
                 <div class="topbar__actions">

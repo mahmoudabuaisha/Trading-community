@@ -727,6 +727,7 @@ select.input option {
     gap: var(--space-3);
 }
 .brand__mark {
+    object-fit: cover;
     display: grid;
     place-items: center;
     inline-size: 46px;
