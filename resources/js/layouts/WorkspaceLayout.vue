@@ -69,7 +69,7 @@ const pageTitle = computed(() =>
 )
 const fullName = computed(() => `${auth.user?.displayName ?? ''} ${auth.user?.surname ?? ''}`.trim())
 
-watch(pageTitle, (title) => (document.title = `${title} · SN Daily Command Center`), { immediate: true })
+watch(pageTitle, (title) => (document.title = `${title} · SN Tasks`), { immediate: true })
 watch(
     () => route.fullPath,
     () => (navOpen.value = false),

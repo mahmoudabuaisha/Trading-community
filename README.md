@@ -1,4 +1,4 @@
-# SN Daily Command Center
+# SN Tasks
 
 مساحة عمل يومية شخصية (عربي / English) لتنظيم المهام والخطط والأهداف وجلسات التركيز، مع لوحة إدارة للمنصة.
 A bilingual (Arabic RTL / English) personal productivity workspace with an admin console.
