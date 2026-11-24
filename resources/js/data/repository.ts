@@ -6,6 +6,9 @@
  */
 import { request } from './http'
 import type {
+    Habit,
+    HabitMonth,
+    MoodEntry,
     Achievement,
     AdminStats,
     AdminUser,
@@ -61,6 +64,18 @@ export const repository = {
     saveReview: (review: Pick<DailyReview, 'date' | 'win' | 'unfinished' | 'lesson' | 'tomorrow'>) =>
         request<{ review: DailyReview }>('PUT', `/reviews/${review.date}`, review).then((r) => r.review),
 
+    loadHabits: (month: string) => request<HabitMonth>('GET', `/habits?month=${month}`),
+    createHabit: (name: string, targetDays: number | null) =>
+        request<{ habit: Habit }>('POST', '/habits', { name, targetDays }).then((r) => r.habit),
+    updateHabit: (id: number, patch: { name?: string; targetDays?: number | null }) =>
+        request<{ habit: Habit }>('PATCH', `/habits/${id}`, patch).then((r) => r.habit),
+    deleteHabit: (id: number) => request<void>('DELETE', `/habits/${id}`),
+    setHabitCheck: (id: number, day: string, done: boolean) =>
+        request<void>('PUT', `/habits/${id}/checks/${day}`, { done }),
+    saveMood: (entry: MoodEntry) =>
+        request<MoodEntry>('PUT', `/moods/${entry.day}`, { mood: entry.mood, motivation: entry.motivation }),
+    saveHabitNote: (month: string, body: string) =>
+        request<{ note: string }>('PUT', `/habit-notes/${month}`, { body }).then((r) => r.note),
     loadLessons: () => request<{ lessons: Lesson[] }>('GET', '/lessons').then((r) => r.lessons),
     loadMessages: () => request<{ messages: Message[] }>('GET', '/messages').then((r) => r.messages),
     sendMessage: (body: string) => request<{ message: Message }>('POST', '/messages', { body }).then((r) => r.message),

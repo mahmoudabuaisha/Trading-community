@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FocusSessionController;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\HabitController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
@@ -49,6 +50,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::put('profile', [ProfileController::class, 'update']);
     Route::post('focus-sessions', [FocusSessionController::class, 'store']);
     Route::put('reviews/{date}', [ReviewController::class, 'update'])->where('date', '\d{4}-\d{2}-\d{2}');
+
+    Route::get('habits', [HabitController::class, 'index']);
+    Route::post('habits', [HabitController::class, 'store']);
+    Route::patch('habits/{habit}', [HabitController::class, 'update']);
+    Route::delete('habits/{habit}', [HabitController::class, 'destroy']);
+    Route::put('habits/{habit}/checks/{day}', [HabitController::class, 'check'])->where('day', '\d{4}-\d{2}-\d{2}');
+    Route::put('moods/{day}', [HabitController::class, 'mood'])->where('day', '\d{4}-\d{2}-\d{2}');
+    Route::put('habit-notes/{month}', [HabitController::class, 'note'])->where('month', '\d{4}-(0[1-9]|1[0-2])');
 
     Route::get('lessons', [LessonController::class, 'index']);
     Route::get('messages', [MessageController::class, 'index']);

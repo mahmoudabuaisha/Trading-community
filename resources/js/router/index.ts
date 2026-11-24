@@ -23,6 +23,7 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('../views/TasksView.vue'),
             },
             { path: 'goals', name: 'goals', component: () => import('../views/GoalsView.vue') },
+            { path: 'habits', name: 'habits', component: () => import('../views/HabitsView.vue') },
             { path: 'achievements', name: 'achievements', component: () => import('../views/AchievementsView.vue') },
             { path: 'growth', name: 'growth', component: () => import('../views/GrowthView.vue') },
             { path: 'profile', name: 'profile', component: () => import('../views/ProfileView.vue') },

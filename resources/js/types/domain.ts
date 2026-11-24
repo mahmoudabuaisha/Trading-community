@@ -234,3 +234,25 @@ export interface LessonInput {
     image: Blob | null
     removeImage: boolean
 }
+
+export interface Habit {
+    id: number
+    name: string
+    /** Monthly goal in days; null means every day. */
+    targetDays: number | null
+    position: number
+}
+
+/** A daily self-rating; each value is 1–10 or null when not rated. */
+export interface MoodEntry {
+    day: string
+    mood: number | null
+    motivation: number | null
+}
+
+export interface HabitMonth {
+    habits: Habit[]
+    checks: { habitId: number; day: string }[]
+    moods: MoodEntry[]
+    note: string
+}

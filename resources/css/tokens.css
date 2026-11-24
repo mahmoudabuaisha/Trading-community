@@ -27,6 +27,13 @@
     --steel-600: #5b5e68;
     --glint-blue: #8fb6ff;
 
+    /* Week bands in the habit tracker: five hues told apart by label as well as colour. */
+    --week-0: #d6ad62;
+    --week-1: #8fb6ff;
+    --week-2: #6fd3c7;
+    --week-3: #e79ac0;
+    --week-4: #79cda4;
+
     /* Text */
     --text: #f0e7d5;
     --text-soft: #c2b69e;

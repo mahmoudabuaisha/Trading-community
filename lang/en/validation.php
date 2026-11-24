@@ -181,6 +181,10 @@ return [
     */
 
     'custom' => [
+        'habits' => [
+            'limit' => 'You can track at most :max habits.',
+            'future' => 'A day cannot be recorded before it happens.',
+        ],
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],

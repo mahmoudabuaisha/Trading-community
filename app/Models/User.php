@@ -105,4 +105,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class);
     }
+
+    public function habits(): HasMany
+    {
+        return $this->hasMany(Habit::class);
+    }
+
+    public function moodEntries(): HasMany
+    {
+        return $this->hasMany(MoodEntry::class);
+    }
+
+    public function habitNotes(): HasMany
+    {
+        return $this->hasMany(HabitNote::class);
+    }
 }

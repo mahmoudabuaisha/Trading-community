@@ -12,6 +12,7 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Command center | Today's top priorities and timeline, focus timer (15/25/50/90 min), daily review, life areas, calendar, 7-day rhythm, "universe" map, rule-based assistant |
 | Plans | Daily, weekly, monthly and yearly task lists with period navigation, filters, priorities, categories, due dates, undoable delete |
 | Goals | Measurable goals per period with progress steps |
+| Habit tracker | Monthly grid of habits by week with daily totals, per-habit goals and analysis, a consistency chart, daily mood and motivation ratings with weekly averages, and monthly notes |
 | Achievements | Badges awarded automatically (first task, 10/50/100 tasks, 7/30-day streaks, first goal, 10 focus hours) |
 | Growth & motivation | Library of texts published by administrators |
 | Education | Lessons (title, text, image) published by administrators |
