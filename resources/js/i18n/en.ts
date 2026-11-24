@@ -69,6 +69,8 @@ export const en: Messages = {
         resetDone: 'Password updated. You can sign in now.',
     },
     nav: {
+        showSidebar: 'Show sidebar',
+        hideSidebar: 'Hide sidebar',
         menu: 'Menu',
         open: 'Open navigation',
         main: 'Main navigation',

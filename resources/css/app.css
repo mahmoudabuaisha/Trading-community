@@ -116,8 +116,10 @@ a {
 }
 .hint-box {
     padding: var(--space-4);
-    border: 1px dashed var(--line);
+    border: 1px solid var(--line-soft);
+    border-inline-start: 2px solid var(--gold-500);
     border-radius: var(--radius-md);
+    background: rgba(214, 173, 98, 0.05);
     color: var(--text-soft);
     font-size: var(--text-sm);
 }
@@ -540,25 +542,33 @@ select.input option {
 .empty {
     display: grid;
     justify-items: center;
-    gap: var(--space-2);
-    padding: var(--space-8) var(--space-4);
-    border: 1px dashed var(--line);
-    border-radius: var(--radius-lg);
+    gap: var(--space-3);
+    padding: var(--space-10) var(--space-5);
+    border-radius: var(--radius-xl);
     text-align: center;
-    background: var(--surface-sunken);
 }
 .empty__icon {
     display: grid;
     place-items: center;
-    inline-size: 42px;
-    block-size: 42px;
-    border-radius: var(--radius-md);
-    background: rgba(131, 216, 245, 0.1);
-    color: var(--blue-500);
+    inline-size: 64px;
+    block-size: 64px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(232, 197, 125, 0.22), transparent);
+    color: var(--gold-300);
+    box-shadow: 0 0 26px rgba(214, 173, 98, 0.25);
+}
+.empty b {
+    font-size: var(--text-lg);
+    background: var(--gold-metal);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 .empty p {
-    color: var(--text-muted);
+    color: var(--text-soft);
     font-size: var(--text-sm);
+    max-inline-size: 46ch;
 }
 
 .section-head,
@@ -844,6 +854,53 @@ select.input option {
     color: var(--text-soft);
     font-size: var(--text-xs);
 }
+/* Desktop toggle: sits on the sidebar's edge, and stays at the screen edge when the sidebar is tucked away. */
+.sidebar-toggle {
+    position: fixed;
+    z-index: 31;
+    top: var(--space-6);
+    left: calc(var(--sidebar-width) - var(--space-6));
+    display: grid;
+    place-items: center;
+    inline-size: 40px;
+    block-size: 40px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: var(--bg-700);
+    color: var(--gold-300);
+    box-shadow:
+        var(--shadow-card),
+        0 0 18px rgba(214, 173, 98, 0.2);
+    transition:
+        left var(--motion-base),
+        color var(--motion-fast),
+        border-color var(--motion-fast);
+}
+.sidebar-toggle:hover {
+    color: var(--gold-200);
+    border-color: var(--gold-300);
+}
+.app-shell,
+.sidebar {
+    transition:
+        padding-left var(--motion-base),
+        translate var(--motion-base);
+}
+.app-shell--collapsed {
+    padding-left: 0;
+}
+.app-shell--collapsed .sidebar {
+    translate: calc(-100% - var(--space-5)) 0;
+}
+.app-shell--collapsed .sidebar-toggle {
+    left: var(--space-3);
+}
+/* With the sidebar away the page may use the extra width; keep clear of the toggle. */
+.app-shell--collapsed .main-area {
+    max-inline-size: 1640px;
+    padding-left: calc(var(--space-12) + var(--space-3));
+}
+
 .nav-scrim {
     position: fixed;
     inset: 0;
@@ -945,6 +1002,12 @@ select.input option {
 }
 
 @media (max-width: 1100px) {
+    .sidebar-toggle {
+        display: none;
+    }
+    .app-shell--collapsed .main-area {
+        padding-left: clamp(var(--space-4), 2.5vw, var(--space-8));
+    }
     .app-shell {
         padding-left: 0;
     }
@@ -2535,6 +2598,7 @@ a.btn-metal {
     .growth-reading,
     .task-row,
     .dash-card,
+    .empty,
     .tile,
     .sidebar,
     .date-card,
@@ -2552,6 +2616,7 @@ a.btn-metal {
 .growth-reading,
 .task-row,
 .dash-card,
+.empty,
 .tile,
 .sidebar,
 .date-card,
@@ -2570,6 +2635,7 @@ a.btn-metal {
 .growth-reading::before,
 .task-row::before,
 .dash-card::before,
+.empty::before,
 .tile::before,
 .sidebar::before,
 .date-card::before,

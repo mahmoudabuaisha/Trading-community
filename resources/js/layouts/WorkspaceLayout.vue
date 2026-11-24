@@ -10,6 +10,8 @@ import {
     House,
     LogOut,
     Mail,
+    PanelLeftClose,
+    PanelLeftOpen,
     Menu,
     Shield,
     Sparkles,
@@ -37,6 +39,25 @@ const router = useRouter()
 
 const { tagline } = useSiteCopy()
 const navOpen = ref(false)
+
+// Desktop: the sidebar can be tucked away to give the page its full width. The choice is remembered.
+const SIDEBAR_KEY = 'sn-dcc:sidebar-collapsed:v1'
+function readCollapsed(): boolean {
+    try {
+        return localStorage.getItem(SIDEBAR_KEY) === '1'
+    } catch {
+        return false
+    }
+}
+const collapsed = ref(readCollapsed())
+function toggleSidebar(): void {
+    collapsed.value = !collapsed.value
+    try {
+        localStorage.setItem(SIDEBAR_KEY, collapsed.value ? '1' : '0')
+    } catch {
+        /* storage unavailable — the choice lasts for this visit only */
+    }
+}
 const now = ref(new Date())
 let clock = 0
 let unreadPoll = 0
@@ -110,12 +131,23 @@ async function signOut(): Promise<void> {
 </script>
 
 <template>
-    <main class="app-shell" :class="{ 'app-shell--nav-open': navOpen }">
+    <main class="app-shell" :class="{ 'app-shell--nav-open': navOpen, 'app-shell--collapsed': collapsed }">
         <WorkspaceBackdrop />
 
         <div v-if="navOpen" class="nav-scrim" @click="navOpen = false" />
 
-        <aside class="sidebar" :aria-label="t('nav.main')">
+        <button
+            type="button"
+            class="sidebar-toggle"
+            :aria-expanded="!collapsed"
+            :aria-label="t(collapsed ? 'nav.showSidebar' : 'nav.hideSidebar')"
+            :title="t(collapsed ? 'nav.showSidebar' : 'nav.hideSidebar')"
+            @click="toggleSidebar"
+        >
+            <component :is="collapsed ? PanelLeftOpen : PanelLeftClose" :size="20" aria-hidden="true" />
+        </button>
+
+        <aside class="sidebar" :aria-label="t('nav.main')" :inert="collapsed && !navOpen">
             <RouterLink :to="{ name: 'overview' }" class="sidebar__logo" :aria-label="t('nav.overview')">
                 <BrandLogo label="SN Tasks" />
             </RouterLink>
