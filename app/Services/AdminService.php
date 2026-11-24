@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Models\AdminAudit;
+use App\Models\Lesson;
 use App\Models\Motivation;
+use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -95,6 +98,59 @@ class AdminService
     /**
      * @param  array<string, mixed>  $details
      */
+    /**
+     * @param  array<string, string|null>  $content  Content keys in snake_case; null or '' clears an override.
+     */
+    public function saveContent(User $admin, array $content): void
+    {
+        DB::transaction(function () use ($admin, $content): void {
+            foreach (Setting::CONTENT_KEYS as $key) {
+                if (! array_key_exists($key, $content)) {
+                    continue;
+                }
+                $value = trim((string) $content[$key]);
+                Setting::updateOrCreate(['key' => $key], ['value' => $value === '' ? null : $value]);
+            }
+            $this->audit($admin, 'settings_updated', null, []);
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function saveLesson(User $admin, ?Lesson $lesson, array $data, ?UploadedFile $image, bool $removeImage): Lesson
+    {
+        // Store the new file first so a failed write never leaves the row pointing at nothing.
+        $path = $image?->store(Lesson::IMAGE_DIRECTORY, 'public');
+
+        return DB::transaction(function () use ($admin, $lesson, $data, $path, $removeImage): Lesson {
+            $creating = $lesson === null;
+            $lesson ??= new Lesson;
+            $lesson->fill($data);
+            if ($path) {
+                $lesson->image_path = $path;
+            } elseif ($removeImage) {
+                $lesson->image_path = null;
+            }
+            if ($creating) {
+                $lesson->created_by = $admin->id;
+                $lesson->position = $data['position'] ?? ((int) Lesson::max('position') + 1);
+            }
+            $lesson->save();
+            $this->audit($admin, $creating ? 'lesson_created' : 'lesson_updated', null, ['name' => $lesson->title]);
+
+            return $lesson;
+        });
+    }
+
+    public function deleteLesson(User $admin, Lesson $lesson): void
+    {
+        DB::transaction(function () use ($admin, $lesson): void {
+            $lesson->delete();
+            $this->audit($admin, 'lesson_deleted', null, ['name' => $lesson->title]);
+        });
+    }
+
     private function audit(User $admin, string $action, ?User $target, array $details): void
     {
         AdminAudit::create([

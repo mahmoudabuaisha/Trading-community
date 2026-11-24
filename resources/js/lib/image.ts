@@ -26,3 +26,30 @@ export async function fileToAvatar(
         return { ok: false, reason: 'failed' }
     }
 }
+
+/** Largest lesson image the API accepts (2 MB). */
+const LESSON_MAX_BYTES = 2 * 1024 * 1024
+const LESSON_EDGE = 1600
+
+/** Downscale a picture to a JPEG small enough to upload as a lesson image. */
+export async function fileToLessonImage(
+    file: File,
+): Promise<{ ok: true; blob: Blob } | { ok: false; reason: AvatarError }> {
+    if (!file.type.startsWith('image/')) return { ok: false, reason: 'invalid' }
+    try {
+        const bitmap = await createImageBitmap(file)
+        const scale = Math.min(1, LESSON_EDGE / Math.max(bitmap.width, bitmap.height))
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale))
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale))
+        const context = canvas.getContext('2d')
+        if (!context) return { ok: false, reason: 'failed' }
+        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+        bitmap.close()
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.84))
+        if (!blob) return { ok: false, reason: 'failed' }
+        return blob.size > LESSON_MAX_BYTES ? { ok: false, reason: 'tooBig' } : { ok: true, blob }
+    } catch {
+        return { ok: false, reason: 'failed' }
+    }
+}

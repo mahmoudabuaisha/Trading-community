@@ -24,6 +24,13 @@ import type {
     TaskInput,
     TaskStatus,
     User,
+    Lesson,
+    LessonInput,
+    Message,
+    SiteContent,
+    Thread,
+    ThreadUser,
+    UnreadCounts,
 } from '../types/domain'
 
 export const repository = {
@@ -54,6 +61,11 @@ export const repository = {
     saveReview: (review: Pick<DailyReview, 'date' | 'win' | 'unfinished' | 'lesson' | 'tomorrow'>) =>
         request<{ review: DailyReview }>('PUT', `/reviews/${review.date}`, review).then((r) => r.review),
 
+    loadLessons: () => request<{ lessons: Lesson[] }>('GET', '/lessons').then((r) => r.lessons),
+    loadMessages: () => request<{ messages: Message[] }>('GET', '/messages').then((r) => r.messages),
+    sendMessage: (body: string) => request<{ message: Message }>('POST', '/messages', { body }).then((r) => r.message),
+    unreadCounts: () => request<UnreadCounts>('GET', '/messages/unread'),
+
     // Admin
     adminOverview: () => request<{ stats: AdminStats; audit: AuditEntry[] }>('GET', '/admin/overview'),
     adminUsers: (search: string, page: number) =>
@@ -68,4 +80,31 @@ export const repository = {
     adminUpdateMotivation: (id: number, patch: Partial<MotivationInput>) =>
         request<{ motivation: Motivation }>('PATCH', `/admin/motivations/${id}`, patch).then((r) => r.motivation),
     adminDeleteMotivation: (id: number) => request<void>('DELETE', `/admin/motivations/${id}`),
+    adminContent: () => request<{ content: SiteContent }>('GET', '/admin/settings').then((r) => r.content),
+    adminSaveContent: (content: SiteContent) =>
+        request<{ content: SiteContent }>('PUT', '/admin/settings', content).then((r) => r.content),
+    adminThreads: () => request<{ threads: Thread[] }>('GET', '/admin/threads').then((r) => r.threads),
+    adminThread: (userId: number) =>
+        request<{ user: ThreadUser; messages: Message[] }>('GET', `/admin/threads/${userId}`),
+    adminSendMessage: (userId: number, body: string) =>
+        request<{ message: Message }>('POST', `/admin/threads/${userId}`, { body }).then((r) => r.message),
+    adminLessons: () => request<{ lessons: Lesson[] }>('GET', '/admin/lessons').then((r) => r.lessons),
+    adminSaveLesson: (id: number | null, input: Partial<LessonInput>) =>
+        request<{ lesson: Lesson }>(
+            'POST',
+            id === null ? '/admin/lessons' : `/admin/lessons/${id}`,
+            lessonForm(input),
+        ).then((r) => r.lesson),
+    adminDeleteLesson: (id: number) => request<void>('DELETE', `/admin/lessons/${id}`),
+}
+
+/** Lessons travel as multipart form data so the image can go with the text. */
+function lessonForm(input: Partial<LessonInput>): FormData {
+    const form = new FormData()
+    if (input.title !== undefined) form.set('title', input.title)
+    if (input.body !== undefined) form.set('body', input.body)
+    if (input.isPublished !== undefined) form.set('isPublished', input.isPublished ? '1' : '0')
+    if (input.removeImage) form.set('removeImage', '1')
+    if (input.image) form.set('image', input.image, 'lesson.jpg')
+    return form
 }

@@ -26,6 +26,8 @@ const routes: RouteRecordRaw[] = [
             { path: 'achievements', name: 'achievements', component: () => import('../views/AchievementsView.vue') },
             { path: 'growth', name: 'growth', component: () => import('../views/GrowthView.vue') },
             { path: 'profile', name: 'profile', component: () => import('../views/ProfileView.vue') },
+            { path: 'education', name: 'education', component: () => import('../views/EducationView.vue') },
+            { path: 'messages', name: 'messages', component: () => import('../views/MessagesView.vue') },
             // Admin has its own route and guard; the server enforces the role again on every request.
             {
                 path: 'admin',

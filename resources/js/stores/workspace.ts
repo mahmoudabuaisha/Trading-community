@@ -4,6 +4,9 @@ import { repository } from '../data/repository'
 import { messages, setLocale, t } from '../i18n'
 import { completionStreak, percent, today } from '../lib/dates'
 import type {
+    Lesson,
+    SiteContent,
+    UnreadCounts,
     Achievement,
     Category,
     DailyReview,
@@ -28,6 +31,9 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     const motivations = ref<Motivation[]>([])
     const focus = ref<FocusTotals>({ totalMinutes: 0, todayMinutes: 0 })
     const review = ref<DailyReview | null>(null)
+    const content = ref<SiteContent>({ taglineAr: null, taglineEn: null, welcomeSubAr: null, welcomeSubEn: null })
+    const lessons = ref<Lesson[]>([])
+    const unread = ref<UnreadCounts>({ member: 0, admin: 0 })
     const loading = ref(false)
     const loaded = ref(false)
     const error = ref<unknown>(null)
@@ -54,6 +60,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
             motivations.value = payload.motivations
             focus.value = payload.focus
             review.value = payload.review
+            content.value = payload.content
             useAuthStore().setUser(payload.user)
             loaded.value = true
         } catch (e) {
@@ -71,6 +78,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         motivations.value = []
         focus.value = { totalMinutes: 0, todayMinutes: 0 }
         review.value = null
+        lessons.value = []
+        unread.value = { member: 0, admin: 0 }
         loaded.value = false
     }
 
@@ -164,6 +173,19 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         celebrate(result.newAchievements)
     }
 
+    async function loadLessons(): Promise<void> {
+        lessons.value = await repository.loadLessons()
+    }
+
+    /** Refresh the message badges; a failed poll simply keeps the last counts. */
+    async function refreshUnread(): Promise<void> {
+        try {
+            unread.value = await repository.unreadCounts()
+        } catch {
+            /* keep the previous counts */
+        }
+    }
+
     async function saveReview(fields: Pick<DailyReview, 'win' | 'unfinished' | 'lesson' | 'tomorrow'>): Promise<void> {
         review.value = await repository.saveReview({ date: today(), ...fields })
     }
@@ -176,6 +198,9 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         motivations,
         focus,
         review,
+        content,
+        lessons,
+        unread,
         loading,
         loaded,
         error,
@@ -196,5 +221,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         saveProfile,
         logFocusSession,
         saveReview,
+        loadLessons,
+        refreshUnread,
     }
 })

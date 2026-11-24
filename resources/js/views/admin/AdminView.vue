@@ -1,6 +1,23 @@
 <script setup lang="ts">
-import { Activity, Award, CircleCheckBig, Crown, Plus, Search, Shield, Sparkles, Users, X } from 'lucide-vue-next'
-import { onMounted, reactive, ref, watch } from 'vue'
+import {
+    Activity,
+    Award,
+    CircleCheckBig,
+    Crown,
+    GraduationCap,
+    Mail,
+    Plus,
+    Search,
+    Shield,
+    Sparkles,
+    Type,
+    Users,
+    X,
+} from 'lucide-vue-next'
+import { onMounted, reactive, ref, watch, type Component } from 'vue'
+import AdminContent from '../../components/admin/AdminContent.vue'
+import AdminLessons from '../../components/admin/AdminLessons.vue'
+import AdminMessages from '../../components/admin/AdminMessages.vue'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import StatCard from '../../components/StatCard.vue'
@@ -9,6 +26,7 @@ import { ApiError } from '../../data/http'
 import { formatDate, messages, t } from '../../i18n'
 import { useAdminStore } from '../../stores/admin'
 import { useUiStore } from '../../stores/ui'
+import { useWorkspaceStore } from '../../stores/workspace'
 import {
     MOTIVATION_CATEGORIES,
     type AdminUser,
@@ -30,6 +48,23 @@ async function run(action: () => Promise<void>, successKey?: string): Promise<bo
         ui.failure(error)
         return false
     }
+}
+
+type TabId = 'users' | 'content' | 'growth' | 'education' | 'messages' | 'audit'
+const tabs: { id: TabId; label: string; icon: Component }[] = [
+    { id: 'users', label: 'tabUsers', icon: Users },
+    { id: 'content', label: 'tabContent', icon: Type },
+    { id: 'growth', label: 'tabGrowth', icon: Sparkles },
+    { id: 'education', label: 'tabEducation', icon: GraduationCap },
+    { id: 'messages', label: 'tabMessages', icon: Mail },
+    { id: 'audit', label: 'tabAudit', icon: Shield },
+]
+const tab = ref<TabId>('users')
+const workspace = useWorkspaceStore()
+
+/** Jump to the inbox with this member's thread open (empty if they never wrote). */
+async function openMessages(user: AdminUser): Promise<void> {
+    if (await run(() => admin.openThread(user.id))) tab.value = 'messages'
 }
 
 const refresh = () => run(() => admin.loadAll())
@@ -212,7 +247,26 @@ function auditDetail(entry: AuditEntry): string {
             />
         </div>
 
-        <div class="panel">
+        <nav class="tabs" :aria-label="t('nav.admin')">
+            <button
+                v-for="item in tabs"
+                :key="item.id"
+                type="button"
+                :class="{ tabs__active: tab === item.id }"
+                :aria-pressed="tab === item.id"
+                @click="tab = item.id"
+            >
+                <component :is="item.icon" :size="15" aria-hidden="true" />{{ t(`admin.${item.label}`) }}
+                <i
+                    v-if="item.id === 'messages' && workspace.unread.admin"
+                    class="nav-item__count nav-item__count--alert"
+                >
+                    {{ workspace.unread.admin }}
+                </i>
+            </button>
+        </nav>
+
+        <div v-show="tab === 'users'" class="panel">
             <div class="section-head">
                 <div>
                     <span class="eyebrow">IDENTITY &amp; ACCESS</span>
@@ -259,6 +313,9 @@ function auditDetail(entry: AuditEntry): string {
                         <button type="button" class="pill" @click="askRole(user)">
                             {{ t(user.role === 'admin' ? 'admin.revoke' : 'admin.grant') }}
                         </button>
+                        <button type="button" class="pill" @click="openMessages(user)">
+                            {{ t('admin.message') }}
+                        </button>
                         <button type="button" class="pill" @click="askRevoke(user)">
                             {{ t('admin.endSessions') }}
                         </button>
@@ -290,7 +347,9 @@ function auditDetail(entry: AuditEntry): string {
             </div>
         </div>
 
-        <div class="panel">
+        <AdminContent v-if="tab === 'content'" />
+
+        <div v-show="tab === 'growth'" class="panel">
             <div class="section-head">
                 <div>
                     <span class="eyebrow">GROWTH &amp; MOTIVATION STUDIO</span>
@@ -365,7 +424,11 @@ function auditDetail(entry: AuditEntry): string {
             </div>
         </div>
 
-        <div class="panel">
+        <AdminLessons v-if="tab === 'education'" />
+
+        <AdminMessages v-if="tab === 'messages'" />
+
+        <div v-show="tab === 'audit'" class="panel">
             <div class="section-head">
                 <div>
                     <h3>{{ t('admin.auditHead') }}</h3>

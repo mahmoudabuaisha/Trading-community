@@ -99,4 +99,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(DailyReview::class);
     }
+
+    /** The member's private thread with the administrators. */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
 }

@@ -5,9 +5,11 @@ import {
     CalendarDays,
     Clock3,
     Flag,
+    GraduationCap,
     Crown,
     House,
     LogOut,
+    Mail,
     Menu,
     Shield,
     Sparkles,
@@ -22,6 +24,7 @@ import BrandLogo from '../components/BrandLogo.vue'
 import EmptyState from '../components/EmptyState.vue'
 import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
 import UserAvatar from '../components/UserAvatar.vue'
+import { useSiteCopy } from '../lib/content'
 import { describeError } from '../stores/ui'
 import { formatDate, locale, setLocale, t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
@@ -32,9 +35,11 @@ const workspace = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
 
+const { tagline } = useSiteCopy()
 const navOpen = ref(false)
 const now = ref(new Date())
 let clock = 0
+let unreadPoll = 0
 
 interface NavItem {
     key: string
@@ -60,6 +65,8 @@ const navItems = computed<NavItem[]>(() => {
         item('goals', 'goals', TrendingUp),
         item('achievements', 'achievements', Award),
         item('growth', 'growth', Sparkles),
+        item('education', 'education', GraduationCap),
+        item('messages', 'messages', Mail),
         item('profile', 'profile', UserRound),
     ]
 })
@@ -85,10 +92,13 @@ onMounted(() => {
     if (auth.user) setLocale(auth.user.language)
     void workspace.load()
     clock = window.setInterval(() => (now.value = new Date()), 1000)
+    void workspace.refreshUnread()
+    unreadPoll = window.setInterval(() => void workspace.refreshUnread(), 60_000)
     window.addEventListener('keydown', onKeydown)
 })
 onBeforeUnmount(() => {
     window.clearInterval(clock)
+    window.clearInterval(unreadPoll)
     window.removeEventListener('keydown', onKeydown)
 })
 
@@ -124,6 +134,12 @@ async function signOut(): Promise<void> {
                     <i v-if="item.key === 'achievements' && workspace.achievements.length" class="nav-item__count">
                         {{ workspace.achievements.length }}
                     </i>
+                    <i
+                        v-if="item.key === 'messages' && workspace.unread.member"
+                        class="nav-item__count nav-item__count--alert"
+                    >
+                        {{ workspace.unread.member }}
+                    </i>
                 </RouterLink>
 
                 <RouterLink
@@ -135,6 +151,9 @@ async function signOut(): Promise<void> {
                 >
                     <span class="nav-item__icon"><Shield :size="20" aria-hidden="true" /></span>
                     <span>{{ t('nav.admin') }}</span>
+                    <i v-if="workspace.unread.admin" class="nav-item__count nav-item__count--alert">{{
+                        workspace.unread.admin
+                    }}</i>
                 </RouterLink>
 
                 <button type="button" class="nav-item nav-item--button" @click="signOut">
@@ -196,7 +215,7 @@ async function signOut(): Promise<void> {
                 </div>
 
                 <h1 class="topbar__title" :class="{ 'topbar__title--tagline': route.name === 'overview' }">
-                    {{ route.name === 'overview' ? t('dash.tagline') : pageTitle }}
+                    {{ route.name === 'overview' ? tagline : pageTitle }}
                 </h1>
             </header>
 

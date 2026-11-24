@@ -110,6 +110,7 @@ export interface DashboardPayload {
     motivations: Motivation[]
     focus: FocusTotals
     review: DailyReview | null
+    content: SiteContent
 }
 
 export interface TaskInput {
@@ -176,4 +177,60 @@ export interface MotivationInput {
     body: string
     category: MotivationCategory
     isActive: boolean
+}
+
+/** Admin-editable interface copy; null means "use the built-in text". */
+export interface SiteContent {
+    taglineAr: string | null
+    taglineEn: string | null
+    welcomeSubAr: string | null
+    welcomeSubEn: string | null
+}
+
+/** One message in a member's private thread with the administrators. */
+export interface Message {
+    id: number
+    body: string
+    fromAdmin: boolean
+    senderName: string
+    readAt: string | null
+    createdAt: string
+}
+
+export interface ThreadUser {
+    id: number
+    displayName: string
+    email: string
+}
+
+export interface Thread {
+    user: ThreadUser
+    lastMessage: Message
+    unread: number
+}
+
+export interface UnreadCounts {
+    /** Messages from the administrators this member has not opened. */
+    member: number
+    /** Messages from members waiting on an administrator (0 for members). */
+    admin: number
+}
+
+export interface Lesson {
+    id: number
+    title: string
+    body: string
+    imageUrl: string | null
+    position: number
+    isPublished: boolean
+    createdAt: string
+}
+
+export interface LessonInput {
+    title: string
+    body: string
+    isPublished: boolean
+    /** A new image to upload, if any. */
+    image: Blob | null
+    removeImage: boolean
 }

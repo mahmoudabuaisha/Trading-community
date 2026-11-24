@@ -1,12 +1,17 @@
 <?php
 
+use App\Http\Controllers\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Admin\MotivationController as AdminMotivationController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\ThreadController as AdminThreadController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FocusSessionController;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\LessonController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TaskController;
@@ -45,6 +50,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('focus-sessions', [FocusSessionController::class, 'store']);
     Route::put('reviews/{date}', [ReviewController::class, 'update'])->where('date', '\d{4}-\d{2}-\d{2}');
 
+    Route::get('lessons', [LessonController::class, 'index']);
+    Route::get('messages', [MessageController::class, 'index']);
+    Route::get('messages/unread', [MessageController::class, 'unread']);
+    Route::post('messages', [MessageController::class, 'store'])->middleware('throttle:20,1');
+
     Route::middleware('role:admin')->prefix('admin')->group(function (): void {
         Route::get('overview', [AdminOverviewController::class, 'show']);
         Route::get('users', [AdminUserController::class, 'index']);
@@ -54,5 +64,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('motivations', [AdminMotivationController::class, 'store']);
         Route::patch('motivations/{motivation}', [AdminMotivationController::class, 'update']);
         Route::delete('motivations/{motivation}', [AdminMotivationController::class, 'destroy']);
+        Route::get('settings', [AdminSettingsController::class, 'show']);
+        Route::put('settings', [AdminSettingsController::class, 'update']);
+        Route::get('threads', [AdminThreadController::class, 'index']);
+        Route::get('threads/{user}', [AdminThreadController::class, 'show']);
+        Route::post('threads/{user}', [AdminThreadController::class, 'store']);
+        Route::get('lessons', [AdminLessonController::class, 'index']);
+        Route::post('lessons', [AdminLessonController::class, 'store']);
+        // POST, not PATCH: the update carries an optional image as multipart form data.
+        Route::post('lessons/{lesson}', [AdminLessonController::class, 'update']);
+        Route::delete('lessons/{lesson}', [AdminLessonController::class, 'destroy']);
     });
 });

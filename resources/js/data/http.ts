@@ -35,10 +35,11 @@ export async function request<T>(method: string, path: string, body?: unknown, r
             Accept: 'application/json',
             'Accept-Language': document.documentElement.lang || 'ar',
             'X-Requested-With': 'XMLHttpRequest',
-            ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+            // A FormData body sets its own multipart Content-Type (with boundary).
+            ...(body !== undefined && !(body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
             ...(method !== 'GET' ? { 'X-XSRF-TOKEN': xsrfToken() } : {}),
         },
-        body: body !== undefined ? JSON.stringify(body) : undefined,
+        body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
     })
 
     // Expired CSRF token: refresh the cookie once and replay.

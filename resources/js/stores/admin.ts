@@ -1,7 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { repository } from '../data/repository'
-import type { AdminStats, AdminUser, AuditEntry, Motivation, MotivationInput, Role } from '../types/domain'
+import type {
+    AdminStats,
+    AdminUser,
+    AuditEntry,
+    Motivation,
+    MotivationInput,
+    Role,
+    Lesson,
+    LessonInput,
+    Message,
+    SiteContent,
+    Thread,
+    ThreadUser,
+} from '../types/domain'
 
 export const useAdminStore = defineStore('admin', () => {
     const stats = ref<AdminStats>({ users: 0, tasks: 0, completed: 0, activeToday: 0 })
@@ -9,6 +22,10 @@ export const useAdminStore = defineStore('admin', () => {
     const users = ref<AdminUser[]>([])
     const usersMeta = ref({ currentPage: 1, lastPage: 1, total: 0 })
     const motivations = ref<Motivation[]>([])
+    const content = ref<SiteContent>({ taglineAr: null, taglineEn: null, welcomeSubAr: null, welcomeSubEn: null })
+    const lessons = ref<Lesson[]>([])
+    const threads = ref<Thread[]>([])
+    const activeThread = ref<{ user: ThreadUser; messages: Message[] } | null>(null)
     const search = ref('')
     const loading = ref(false)
     const error = ref<unknown>(null)
@@ -29,11 +46,58 @@ export const useAdminStore = defineStore('admin', () => {
         motivations.value = await repository.adminMotivations()
     }
 
+    async function loadContent(): Promise<void> {
+        content.value = await repository.adminContent()
+    }
+
+    async function saveContent(next: SiteContent): Promise<void> {
+        content.value = await repository.adminSaveContent(next)
+        await loadOverview()
+    }
+
+    async function loadLessons(): Promise<void> {
+        lessons.value = await repository.adminLessons()
+    }
+
+    async function saveLesson(id: number | null, input: Partial<LessonInput>): Promise<void> {
+        await repository.adminSaveLesson(id, input)
+        await Promise.all([loadLessons(), loadOverview()])
+    }
+
+    async function deleteLesson(id: number): Promise<void> {
+        await repository.adminDeleteLesson(id)
+        await Promise.all([loadLessons(), loadOverview()])
+    }
+
+    async function loadThreads(): Promise<void> {
+        threads.value = await repository.adminThreads()
+    }
+
+    /** Opening a thread marks the member's messages as read on the server. */
+    async function openThread(userId: number): Promise<void> {
+        activeThread.value = await repository.adminThread(userId)
+        await loadThreads()
+    }
+
+    async function sendMessage(body: string): Promise<void> {
+        if (!activeThread.value) return
+        const message = await repository.adminSendMessage(activeThread.value.user.id, body)
+        activeThread.value.messages.push(message)
+        await loadThreads()
+    }
+
     async function loadAll(): Promise<void> {
         loading.value = true
         error.value = null
         try {
-            await Promise.all([loadOverview(), loadUsers(1), loadMotivations()])
+            await Promise.all([
+                loadOverview(),
+                loadUsers(1),
+                loadMotivations(),
+                loadContent(),
+                loadLessons(),
+                loadThreads(),
+            ])
         } catch (e) {
             error.value = e
             throw e
@@ -69,6 +133,10 @@ export const useAdminStore = defineStore('admin', () => {
         users,
         usersMeta,
         motivations,
+        content,
+        lessons,
+        threads,
+        activeThread,
         search,
         loading,
         error,
@@ -78,5 +146,11 @@ export const useAdminStore = defineStore('admin', () => {
         revokeSessions,
         saveMotivation,
         deleteMotivation,
+        saveContent,
+        saveLesson,
+        deleteLesson,
+        loadThreads,
+        openThread,
+        sendMessage,
     }
 })

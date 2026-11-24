@@ -10,6 +10,7 @@ use App\Http\Resources\MotivationResource;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\UserResource;
 use App\Models\Motivation;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ class DashboardController extends Controller
             'motivations' => MotivationResource::collection(Motivation::where('is_active', true)->latest()->latest('id')->get()),
             'focus' => self::focusTotals($user, $day),
             'review' => $review ? new DailyReviewResource($review) : null,
+            'content' => Setting::content(),
         ]);
     }
 

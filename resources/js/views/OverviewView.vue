@@ -22,6 +22,7 @@ import { computed, ref, type Component } from 'vue'
 import CommandCenter from '../components/CommandCenter.vue'
 import TaskModal from '../components/TaskModal.vue'
 import { formatDate, isRtl, messages, t } from '../i18n'
+import { useSiteCopy } from '../lib/content'
 import { lastDays, parseDay, percent, today, ymd } from '../lib/dates'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
@@ -32,6 +33,7 @@ const auth = useAuthStore()
 const workspace = useWorkspaceStore()
 const ui = useUiStore()
 const adding = ref(false)
+const { welcomeSub } = useSiteCopy()
 
 const firstName = computed(() => (auth.user?.displayName ?? '').split(' ')[0])
 const completionRate = computed(() => percent(workspace.completedCount, workspace.tasks.length))
@@ -126,7 +128,7 @@ const chart = computed(() => {
                     <Hand :size="34" class="welcome__hand" aria-hidden="true" />
                     {{ t('dash.welcome', { name: firstName }) }}
                 </h2>
-                <p>{{ t('dash.welcomeSub') }}</p>
+                <p>{{ welcomeSub }}</p>
                 <i class="welcome__swoosh" aria-hidden="true" />
             </div>
         </div>

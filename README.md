@@ -14,8 +14,10 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Goals | Measurable goals per period with progress steps |
 | Achievements | Badges awarded automatically (first task, 10/50/100 tasks, 7/30-day streaks, first goal, 10 focus hours) |
 | Growth & motivation | Library of texts published by administrators |
+| Education | Lessons (title, text, image) published by administrators |
+| Messages | A private thread between each member and the administrators, with unread badges |
 | Profile | Details, avatar, weekly goal, focus target, time zone, language, and performance charts |
-| Admin center | Platform stats, user search, role changes, session revocation, motivation content studio, audit log |
+| Admin center | Platform stats, user search, role changes, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log |
 
 ## Stack
 
