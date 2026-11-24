@@ -3,6 +3,7 @@ import { Eye, EyeOff, Lock, LogIn, Mail, UserRound } from 'lucide-vue-next'
 import { computed, reactive, ref } from 'vue'
 import AuthScene from '../components/AuthScene.vue'
 import SummitArt from '../components/SummitArt.vue'
+import { usePointerParallax } from '../composables/usePointerParallax'
 import BrandLogo from '../components/BrandLogo.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ApiError } from '../data/http'
@@ -10,6 +11,9 @@ import { repository } from '../data/repository'
 import { locale, messages, setLocale, t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 import { describeError } from '../stores/ui'
+
+const page = ref<HTMLElement | null>(null)
+usePointerParallax(page)
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -91,7 +95,7 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-    <main class="auth-page">
+    <main ref="page" class="auth-page">
         <AuthScene />
 
         <header class="auth-topbar">

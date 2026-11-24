@@ -20,7 +20,17 @@ Every colour, spacing step, radius, shadow and duration is defined once in `reso
 
 ## Sign-in scene
 
-The sign-in screens are built from three decorative components, all `aria-hidden`: `AuthScene` (sky, gold ribbons, light streaks, reflective floor), `SummitArt` (faceted, lit rock face with flag, halo and clouds) and `BrandLogo` (the SN Tasks wordmark as vector art with an SVG lighting bevel). Display type uses `--font-display` (Cinzel) for the Latin wordmark and `--font-script` (Amiri) for the Arabic tagline. The composition is the same in both languages — summit on the left, card on the right — and the filtered artwork is static so nothing repaints beneath the blurred glass card.
+The sign-in screens are built from three decorative components, all `aria-hidden`:
+
+- `AuthScene` — sky, gold ribbons, light streaks, a low mist band, an occasional meteor and the reflective floor.
+- `SummitArt` — a rendered mountain (`public/images/summit.webp`) with a waving flag, halo, two drifting fog layers and rising gold dust.
+- `BrandLogo` — the SN Tasks wordmark as vector art with an SVG lighting bevel, plus a filter-free effects layer (letter light sweep, a spark orbiting the ring, crown glints).
+
+The mountain is not a photograph: `tools/render_summit.py` builds a procedural heightfield, lights it with a warm key and cool fill, casts shadows and ray-casts it to an image. Re-run it to change the peak, camera or light, then update the flag anchor in `.summit__flag` (the script prints the peak position).
+
+Motion rules: only `transform`, `translate`, `opacity` and `offset-distance` animate; no moving element carries a CSS filter; the bevelled logo art is never re-rasterised. `usePointerParallax` publishes the pointer position as `--px` / `--py` for depth on the summit, logo and card. Everything stops under `prefers-reduced-motion`.
+
+Display type uses `--font-display` (Cinzel) for the Latin wordmark and `--font-script` (Amiri) for the Arabic tagline. The composition is the same in both languages — summit on the left, card on the right.
 
 ## Direction
 

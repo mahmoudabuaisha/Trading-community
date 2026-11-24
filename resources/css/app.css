@@ -2094,15 +2094,6 @@ select.input option {
         radial-gradient(1px 1px at 35% 30%, #fff 50%, transparent 51%),
         radial-gradient(1px 1px at 64% 33%, #ffe7b3 50%, transparent 51%);
 }
-.sc-stop-gold {
-    stop-color: var(--gold-300);
-}
-.sc-stroke-gold {
-    stroke: var(--gold-300);
-}
-.sc-fill-gold {
-    fill: var(--gold-300);
-}
 /* Gold ribbons sweeping across the corners (ring segments revealed by a mask). */
 .scene__ribbon {
     border-radius: 50%;
@@ -2222,26 +2213,6 @@ select.input option {
 [dir='rtl'] .auth-hero {
     order: 2;
 }
-.summit {
-    position: absolute;
-    z-index: -1;
-    inset-block-start: clamp(-170px, -17vh, -90px);
-    inset-inline-start: 50%;
-    inline-size: 175%;
-    max-inline-size: none;
-    block-size: auto;
-    translate: -50% 0;
-    pointer-events: none;
-}
-[dir='rtl'] .summit {
-    translate: 50% 0;
-}
-.brand-logo {
-    inline-size: min(100%, 460px);
-    block-size: auto;
-    overflow: visible;
-    filter: drop-shadow(0 0 34px rgba(214, 173, 98, 0.28));
-}
 .bl-stop-gold-hi {
     stop-color: #fff3cf;
 }
@@ -2323,8 +2294,7 @@ select.input option {
     gap: var(--space-6);
     padding: var(--space-10) var(--space-8);
     border-radius: var(--radius-xl);
-    background: linear-gradient(155deg, rgba(34, 30, 24, 0.62), rgba(8, 8, 10, 0.78));
-    backdrop-filter: blur(22px) saturate(1.2);
+    background: linear-gradient(155deg, rgba(30, 27, 22, 0.86), rgba(8, 8, 10, 0.92));
     box-shadow:
         0 30px 80px rgba(0, 0, 0, 0.7),
         0 0 44px rgba(214, 173, 98, 0.16),
@@ -2617,6 +2587,342 @@ select.input option {
     border-color: color-mix(in srgb, var(--green-500) 50%, transparent);
     color: var(--green-500);
 }
+/* Summit artwork: rendered rock with small live layers on top. */
+.summit {
+    position: absolute;
+    z-index: -1;
+    inset-block-start: clamp(-110px, -10vh, -50px);
+    left: 50%;
+    inline-size: 178%;
+    max-inline-size: none;
+    aspect-ratio: 1600 / 932;
+    /* Centre the rendered peak (53.75% across the image) on the logo. */
+    translate: -53.75% 0;
+    pointer-events: none;
+    transform: translate3d(calc(var(--px, 0) * -12px), calc(var(--py, 0) * -7px), 0);
+}
+.summit > * {
+    position: absolute;
+}
+.summit__rock {
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    animation: summit-in 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes summit-in {
+    from {
+        opacity: 0;
+        translate: 0 26px;
+    }
+}
+.summit__halo {
+    inset: -6% 14% 30%;
+    left: 18%;
+    right: 10%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(232, 197, 125, 0.3), rgba(214, 173, 98, 0.08) 55%, transparent 72%);
+    animation: halo-pulse 7s ease-in-out infinite;
+}
+@keyframes halo-pulse {
+    50% {
+        opacity: 0.6;
+    }
+}
+/* Thin light arc behind the peak (top half of a ring). */
+.summit__arc {
+    left: 27.75%;
+    top: 9%;
+    inline-size: 52%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold-300);
+    mask: linear-gradient(#000 12%, transparent 46%);
+    filter: drop-shadow(0 0 7px rgba(232, 197, 125, 0.8));
+    opacity: 0.7;
+}
+/* Flag: anchored to the rendered peak (53.75%, 4.3%). */
+.summit__flag {
+    left: 53.75%;
+    top: 4.3%;
+    inline-size: 4.4%;
+    overflow: visible;
+    translate: -6.25% -100%;
+}
+.summit__pole {
+    stroke: var(--gold-300);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+}
+.summit__finial {
+    fill: var(--gold-200);
+}
+.summit__cloth {
+    fill: var(--gold-300);
+    transform-origin: 5px 20px;
+    animation: flag-wave 2.6s ease-in-out infinite;
+}
+.summit__fold {
+    fill: var(--gold-200);
+    opacity: 0.55;
+}
+@keyframes flag-wave {
+    0%,
+    100% {
+        transform: skewY(-5deg) scaleX(1);
+    }
+    30% {
+        transform: skewY(4deg) scaleX(0.9);
+    }
+    60% {
+        transform: skewY(-2deg) scaleX(1.04);
+    }
+    80% {
+        transform: skewY(5deg) scaleX(0.94);
+    }
+}
+/* Fog banks drifting past the rock at two depths. */
+.summit__fog {
+    left: -12%;
+    inline-size: 124%;
+    block-size: auto;
+    will-change: transform;
+}
+.summit__fog--back {
+    top: 34%;
+    opacity: 0.55;
+    animation: fog-drift 70s ease-in-out infinite alternate;
+}
+.summit__fog--front {
+    top: 50%;
+    opacity: 0.9;
+    animation: fog-drift 46s ease-in-out -12s infinite alternate-reverse;
+}
+@keyframes fog-drift {
+    from {
+        transform: translate3d(-7%, 0, 0);
+    }
+    to {
+        transform: translate3d(7%, -2%, 0);
+    }
+}
+/* Gold dust rising in the key light. */
+.summit__dust {
+    inset: 0;
+}
+.summit__dust i {
+    position: absolute;
+    inset-block-end: 22%;
+    left: var(--x);
+    inline-size: var(--size);
+    block-size: var(--size);
+    border-radius: 50%;
+    background: radial-gradient(#fff, var(--gold-300) 45%, transparent 70%);
+    opacity: 0;
+    animation: dust-rise var(--rise) linear var(--delay) infinite;
+}
+@keyframes dust-rise {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(0.6);
+    }
+    12% {
+        opacity: 0.9;
+    }
+    70% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--sway), -46vh, 0) scale(1.1);
+    }
+}
+
+/* Logo: static bevelled art with a filter-free effects layer on top. */
+.brand-logo {
+    position: relative;
+    inline-size: min(100%, 460px);
+    aspect-ratio: 560 / 470;
+    transform: translate3d(calc(var(--px, 0) * 9px), calc(var(--py, 0) * 6px), 0);
+    animation: logo-in 1.3s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}
+@keyframes logo-in {
+    from {
+        opacity: 0;
+        scale: 0.9;
+    }
+}
+.brand-logo svg {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+}
+.brand-logo__art {
+    filter: drop-shadow(0 0 34px rgba(214, 173, 98, 0.28));
+}
+.bl-sweep {
+    animation: letter-sweep 10s ease-in-out 1.8s infinite;
+}
+@keyframes letter-sweep {
+    0% {
+        translate: 0 0;
+    }
+    14%,
+    100% {
+        translate: 820px 0;
+    }
+}
+/* The spark follows the ring's ellipse (rx 252, ry 78 around 280,215). */
+.bl-comet {
+    offset-path: path('M 532 215 A 252 78 0 0 1 28 215 A 252 78 0 0 1 532 215');
+    offset-rotate: 0deg;
+    animation: comet-orbit 9s linear infinite;
+}
+@keyframes comet-orbit {
+    0% {
+        offset-distance: 0%;
+        opacity: 1;
+    }
+    50% {
+        offset-distance: 50%;
+        opacity: 1;
+    }
+    58%,
+    92% {
+        opacity: 0;
+    }
+    100% {
+        offset-distance: 100%;
+        opacity: 1;
+    }
+}
+.bl-glint {
+    fill: #fff;
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+    animation: glint 4.8s ease-in-out infinite;
+}
+.bl-glint--two {
+    animation-delay: -1.7s;
+}
+.bl-glint--three {
+    animation-delay: -3.1s;
+}
+@keyframes glint {
+    0%,
+    62%,
+    100% {
+        opacity: 0;
+        transform: scale(0.2) rotate(0deg);
+    }
+    76% {
+        opacity: 1;
+        transform: scale(1) rotate(45deg);
+    }
+    90% {
+        opacity: 0;
+        transform: scale(0.3) rotate(90deg);
+    }
+}
+
+/* Scene extras: a low mist band and an occasional meteor. */
+.scene__mist {
+    inset-inline: -10%;
+    inset-block-end: 10%;
+    inline-size: 120%;
+    block-size: 34%;
+    object-fit: fill;
+    opacity: 0.35;
+}
+.scene__meteor {
+    inset-block-start: 12%;
+    inset-inline-end: 6%;
+    inline-size: 150px;
+    block-size: 2px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg, #fff, var(--glint-blue) 30%, transparent);
+    opacity: 0;
+    rotate: -24deg;
+    animation: meteor 11s ease-in 3s infinite;
+}
+@keyframes meteor {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0);
+    }
+    2% {
+        opacity: 1;
+    }
+    9% {
+        opacity: 0;
+        transform: translate3d(-46vw, 0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(-46vw, 0, 0);
+    }
+}
+
+/* Entrances and pointer depth for the card and tagline. */
+.auth-tagline {
+    animation: rise-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.7s both;
+}
+.auth-card {
+    transform: perspective(1400px) rotateY(calc(var(--px, 0) * 2.4deg)) rotateX(calc(var(--py, 0) * -2deg));
+    animation: card-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s both;
+}
+@keyframes card-in {
+    from {
+        opacity: 0;
+        translate: 0 34px;
+    }
+}
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        translate: 0 18px;
+    }
+}
+.auth-card__welcome,
+.auth-form > *,
+.auth-switch {
+    animation: rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.auth-card__welcome {
+    animation-delay: 0.6s;
+}
+.auth-form > :nth-child(1) {
+    animation-delay: 0.72s;
+}
+.auth-form > :nth-child(2) {
+    animation-delay: 0.8s;
+}
+.auth-form > :nth-child(3) {
+    animation-delay: 0.88s;
+}
+.auth-form > :nth-child(n + 4) {
+    animation-delay: 0.96s;
+}
+.auth-switch {
+    animation-delay: 1.05s;
+}
+/* A soft light that follows the pointer across the glass. */
+.auth-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+        420px circle at calc(50% + var(--px, 0) * 60%) calc(50% + var(--py, 0) * 60%),
+        rgba(255, 240, 205, 0.09),
+        transparent 60%
+    );
+}
+
 /* Phone: summit and logo on top, then the form. */
 @media (max-width: 980px) {
     [dir] .auth-stage {
@@ -2629,8 +2935,11 @@ select.input option {
         padding-block-start: 74px;
     }
     .summit {
-        inset-block-start: -64px;
-        inline-size: 190%;
+        inset-block-start: -18px;
+        inline-size: 200%;
+    }
+    .summit__dust i:nth-child(n + 8) {
+        display: none;
     }
     .scene__floor {
         block-size: 8%;
