@@ -32,6 +32,12 @@ Motion rules: only `transform`, `translate`, `opacity` and `offset-distance` ani
 
 Display type uses `--font-display` (Cinzel) for the Latin wordmark and `--font-script` (Amiri) for the Arabic tagline. The composition is the same in both languages — summit on the left, card on the right.
 
+## Workspace shell
+
+Signed-in pages share one shell (`layouts/WorkspaceLayout.vue`): a fixed sidebar with the logo and navigation, a top bar with the user chip, language switch and date card, and `WorkspaceBackdrop` (the summit behind the header, static apart from the flag). Below 1100px the sidebar becomes a drawer opened from the top bar. The composition is the same in both languages: sidebar on the left.
+
+Every card — `.panel`, `.suite`, `.stat-card`, `.dash-card`, `.tile`, `.task-row`, `.goal-card`, … — takes its surface from two tokens: `--glass` (the fill) and `--edge-light` (the gradient border, brightest at two opposite corners). The shared rule lives in the “Glass surfaces” section of `app.css`, after the page sections, so a new card only needs to be added to that list.
+
 ## Direction
 
 Layout uses CSS logical properties throughout (`margin-inline-start`, `inset-inline-end`, `text-align: start`), so one stylesheet serves RTL and LTR. Direction is set once on `<html>` by `resources/js/i18n/index.ts`. Directional icons (chevrons, arrows) are swapped in the component by `isRtl`. Emails, dates and numbers that must stay left-to-right use `dir="ltr"` or `<bdi>`.
@@ -40,7 +46,7 @@ Layout uses CSS logical properties throughout (`margin-inline-start`, `inset-inl
 
 | Class | Role |
 | --- | --- |
-| `.panel`, `.suite`, `.banner` | Glass containers |
+| `.panel`, `.suite`, `.dash-card`, `.tile` | Glass containers with a lit edge |
 | `.btn` (+ `--outline`, `--ghost`, `--gold`, `--block`) | Actions; `--gold` is reserved for the single primary action on the auth screen |
 | `.icon-btn`, `.pill`, `.chip-btn`, `.segmented` | Compact controls |
 | `.count-pill` (+ `--ok`, `--gold`) | Read-only labels and counters |

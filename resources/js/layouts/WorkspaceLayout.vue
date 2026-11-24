@@ -5,7 +5,8 @@ import {
     CalendarDays,
     Clock3,
     Flag,
-    LayoutGrid,
+    Crown,
+    House,
     LogOut,
     Menu,
     Shield,
@@ -17,7 +18,9 @@ import {
 } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch, type Component } from 'vue'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
+import BrandLogo from '../components/BrandLogo.vue'
 import EmptyState from '../components/EmptyState.vue'
+import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { describeError } from '../stores/ui'
 import { formatDate, locale, setLocale, t } from '../i18n'
@@ -49,7 +52,7 @@ const navItems = computed<NavItem[]>(() => {
         active: route.name === name && (!params || params.period === period),
     })
     return [
-        item('overview', 'overview', LayoutGrid),
+        item('overview', 'overview', House),
         item('daily', 'tasks', CalendarDays, { period: 'daily' }),
         item('weekly', 'tasks', BarChart3, { period: 'weekly' }),
         item('monthly', 'tasks', Target, { period: 'monthly' }),
@@ -97,79 +100,78 @@ async function signOut(): Promise<void> {
 </script>
 
 <template>
-    <main class="app-shell">
-        <div v-if="navOpen" class="nav-scrim" @mousedown.self="navOpen = false">
-            <aside class="nav-drawer" :aria-label="t('nav.main')">
-                <div class="nav-drawer__head">
-                    <div class="brand">
-                        <img class="brand__mark" src="/images/icon-192.png" width="46" height="46" alt="" />
-                        <span><b>SN TASKS</b><small>PLAN · ORGANIZE · ACHIEVE</small></span>
-                    </div>
-                    <button type="button" class="icon-btn" :aria-label="t('common.close')" @click="navOpen = false">
-                        <X :size="18" />
-                    </button>
-                </div>
-                <div class="nav-welcome">
-                    <span>YOUR SPACE · YOUR PACE</span>
-                    <b>{{ t('nav.welcomeTitle') }}</b>
-                    <small>{{ t('nav.welcomeSub') }}</small>
-                </div>
+    <main class="app-shell" :class="{ 'app-shell--nav-open': navOpen }">
+        <WorkspaceBackdrop />
 
-                <div class="nav-caption">{{ t('nav.workspace') }}</div>
-                <nav class="nav-list">
-                    <RouterLink
-                        v-for="item in navItems"
-                        :key="item.key"
-                        :to="item.to"
-                        class="nav-item"
-                        :class="{ 'nav-item--active': item.active }"
-                    >
-                        <span class="nav-item__icon"><component :is="item.icon" :size="17" aria-hidden="true" /></span>
-                        <span>{{ t(`nav.${item.key}`) }}</span>
-                        <i v-if="item.key === 'achievements' && workspace.achievements.length" class="nav-item__count">
-                            {{ workspace.achievements.length }}
-                        </i>
-                        <span v-if="item.active" class="nav-item__current">{{ t('nav.current') }}</span>
-                    </RouterLink>
-                </nav>
+        <div v-if="navOpen" class="nav-scrim" @click="navOpen = false" />
 
-                <template v-if="auth.isAdmin">
-                    <div class="nav-caption">{{ t('nav.administration') }}</div>
-                    <nav class="nav-list">
-                        <RouterLink
-                            :to="{ name: 'admin' }"
-                            class="nav-item"
-                            :class="{ 'nav-item--active': route.name === 'admin' }"
-                        >
-                            <span class="nav-item__icon"><Shield :size="17" aria-hidden="true" /></span>
-                            <span>{{ t('nav.admin') }}</span>
-                            <span v-if="route.name === 'admin'" class="nav-item__current">{{ t('nav.current') }}</span>
-                        </RouterLink>
-                    </nav>
-                </template>
+        <aside class="sidebar" :aria-label="t('nav.main')">
+            <RouterLink :to="{ name: 'overview' }" class="sidebar__logo" :aria-label="t('nav.overview')">
+                <BrandLogo label="SN Tasks" />
+            </RouterLink>
 
-                <div class="nav-drawer__foot">
-                    <div class="mini-profile">
-                        <UserAvatar :name="fullName" :src="auth.user?.avatarUrl" />
-                        <div>
-                            <b>{{ fullName }}</b>
-                            <small>{{ t(`role.${auth.user?.role ?? 'user'}`) }}</small>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn--outline btn--block" @click="signOut">
-                        <LogOut :size="16" aria-hidden="true" /> {{ t('nav.signOut') }}
-                    </button>
-                </div>
-            </aside>
-        </div>
+            <nav class="sidebar__nav">
+                <RouterLink
+                    v-for="item in navItems"
+                    :key="item.key"
+                    :to="item.to"
+                    class="nav-item"
+                    :class="{ 'nav-item--active': item.active }"
+                    :aria-current="item.active ? 'page' : undefined"
+                >
+                    <span class="nav-item__icon"><component :is="item.icon" :size="20" aria-hidden="true" /></span>
+                    <span>{{ t(`nav.${item.key}`) }}</span>
+                    <i v-if="item.key === 'achievements' && workspace.achievements.length" class="nav-item__count">
+                        {{ workspace.achievements.length }}
+                    </i>
+                </RouterLink>
+
+                <RouterLink
+                    v-if="auth.isAdmin"
+                    :to="{ name: 'admin' }"
+                    class="nav-item"
+                    :class="{ 'nav-item--active': route.name === 'admin' }"
+                    :aria-current="route.name === 'admin' ? 'page' : undefined"
+                >
+                    <span class="nav-item__icon"><Shield :size="20" aria-hidden="true" /></span>
+                    <span>{{ t('nav.admin') }}</span>
+                </RouterLink>
+
+                <button type="button" class="nav-item nav-item--button" @click="signOut">
+                    <span class="nav-item__icon"><LogOut :size="20" aria-hidden="true" /></span>
+                    <span>{{ t('nav.signOut') }}</span>
+                </button>
+            </nav>
+
+            <div class="sidebar__badge">
+                <Crown :size="22" aria-hidden="true" />
+                <b>SN TASKS</b>
+                <small>{{ t(`role.${auth.user?.role ?? 'user'}`) }}</small>
+            </div>
+        </aside>
 
         <section class="main-area">
             <header class="topbar">
-                <div>
-                    <span class="topbar__kicker">SN TASKS</span>
-                    <h1>{{ pageTitle }}</h1>
-                </div>
-                <div class="topbar__actions">
+                <div class="topbar__start">
+                    <button
+                        type="button"
+                        class="icon-btn topbar__menu"
+                        :aria-expanded="navOpen"
+                        :aria-label="t('nav.open')"
+                        @click="navOpen = !navOpen"
+                    >
+                        <component :is="navOpen ? X : Menu" :size="20" aria-hidden="true" />
+                    </button>
+                    <RouterLink :to="{ name: 'profile' }" class="user-chip" :aria-label="t('nav.profile')">
+                        <UserAvatar :name="fullName" :src="auth.user?.avatarUrl" />
+                        <span>
+                            <b
+                                ><Crown v-if="auth.isAdmin" :size="14" aria-hidden="true" />
+                                {{ auth.user?.displayName }}</b
+                            >
+                            <small>{{ t(`role.${auth.user?.role ?? 'user'}`) }}</small>
+                        </span>
+                    </RouterLink>
                     <button
                         type="button"
                         class="chip-btn"
@@ -178,27 +180,24 @@ async function signOut(): Promise<void> {
                     >
                         {{ t('nav.langButton') }}
                     </button>
-                    <button
-                        type="button"
-                        class="chip-btn chip-btn--menu"
-                        :aria-expanded="navOpen"
-                        :aria-label="t('nav.open')"
-                        @click="navOpen = !navOpen"
-                    >
-                        <span class="chip-btn__glyph"
-                            ><component :is="navOpen ? X : Menu" :size="19" aria-hidden="true"
-                        /></span>
-                        <span>{{ t('nav.menu') }}</span>
-                    </button>
-                    <div class="date-chip">
-                        <Clock3 :size="15" aria-hidden="true" />
-                        <span>{{ formatDate(now, { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</span>
-                        <b>{{ formatDate(now, { day: 'numeric', month: 'short' }) }}</b>
-                    </div>
-                    <RouterLink :to="{ name: 'profile' }" :aria-label="t('nav.profile')">
-                        <UserAvatar :name="fullName" :src="auth.user?.avatarUrl" />
-                    </RouterLink>
                 </div>
+
+                <div class="date-card">
+                    <span
+                        ><CalendarDays :size="18" aria-hidden="true" />{{
+                            formatDate(now, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+                        }}</span
+                    >
+                    <span
+                        ><Clock3 :size="18" aria-hidden="true" />{{
+                            formatDate(now, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                        }}</span
+                    >
+                </div>
+
+                <h1 class="topbar__title" :class="{ 'topbar__title--tagline': route.name === 'overview' }">
+                    {{ route.name === 'overview' ? t('dash.tagline') : pageTitle }}
+                </h1>
             </header>
 
             <div v-if="workspace.loading" class="loading-panel">

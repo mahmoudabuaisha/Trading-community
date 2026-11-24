@@ -33,6 +33,20 @@
     --text-muted: #aa9b7d;
     --text-on-gold: #17130b;
 
+    /* Glass cards */
+    --glass: linear-gradient(155deg, rgba(26, 24, 20, 0.7), rgba(7, 7, 9, 0.8));
+    --edge-light: linear-gradient(
+        135deg,
+        #dfe9ff 0%,
+        #f3dca6 5%,
+        rgba(214, 173, 98, 0.55) 16%,
+        rgba(214, 173, 98, 0.16) 42%,
+        rgba(214, 173, 98, 0.14) 60%,
+        rgba(214, 173, 98, 0.55) 84%,
+        #f3dca6 95%,
+        #dfe9ff 100%
+    );
+
     /* Lines */
     --line: rgba(214, 173, 98, 0.22);
     --line-soft: rgba(214, 173, 98, 0.1);
@@ -87,5 +101,5 @@
 
     /* Layout */
     --page-max: 1340px;
-    --drawer-width: 390px;
+    --sidebar-width: 290px;
 }
