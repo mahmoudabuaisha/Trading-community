@@ -2031,50 +2031,25 @@ select.input option {
 /* ── Auth ─────────────────────────────────────────────────────────────── */
 .auth-page {
     position: relative;
+    isolation: isolate;
     min-block-size: 100vh;
-    max-inline-size: var(--page-max);
-    margin-inline: auto;
-    padding: var(--space-5) clamp(var(--space-4), 4vw, var(--space-12)) var(--space-8);
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
-    overflow-x: clip;
+    gap: var(--space-4);
+    padding: var(--space-5) clamp(var(--space-4), 5vw, var(--space-12)) var(--space-8);
+    overflow: clip;
 }
 .auth-page--center {
     align-items: center;
     justify-content: center;
 }
-.auth-ambient i {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(90px);
-    pointer-events: none;
-    z-index: -1;
-}
-.auth-ambient i:nth-child(1) {
-    inline-size: 520px;
-    block-size: 520px;
-    inset-block-start: -160px;
-    inset-inline-end: 12%;
-    background: rgba(214, 173, 98, 0.16);
-}
-.auth-ambient i:nth-child(2) {
-    inline-size: 360px;
-    block-size: 360px;
-    inset-block-end: -80px;
-    inset-inline-start: -80px;
-    background: rgba(131, 216, 245, 0.07);
-}
-.auth-ambient i:nth-child(3) {
-    inline-size: 300px;
-    block-size: 300px;
-    inset-block-start: 45%;
-    inset-inline-end: -100px;
-    background: rgba(214, 173, 98, 0.08);
-}
 .auth-topbar {
     display: flex;
     justify-content: flex-end;
+}
+.auth-topbar .chip-btn {
+    background: var(--surface-sunken);
+    backdrop-filter: blur(10px);
 }
 .live-dot {
     display: inline-block;
@@ -2084,61 +2059,324 @@ select.input option {
     background: var(--gold-300);
     box-shadow: 0 0 10px var(--gold-300);
 }
+
+/* Scene: static painted layers plus a few composited glows. */
+.scene {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    background: var(--bg-900);
+}
+.scene > * {
+    position: absolute;
+    pointer-events: none;
+}
+.scene__sky {
+    inset: 0;
+    background:
+        radial-gradient(60% 55% at 38% 38%, rgba(214, 173, 98, 0.13), transparent 70%),
+        radial-gradient(40% 40% at 92% 8%, rgba(143, 182, 255, 0.08), transparent 70%),
+        linear-gradient(180deg, #050507 0%, #0a0a0d 55%, #030304 100%);
+}
+.scene__stars {
+    inset: 0;
+    opacity: 0.8;
+    background-image:
+        radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 27% 9%, #ffe7b3 50%, transparent 51%),
+        radial-gradient(1.4px 1.4px at 44% 14%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 58% 7%, #cfe0ff 50%, transparent 51%),
+        radial-gradient(1.2px 1.2px at 71% 21%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 83% 12%, #ffe7b3 50%, transparent 51%),
+        radial-gradient(1.3px 1.3px at 93% 30%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 6% 41%, #cfe0ff 50%, transparent 51%),
+        radial-gradient(1px 1px at 35% 30%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 64% 33%, #ffe7b3 50%, transparent 51%);
+}
+.sc-stop-gold {
+    stop-color: var(--gold-300);
+}
+.sc-stroke-gold {
+    stroke: var(--gold-300);
+}
+.sc-fill-gold {
+    fill: var(--gold-300);
+}
+/* Gold ribbons sweeping across the corners (ring segments revealed by a mask). */
+.scene__ribbon {
+    border-radius: 50%;
+    border: 3px solid transparent;
+    background: conic-gradient(
+            from 200deg,
+            transparent 0 18%,
+            var(--gold-700) 24%,
+            var(--gold-200) 31%,
+            var(--gold-500) 36%,
+            transparent 44% 100%
+        )
+        border-box;
+    mask:
+        linear-gradient(#000 0 0) padding-box exclude,
+        linear-gradient(#000 0 0);
+    filter: drop-shadow(0 0 10px rgba(232, 197, 125, 0.55));
+}
+.scene__ribbon--one {
+    inline-size: 90vmax;
+    block-size: 52vmax;
+    inset-block-start: -30vmax;
+    inset-inline-start: -34vmax;
+    transform: rotate(-14deg);
+}
+.scene__ribbon--two {
+    inline-size: 70vmax;
+    block-size: 40vmax;
+    inset-block-end: -26vmax;
+    inset-inline-end: -26vmax;
+    transform: rotate(158deg);
+    border-width: 2px;
+    opacity: 0.8;
+}
+.scene__streak {
+    block-size: 2px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--glint-blue) 45%,
+        #fff 50%,
+        var(--glint-blue) 55%,
+        transparent
+    );
+    filter: blur(0.6px) drop-shadow(0 0 8px var(--glint-blue));
+    opacity: 0.75;
+}
+.scene__streak--one {
+    inline-size: 42vw;
+    inset-block-start: 16%;
+    inset-inline-end: -8vw;
+    transform: rotate(-24deg);
+}
+.scene__streak--two {
+    inline-size: 34vw;
+    inset-block-end: 22%;
+    inset-inline-start: -6vw;
+    transform: rotate(-24deg);
+    opacity: 0.5;
+}
+.scene__flare {
+    inline-size: 260px;
+    block-size: 260px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 236, 190, 0.5), rgba(214, 173, 98, 0.14) 40%, transparent 70%);
+}
+.scene__flare--one {
+    inset-block-end: 4%;
+    inset-inline-start: -90px;
+}
+.scene__flare--two {
+    inset-block-end: 10%;
+    inset-inline-end: -110px;
+}
+@keyframes breathe-opacity {
+    50% {
+        opacity: 0.5;
+    }
+}
+/* Polished floor: a horizon line with a soft reflection beneath it. */
+.scene__floor {
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 14%;
+    background: linear-gradient(180deg, rgba(232, 197, 125, 0.16), rgba(10, 10, 12, 0.9) 22%, #020203 100%);
+    border-block-start: 1px solid rgba(232, 197, 125, 0.28);
+    box-shadow: 0 -30px 60px -20px rgba(214, 173, 98, 0.18);
+}
+.scene__vignette {
+    inset: 0;
+    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.72) 100%);
+}
+
 .auth-stage {
+    flex: 1;
+    inline-size: 100%;
+    max-inline-size: var(--page-max);
+    margin-inline: auto;
     display: grid;
     gap: var(--space-10);
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     align-items: center;
-    flex: 1;
+}
+/* The composition is the same in both languages: summit on the left, card on the right. */
+[dir='rtl'] .auth-stage {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
 }
 .auth-hero {
+    position: relative;
     display: grid;
     justify-items: center;
-    gap: var(--space-6);
+    gap: var(--space-2);
+    padding-block-start: clamp(56px, 10vh, 110px);
     text-align: center;
 }
-.auth-hero__logo {
-    inline-size: min(100%, 520px);
-    block-size: auto;
-    aspect-ratio: 1;
-    border-radius: 18%;
-    box-shadow:
-        0 0 90px rgba(214, 173, 98, 0.22),
-        0 30px 80px rgba(0, 0, 0, 0.6);
-    animation: drift 9s ease-in-out infinite;
+[dir='rtl'] .auth-hero {
+    order: 2;
 }
-@keyframes drift {
-    50% {
-        transform: translateY(-8px);
-    }
+.summit {
+    position: absolute;
+    z-index: -1;
+    inset-block-start: clamp(-170px, -17vh, -90px);
+    inset-inline-start: 50%;
+    inline-size: 175%;
+    max-inline-size: none;
+    block-size: auto;
+    translate: -50% 0;
+    pointer-events: none;
+}
+[dir='rtl'] .summit {
+    translate: 50% 0;
+}
+.brand-logo {
+    inline-size: min(100%, 460px);
+    block-size: auto;
+    overflow: visible;
+    filter: drop-shadow(0 0 34px rgba(214, 173, 98, 0.28));
+}
+.bl-stop-gold-hi {
+    stop-color: #fff3cf;
+}
+.bl-stop-gold {
+    stop-color: var(--gold-300);
+}
+.bl-stop-gold-lo {
+    stop-color: var(--gold-700);
+}
+.bl-stop-gold-deep {
+    stop-color: #6f4f22;
+}
+.bl-stop-steel-hi {
+    stop-color: var(--steel-100);
+}
+.bl-stop-steel {
+    stop-color: var(--steel-300);
+}
+.bl-stop-steel-lo {
+    stop-color: var(--steel-600);
+}
+.bl-light {
+    lighting-color: #fff8e6;
+}
+.bl-monogram text {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 250px;
+}
+.bl-word {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 56px;
+    letter-spacing: 0.42em;
+}
+.bl-motto {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: 0.42em;
+    fill: var(--steel-300);
 }
 .auth-tagline {
     position: relative;
-    padding-block-end: var(--space-4);
-    font-size: clamp(1.5rem, 3.4vw, 2.6rem);
-    font-weight: 500;
-    line-height: 1.4;
-    color: var(--gold-200);
+    padding-block-end: var(--space-5);
+    font-family: var(--font-script);
+    font-size: clamp(1.9rem, 3.6vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.5;
+    background: var(--gold-metal);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 2px 14px rgba(214, 173, 98, 0.35));
 }
-/* Gold swoosh under the tagline. */
+[dir='ltr'] .auth-tagline {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    font-size: clamp(1.4rem, 2.6vw, 2.3rem);
+}
+/* Brush-stroke swoosh under the tagline. */
 .auth-tagline::after {
     content: '';
     position: absolute;
     inset-block-end: 0;
-    inset-inline: 14%;
-    block-size: 3px;
-    border-radius: var(--radius-pill);
-    background: linear-gradient(90deg, transparent, var(--gold-300), transparent);
+    inset-inline: 8%;
+    block-size: 5px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, transparent, var(--gold-500) 20%, #fff3cf 55%, var(--gold-500) 80%, transparent);
+    transform: rotate(-2deg);
+    filter: drop-shadow(0 0 8px rgba(232, 197, 125, 0.8));
 }
+
+/* Glass card with a lit edge. */
 .auth-card {
+    position: relative;
     display: grid;
-    gap: var(--space-5);
-    padding: var(--space-8) var(--space-6);
-    border: 1px solid var(--line-strong);
+    gap: var(--space-6);
+    padding: var(--space-10) var(--space-8);
     border-radius: var(--radius-xl);
-    background: linear-gradient(160deg, var(--surface-raised), var(--surface));
-    box-shadow: var(--shadow-card), var(--shadow-glow);
-    backdrop-filter: blur(14px);
+    background: linear-gradient(155deg, rgba(34, 30, 24, 0.62), rgba(8, 8, 10, 0.78));
+    backdrop-filter: blur(22px) saturate(1.2);
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.7),
+        0 0 44px rgba(214, 173, 98, 0.16),
+        inset 0 1px 0 rgba(255, 240, 205, 0.14),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+}
+/* Gradient border: bright at two opposite corners, as if catching the light. */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(
+        135deg,
+        #fff3cf 0%,
+        var(--gold-500) 14%,
+        rgba(214, 173, 98, 0.25) 40%,
+        rgba(214, 173, 98, 0.2) 60%,
+        var(--gold-500) 86%,
+        #fff3cf 100%
+    );
+    mask:
+        linear-gradient(#000 0 0) content-box exclude,
+        linear-gradient(#000 0 0);
+    pointer-events: none;
+}
+.auth-card__glint {
+    position: absolute;
+    inline-size: 120px;
+    block-size: 120px;
+    pointer-events: none;
+    background:
+        radial-gradient(
+            closest-side,
+            #fff 0,
+            rgba(255, 240, 205, 0.7) 8%,
+            rgba(143, 182, 255, 0.28) 24%,
+            transparent 60%
+        ),
+        linear-gradient(90deg, transparent 20%, rgba(255, 255, 255, 0.85) 50%, transparent 80%) center / 100% 1.5px
+            no-repeat;
+    animation: breathe-opacity 5s ease-in-out infinite;
+}
+.auth-card__glint--start {
+    inset-block-start: -60px;
+    inset-inline-end: -40px;
+}
+.auth-card__glint--end {
+    inset-block-end: -60px;
+    inset-inline-start: -40px;
+    animation-delay: -2.5s;
 }
 .auth-card--solo {
     inline-size: min(460px, 100%);
@@ -2159,7 +2397,7 @@ select.input option {
 }
 .auth-card__welcome {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--space-3);
     text-align: center;
 }
 .auth-card--solo .auth-card__welcome {
@@ -2168,13 +2406,17 @@ select.input option {
 .auth-card__welcome h1,
 .auth-card__welcome h2 {
     font-size: var(--text-2xl);
-    color: var(--gold-200);
+    font-weight: 600;
+    background: var(--gold-metal);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 .auth-card--solo .auth-card__welcome p {
     color: var(--text-muted);
     font-size: var(--text-sm);
 }
-/* Subtitle flanked by fading gold rules. */
+/* Subtitle flanked by gold rules. */
 .auth-card__sub {
     display: flex;
     align-items: center;
@@ -2189,20 +2431,37 @@ select.input option {
     block-size: 1px;
     background: var(--line-strong);
 }
+.auth-form {
+    display: grid;
+    gap: var(--space-4);
+}
 .input-wrap {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    min-block-size: 54px;
+    min-block-size: 56px;
     padding-inline: var(--space-4);
     border: 1px solid var(--line);
-    border-radius: var(--radius-pill);
-    background: var(--surface-sunken);
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, rgba(4, 4, 5, 0.85), rgba(18, 17, 15, 0.7));
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.7),
+        0 1px 0 rgba(255, 240, 205, 0.06);
     color: var(--gold-300);
+    transition:
+        border-color var(--motion-fast),
+        box-shadow var(--motion-fast);
 }
 .input-wrap:focus-within {
-    border-color: var(--gold-500);
-    box-shadow: 0 0 0 3px rgba(214, 173, 98, 0.14);
+    border-color: var(--gold-300);
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.7),
+        0 0 0 3px rgba(214, 173, 98, 0.16),
+        0 0 22px rgba(214, 173, 98, 0.18);
+}
+.input-wrap > svg {
+    flex: none;
+    filter: drop-shadow(0 0 6px rgba(232, 197, 125, 0.5));
 }
 .input-wrap input {
     flex: 1;
@@ -2215,6 +2474,10 @@ select.input option {
 .input-wrap input::placeholder {
     color: var(--text-muted);
 }
+.input-wrap input:-webkit-autofill {
+    -webkit-text-fill-color: var(--text);
+    transition: background-color 9999s;
+}
 .input-wrap__btn {
     display: grid;
     border: 0;
@@ -2222,9 +2485,87 @@ select.input option {
     color: var(--text-muted);
     padding: var(--space-1);
 }
-.auth-card .btn--gold {
-    border-radius: var(--radius-pill);
+.input-wrap__btn:hover {
+    color: var(--gold-200);
+}
+/* Brushed-gold primary action with a moving sheen. */
+.btn-metal {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    inline-size: 100%;
+    min-block-size: 56px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--gold-metal);
+    color: var(--text-on-gold);
+    font-size: var(--text-lg);
     font-weight: 700;
+    box-shadow:
+        0 10px 26px rgba(214, 173, 98, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.75),
+        inset 0 -2px 0 rgba(90, 60, 20, 0.55);
+    transition:
+        transform var(--motion-fast),
+        box-shadow var(--motion-fast),
+        filter var(--motion-fast);
+}
+.btn-metal::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: -40%;
+    inline-size: 34%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+    transform: skewX(-20deg);
+    animation: sheen 5.5s ease-in-out infinite;
+}
+@keyframes sheen {
+    0%,
+    62% {
+        translate: 0 0;
+    }
+    100% {
+        translate: 520% 0;
+    }
+}
+[dir='rtl'] .btn-metal::after {
+    animation-name: sheen-rtl;
+}
+@keyframes sheen-rtl {
+    0%,
+    62% {
+        translate: 0 0;
+    }
+    100% {
+        translate: -520% 0;
+    }
+}
+.btn-metal:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+    box-shadow:
+        0 14px 34px rgba(214, 173, 98, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        inset 0 -2px 0 rgba(90, 60, 20, 0.55);
+}
+.btn-metal:active:not(:disabled) {
+    transform: translateY(1px);
+}
+.auth-forgot {
+    justify-self: center;
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--text-soft);
+    font-size: var(--text-sm);
+}
+.auth-forgot:hover {
+    color: var(--gold-200);
+    text-decoration: underline;
 }
 .strength {
     display: grid;
@@ -2248,32 +2589,25 @@ select.input option {
 .strength__bars i.on {
     background: var(--gold-300);
 }
-.auth-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-}
 .auth-switch {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--space-2);
-    padding-block-start: var(--space-4);
-    border-block-start: 1px solid var(--line-soft);
     color: var(--text-soft);
     font-size: var(--text-sm);
 }
 .auth-switch .inline-link {
     font-weight: 700;
     text-decoration: underline;
+    text-underline-offset: 4px;
 }
 .notice {
     padding: var(--space-3) var(--space-4);
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
     font-size: var(--text-sm);
+    background: var(--surface-sunken);
 }
 .notice--error {
     border-color: color-mix(in srgb, var(--red-500) 60%, transparent);
@@ -2283,17 +2617,33 @@ select.input option {
     border-color: color-mix(in srgb, var(--green-500) 50%, transparent);
     color: var(--green-500);
 }
-/* Phone: logo first and compact, then the form — as in the mobile mockup. */
+/* Phone: summit and logo on top, then the form. */
 @media (max-width: 980px) {
-    .auth-stage {
-        grid-template-columns: 1fr;
-        gap: var(--space-6);
+    [dir] .auth-stage {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-5);
         align-content: start;
     }
-    .auth-hero {
-        gap: var(--space-4);
+    [dir] .auth-hero {
+        order: 0;
+        padding-block-start: 74px;
     }
-    .auth-hero__logo {
-        inline-size: min(64%, 300px);
+    .summit {
+        inset-block-start: -64px;
+        inline-size: 190%;
+    }
+    .scene__floor {
+        block-size: 8%;
+    }
+    .brand-logo {
+        inline-size: min(72%, 300px);
+    }
+    .auth-tagline {
+        font-size: 1.7rem;
+        padding-block-end: var(--space-3);
+    }
+    .auth-card {
+        padding: var(--space-6) var(--space-5);
+        gap: var(--space-5);
     }
 }

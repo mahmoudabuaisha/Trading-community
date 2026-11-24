@@ -19,6 +19,14 @@
     --gold-900: #3a2e19;
     --gold-gradient: linear-gradient(100deg, #f3dca6 0%, #d6ad62 45%, #a87a35 100%);
 
+    --gold-metal: linear-gradient(180deg, #fbeec4 0%, #e6c683 22%, #c79a4f 52%, #9c7030 70%, #dfbd78 100%);
+
+    /* Steel (logo "N", cool highlights) */
+    --steel-100: #f4f5f8;
+    --steel-300: #b9bcc6;
+    --steel-600: #5b5e68;
+    --glint-blue: #8fb6ff;
+
     /* Text */
     --text: #f0e7d5;
     --text-soft: #c2b69e;
@@ -60,6 +68,8 @@
     --shadow-glow: 0 0 34px rgba(214, 173, 98, 0.22);
 
     /* Type */
+    --font-display: 'Cinzel', 'Times New Roman', serif;
+    --font-script: 'Amiri', 'Alexandria', serif;
     --font-sans: 'Alexandria', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --text-xs: 0.72rem;
     --text-sm: 0.82rem;

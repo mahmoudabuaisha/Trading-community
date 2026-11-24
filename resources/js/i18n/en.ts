@@ -53,7 +53,6 @@ export const en: Messages = {
         strengthEmpty: 'Enter a password',
         strengthLevels: ['Weak', 'Weak', 'Fair', 'Good', 'Strong'],
         strengthHint: 'Use at least 8 characters with numbers and symbols.',
-        remember: 'Remember me',
         forgot: 'Forgot password?',
         checking: 'Checking...',
         submitSignIn: 'Sign in',

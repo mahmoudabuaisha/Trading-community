@@ -10,12 +10,17 @@ Every colour, spacing step, radius, shadow and duration is defined once in `reso
 | --- | --- | --- |
 | Surfaces | `--bg-900…700`, `--surface`, `--surface-raised`, `--surface-sunken` | Page, panels, inset wells |
 | Gold | `--gold-200…900`, `--gold-gradient` | Accent text, borders, primary actions, progress |
+| Steel | `--steel-100/300/600`, `--glint-blue` | Logo "N", cool light glints on the sign-in scene |
 | Text | `--text`, `--text-soft`, `--text-muted`, `--text-on-gold` | Body, secondary, captions, text on gold fills |
 | Lines | `--line-soft`, `--line`, `--line-strong` | Dividers, default borders, emphasised borders |
 | Semantic | `--green-500` (done), `--red-500` (error / urgent), `--blue-500`, `--neutral-400/500` | Status only — never decoration |
 | Spacing | `--space-1…12` (4px base) | All padding and gaps |
 | Shape | `--radius-sm…xl`, `--radius-pill` | Controls → cards → panels |
 | Motion | `--motion-fast` (hover), `--motion-base` (entrances), `--motion-slow` (ambient) | Respects `prefers-reduced-motion` |
+
+## Sign-in scene
+
+The sign-in screens are built from three decorative components, all `aria-hidden`: `AuthScene` (sky, gold ribbons, light streaks, reflective floor), `SummitArt` (faceted, lit rock face with flag, halo and clouds) and `BrandLogo` (the SN Tasks wordmark as vector art with an SVG lighting bevel). Display type uses `--font-display` (Cinzel) for the Latin wordmark and `--font-script` (Amiri) for the Arabic tagline. The composition is the same in both languages — summit on the left, card on the right — and the filtered artwork is static so nothing repaints beneath the blurred glass card.
 
 ## Direction
 

@@ -51,7 +51,6 @@ export const ar = {
         strengthEmpty: 'أدخل كلمة مرور',
         strengthLevels: ['ضعيفة', 'ضعيفة', 'مقبولة', 'جيدة', 'قوية'],
         strengthHint: 'استخدم 8 أحرف على الأقل مع أرقام ورموز لزيادة الحماية.',
-        remember: 'تذكرني',
         forgot: 'نسيت كلمة المرور؟',
         checking: 'جارٍ التحقق...',
         submitSignIn: 'تسجيل الدخول',

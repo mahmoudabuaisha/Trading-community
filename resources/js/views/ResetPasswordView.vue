@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Lock } from 'lucide-vue-next'
 import { ref } from 'vue'
+import AuthScene from '../components/AuthScene.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { repository } from '../data/repository'
 import { t } from '../i18n'
@@ -30,7 +31,7 @@ async function submit(): Promise<void> {
 
 <template>
     <main class="auth-page auth-page--center">
-        <div class="auth-ambient" aria-hidden="true"><i /><i /><i /></div>
+        <AuthScene />
         <div class="auth-card auth-card--solo">
             <div class="auth-card__head">
                 <div class="auth-card__icon"><Lock :size="20" aria-hidden="true" /></div>
@@ -57,7 +58,7 @@ async function submit(): Promise<void> {
                         dir="ltr"
                     />
                 </label>
-                <button type="submit" class="btn btn--gold btn--block" :disabled="busy">
+                <button type="submit" class="btn-metal" :disabled="busy">
                     {{ busy ? t('auth.checking') : t('auth.resetSubmit') }}
                 </button>
                 <RouterLink :to="{ name: 'auth' }" class="inline-link">{{ t('auth.backToSignIn') }}</RouterLink>

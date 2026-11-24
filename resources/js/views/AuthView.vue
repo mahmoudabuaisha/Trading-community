@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Lock, Mail, UserRound } from 'lucide-vue-next'
+import { Eye, EyeOff, Lock, LogIn, Mail, UserRound } from 'lucide-vue-next'
 import { computed, reactive, ref } from 'vue'
+import AuthScene from '../components/AuthScene.vue'
+import SummitArt from '../components/SummitArt.vue'
+import BrandLogo from '../components/BrandLogo.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ApiError } from '../data/http'
 import { repository } from '../data/repository'
-import { isRtl, locale, messages, setLocale, t } from '../i18n'
+import { locale, messages, setLocale, t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 import { describeError } from '../stores/ui'
 
@@ -32,7 +35,7 @@ function rememberEmail(value: string | null): void {
 
 type Mode = 'login' | 'signup' | 'forgot'
 const mode = ref<Mode>('login')
-const form = reactive({ name: '', email: rememberedEmail(), password: '', remember: true })
+const form = reactive({ name: '', email: rememberedEmail(), password: '' })
 const showPassword = ref(false)
 const busy = ref(false)
 const notice = ref<{ kind: 'error' | 'ok'; text: string } | null>(
@@ -53,7 +56,6 @@ const strength = computed(
             /[^A-Za-z0-9ء-ي]/.test(form.password),
         ].filter(Boolean).length,
 )
-const SubmitArrow = computed(() => (isRtl.value ? ArrowLeft : ArrowRight))
 
 function switchMode(next: Mode): void {
     mode.value = next
@@ -71,9 +73,9 @@ async function submit(): Promise<void> {
             notice.value = { kind: 'ok', text: result.message }
             return
         }
-        if (mode.value === 'login') await auth.login(form.email, form.password, form.remember)
+        if (mode.value === 'login') await auth.login(form.email, form.password, true)
         else await auth.register(form.name.trim(), form.email, form.password)
-        rememberEmail(form.remember ? form.email : null)
+        rememberEmail(form.email)
         const next =
             typeof route.query.next === 'string' && route.query.next.startsWith('/app')
                 ? route.query.next
@@ -90,7 +92,7 @@ async function submit(): Promise<void> {
 
 <template>
     <main class="auth-page">
-        <div class="auth-ambient" aria-hidden="true"><i /><i /><i /></div>
+        <AuthScene />
 
         <header class="auth-topbar">
             <button
@@ -105,29 +107,24 @@ async function submit(): Promise<void> {
 
         <section class="auth-stage">
             <div class="auth-hero">
-                <img
-                    class="auth-hero__logo"
-                    src="/images/sn-tasks-cover-720.webp"
-                    srcset="/images/sn-tasks-cover-360.webp 360w, /images/sn-tasks-cover-720.webp 720w"
-                    sizes="(max-width: 980px) 300px, 520px"
-                    width="720"
-                    height="720"
-                    :alt="t('auth.logoAlt')"
-                    fetchpriority="high"
-                />
+                <SummitArt />
+                <BrandLogo :label="t('auth.logoAlt')" />
                 <h1 class="auth-tagline">{{ t('auth.tagline') }}</h1>
             </div>
 
             <div class="auth-card">
+                <span class="auth-card__glint auth-card__glint--start" aria-hidden="true" />
+                <span class="auth-card__glint auth-card__glint--end" aria-hidden="true" />
+
                 <div class="auth-card__welcome">
                     <h2>{{ t(`auth.${titles[mode]}`) }}</h2>
                     <p class="auth-card__sub">{{ t(`auth.${subtitles[mode]}`) }}</p>
                 </div>
 
-                <form class="stack stack--tight" @submit.prevent="submit">
+                <form class="auth-form" @submit.prevent="submit">
                     <div v-if="mode === 'signup'" class="field">
                         <div class="input-wrap">
-                            <UserRound :size="18" aria-hidden="true" />
+                            <UserRound :size="20" aria-hidden="true" />
                             <input
                                 v-model="form.name"
                                 autocomplete="name"
@@ -144,7 +141,7 @@ async function submit(): Promise<void> {
 
                     <div class="field">
                         <div class="input-wrap">
-                            <Mail :size="18" aria-hidden="true" />
+                            <Mail :size="20" aria-hidden="true" />
                             <input
                                 v-model="form.email"
                                 type="email"
@@ -159,7 +156,7 @@ async function submit(): Promise<void> {
 
                     <div v-if="mode !== 'forgot'" class="field">
                         <div class="input-wrap">
-                            <Lock :size="18" aria-hidden="true" />
+                            <Lock :size="20" aria-hidden="true" />
                             <input
                                 v-model="form.password"
                                 :type="showPassword ? 'text' : 'password'"
@@ -175,7 +172,7 @@ async function submit(): Promise<void> {
                                 :aria-label="t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')"
                                 @click="showPassword = !showPassword"
                             >
-                                <component :is="showPassword ? Eye : EyeOff" :size="18" />
+                                <component :is="showPassword ? Eye : EyeOff" :size="19" />
                             </button>
                         </div>
                         <small v-if="fieldErrors.password" class="field__error">{{ fieldErrors.password[0] }}</small>
@@ -194,19 +191,13 @@ async function submit(): Promise<void> {
                         <small>{{ t('auth.strengthHint') }}</small>
                     </div>
 
-                    <div v-if="mode === 'login'" class="auth-options">
-                        <label class="check"
-                            ><input v-model="form.remember" type="checkbox" />
-                            <span>{{ t('auth.remember') }}</span></label
-                        >
-                        <button type="button" class="inline-link" @click="switchMode('forgot')">
-                            {{ t('auth.forgot') }}
-                        </button>
-                    </div>
+                    <button type="submit" class="btn-metal" :disabled="busy">
+                        <LogIn :size="20" aria-hidden="true" />
+                        <span>{{ busy ? t('auth.checking') : t(`auth.${submitLabels[mode]}`) }}</span>
+                    </button>
 
-                    <button type="submit" class="btn btn--gold btn--block" :disabled="busy">
-                        <component :is="SubmitArrow" :size="18" aria-hidden="true" />
-                        {{ busy ? t('auth.checking') : t(`auth.${submitLabels[mode]}`) }}
+                    <button v-if="mode === 'login'" type="button" class="auth-forgot" @click="switchMode('forgot')">
+                        {{ t('auth.forgot') }}
                     </button>
 
                     <div
