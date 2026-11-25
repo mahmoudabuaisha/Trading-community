@@ -181,6 +181,7 @@ return [
     */
 
     'custom' => [
+        'rewards' => ['locked' => 'You need more points to unlock this reward.'],
         'habits' => [
             'limit' => 'You can track at most :max habits.',
             'future' => 'A day cannot be recorded before it happens.',

@@ -18,6 +18,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Second, independent admin check behind the `role:admin` route middleware.
         Gate::define('admin', fn (User $user): bool => $user->isAdmin());
+        // One area of the admin center: administrators always, moderators when granted.
+        Gate::define('area', fn (User $user, string $area): bool => $user->hasPermission($area));
+        Gate::define('staff', fn (User $user): bool => $user->isStaff());
 
         // Password-reset emails link to the SPA screen.
         ResetPassword::createUrlUsing(fn (User $user, string $token): string => url(route('password.reset', [

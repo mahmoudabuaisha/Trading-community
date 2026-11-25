@@ -16,7 +16,7 @@ class MotivationController extends Controller
 {
     public function index(): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'growth');
 
         return response()->json(['motivations' => MotivationResource::collection(Motivation::latest()->latest('id')->get())]);
     }
@@ -37,7 +37,7 @@ class MotivationController extends Controller
 
     public function destroy(Request $request, Motivation $motivation, AdminService $admin): Response
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'growth');
 
         $admin->deleteMotivation($request->user(), $motivation);
 

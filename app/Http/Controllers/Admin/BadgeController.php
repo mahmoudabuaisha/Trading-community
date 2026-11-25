@@ -16,7 +16,7 @@ class BadgeController extends Controller
 {
     public function index(): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'badges');
 
         return response()->json(['badges' => BadgeResource::collection(Badge::orderBy('id')->get())]);
     }
@@ -35,7 +35,7 @@ class BadgeController extends Controller
 
     public function destroy(Request $request, Badge $badge, AdminService $admin): Response
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'badges');
         $admin->deleteBadge($request->user(), $badge);
 
         return response()->noContent();

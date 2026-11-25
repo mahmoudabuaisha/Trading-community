@@ -18,8 +18,10 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Growth & motivation | Library of texts published by administrators |
 | Education | Lessons (title, text, image) published by administrators, shown as cards that open a lesson page; lessons can be subscriber-only and administrators grant premium access per member |
 | Messages | A private thread between each member and the administrators, with unread badges |
-| Profile | Photo and names, settings (language, time zone, goals, notifications), security (password change, sign out of other devices) and account statistics |
-| Admin center | Platform stats, user search, role changes, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log |
+| Profile | Photo and names, settings (language: Arabic, English or French; time zone; goals; per-account notification switches), security (password change, list of signed-in devices, sign out of other devices) and account statistics |
+| Notifications | Task reminders, a morning motivation line, a welcome back after a day or more away, and bedtime / wake-up reminders; each can be switched off. They appear while the app is open |
+| Commitment rewards | 10 points for every day on which all daily tasks were completed; points unlock avatar frames and titles (`config/rewards.php`) |
+| Admin center | Platform stats, user search, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log. A full administrator can appoint moderators and choose which areas each one manages; the server enforces it per area |
 
 ## Stack
 

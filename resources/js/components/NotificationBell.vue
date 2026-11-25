@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { Bell, BellRing, Check, Mail, X } from 'lucide-vue-next'
+import { Bell, BellRing, Check, Mail, Moon, Sparkles, Sun, X } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useNudges } from '../composables/useNudges'
 import { useReminders } from '../composables/useReminders'
 import { formatDate, t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
+import { useNoticesStore, type NoticeKind } from '../stores/notices'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
 import type { Task } from '../types/domain'
@@ -11,11 +13,15 @@ import type { Task } from '../types/domain'
 const auth = useAuthStore()
 const workspace = useWorkspaceStore()
 const ui = useUiStore()
+const notices = useNoticesStore()
 const { due } = useReminders()
+useNudges()
+
+const noticeIcons: Record<NoticeKind, typeof Sun> = { morning: Sun, absence: Sparkles, sleep: Moon, wake: Sun }
 
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)
-const count = computed(() => due.value.length + workspace.unread.member + workspace.unread.admin)
+const count = computed(() => notices.items.length + due.value.length + workspace.unread.member + workspace.unread.admin)
 
 async function attempt(action: () => Promise<void>): Promise<void> {
     try {
@@ -61,7 +67,7 @@ onBeforeUnmount(() => {
             <div class="bell__head">
                 <b>{{ t('notify.title') }}</b>
                 <RouterLink
-                    :to="{ name: 'profile', hash: '#notifications' }"
+                    :to="{ name: 'profile', params: { section: 'settings' }, hash: '#notifications' }"
                     class="inline-link"
                     @click="open = false"
                     >{{ t('notify.settings') }}</RouterLink
@@ -86,6 +92,26 @@ onBeforeUnmount(() => {
                 <Mail :size="18" aria-hidden="true" />
                 <span>{{ t('notify.memberMessages', { n: workspace.unread.admin }) }}</span>
             </RouterLink>
+
+            <div v-for="notice in notices.items" :key="`notice-${notice.id}`" class="bell__item">
+                <component :is="noticeIcons[notice.kind]" :size="18" aria-hidden="true" />
+
+                <span>
+                    <b>{{ notice.title }}</b>
+
+                    <small class="bell__text">{{ notice.text }}</small>
+                </span>
+
+                <button
+                    type="button"
+                    class="icon-btn icon-btn--sm"
+                    :title="t('common.close')"
+                    :aria-label="`${t('common.close')}: ${notice.title}`"
+                    @click="notices.dismiss(notice.id)"
+                >
+                    <X :size="14" />
+                </button>
+            </div>
 
             <div v-for="task in due" :key="task.id" class="bell__item">
                 <BellRing :size="18" aria-hidden="true" />

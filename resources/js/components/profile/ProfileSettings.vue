@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import AccountNotifications from '../AccountNotifications.vue'
 import NotificationSettings from '../NotificationSettings.vue'
 import { ApiError } from '../../data/http'
-import { t } from '../../i18n'
+import { LOCALE_NAMES, t } from '../../i18n'
 import { useAuthStore } from '../../stores/auth'
 import { useUiStore } from '../../stores/ui'
 import { useWorkspaceStore } from '../../stores/workspace'
-import type { Locale } from '../../types/domain'
+import { LOCALES } from '../../types/domain'
 
 const auth = useAuthStore()
 const workspace = useWorkspaceStore()
@@ -22,7 +23,6 @@ const form = reactive({
 })
 const errors = ref<Record<string, string[]>>({})
 const saving = ref(false)
-const languages: Locale[] = ['ar', 'en']
 const timezones: string[] = (() => {
     try {
         return Intl.supportedValuesOf('timeZone')
@@ -53,8 +53,8 @@ async function save(): Promise<void> {
                 <label class="field">
                     <span>{{ t('profile.language') }}</span>
                     <select v-model="form.language" class="input">
-                        <option v-for="language in languages" :key="language" :value="language">
-                            {{ language === 'ar' ? 'العربية' : 'English' }}
+                        <option v-for="language in LOCALES" :key="language" :value="language">
+                            {{ LOCALE_NAMES[language] }}
                         </option>
                     </select>
                 </label>
@@ -103,6 +103,7 @@ async function save(): Promise<void> {
             </div>
         </form>
 
+        <AccountNotifications />
         <NotificationSettings />
     </div>
 </template>

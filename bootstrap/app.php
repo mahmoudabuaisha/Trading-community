@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsureArea;
 use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\EnsureStaff;
 use App\Http\Middleware\SetLocaleFromRequest;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Sanctum SPA auth: same-origin requests to /api use the session cookie + CSRF.
         $middleware->statefulApi();
         $middleware->api(append: [SetLocaleFromRequest::class]);
-        $middleware->alias(['role' => EnsureRole::class]);
+        $middleware->alias(['role' => EnsureRole::class, 'staff' => EnsureStaff::class, 'area' => EnsureArea::class]);
         // An already signed-in SPA hitting a guest-only endpoint gets JSON, not a redirect.
         $middleware->redirectUsersTo(fn (Request $request) => abort(409, 'Already authenticated.'));
     })

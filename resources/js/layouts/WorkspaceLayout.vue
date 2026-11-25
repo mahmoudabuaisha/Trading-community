@@ -29,9 +29,11 @@ import NotificationBell from '../components/NotificationBell.vue'
 import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { useSiteCopy } from '../lib/content'
+import { roleName } from '../lib/roles'
 import { describeError } from '../stores/ui'
-import { formatDate, locale, setLocale, t } from '../i18n'
+import { formatDate, locale, setLocale, t, cycleLocale } from '../i18n'
 import { useAuthStore } from '../stores/auth'
+import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
 
 const auth = useAuthStore()
@@ -102,9 +104,7 @@ const pageTitle = computed(() =>
         ? t('title.tasks', { period: t(`period.${String(route.params.period)}`) })
         : t(`title.${route.name === 'lesson' ? 'education' : String(route.name)}`),
 )
-const roleLabel = computed(() =>
-    auth.isAdmin ? t('role.admin') : auth.user?.isPremium ? t('role.premium') : t('role.user'),
-)
+const roleLabel = computed(() => roleName(auth.user))
 const fullName = computed(() => `${auth.user?.displayName ?? ''} ${auth.user?.surname ?? ''}`.trim())
 
 watch(pageTitle, (title) => (document.title = `${title} · SN Tasks`), { immediate: true })
@@ -130,6 +130,16 @@ onBeforeUnmount(() => {
     window.clearInterval(unreadPoll)
     window.removeEventListener('keydown', onKeydown)
 })
+
+/** The top-bar language button changes the account's language, so it stays after a reload and on other devices. */
+async function switchLanguage(): Promise<void> {
+    cycleLocale()
+    try {
+        await workspace.patchProfile({ language: locale.value })
+    } catch (error) {
+        useUiStore().failure(error)
+    }
+}
 
 async function signOut(): Promise<void> {
     await auth.logout()
@@ -184,7 +194,7 @@ async function signOut(): Promise<void> {
                     </RouterLink>
 
                     <RouterLink
-                        v-if="auth.isAdmin"
+                        v-if="auth.isStaff"
                         :to="{ name: 'admin' }"
                         class="nav-item"
                         :class="{ 'nav-item--active': route.name === 'admin' }"
@@ -224,7 +234,7 @@ async function signOut(): Promise<void> {
                         <component :is="navOpen ? X : Menu" :size="20" aria-hidden="true" />
                     </button>
                     <RouterLink :to="{ name: 'profile' }" class="user-chip" :aria-label="t('nav.profile')">
-                        <UserAvatar :name="fullName" :src="auth.user?.avatarUrl" />
+                        <UserAvatar :name="fullName" :src="auth.user?.avatarUrl" :frame="auth.user?.frame" />
                         <span>
                             <b
                                 ><Crown v-if="auth.isAdmin" :size="14" aria-hidden="true" />
@@ -234,13 +244,8 @@ async function signOut(): Promise<void> {
                         </span>
                     </RouterLink>
                     <NotificationBell />
-                    <button
-                        type="button"
-                        class="chip-btn"
-                        :aria-label="t('nav.switchLang')"
-                        @click="setLocale(locale === 'ar' ? 'en' : 'ar')"
-                    >
-                        {{ t('nav.langButton') }}
+                    <button type="button" class="chip-btn" :aria-label="t('nav.switchLang')" @click="switchLanguage">
+                        {{ locale.toUpperCase() }}
                     </button>
                 </div>
 

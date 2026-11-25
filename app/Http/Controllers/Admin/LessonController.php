@@ -17,7 +17,7 @@ class LessonController extends Controller
 {
     public function index(): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'education');
 
         return response()->json(['lessons' => LessonResource::collection(Lesson::orderBy('position')->orderBy('id')->get())]);
     }
@@ -36,7 +36,7 @@ class LessonController extends Controller
 
     public function destroy(Request $request, Lesson $lesson, AdminService $admin): Response
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'education');
         $admin->deleteLesson($request->user(), $lesson);
 
         return response()->noContent();

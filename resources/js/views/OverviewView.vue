@@ -15,7 +15,6 @@ import {
     Lock,
     Plus,
     Star,
-    Timer,
     Trophy,
 } from 'lucide-vue-next'
 import { computed, ref, type Component } from 'vue'
@@ -46,7 +45,7 @@ const tiles = computed(() => [
     { icon: Trophy, value: workspace.tasks.length, label: t('dash.tTotal') },
     { icon: BarChart3, value: `${completionRate.value}%`, label: t('dash.tRate') },
     { icon: Flame, value: workspace.streak, label: t('dash.tStreak') },
-    { icon: Timer, value: workspace.focus.totalMinutes, label: t('dash.tFocus') },
+    { icon: Star, value: auth.user?.points ?? 0, label: t('dash.tPoints') },
 ])
 
 /** Open tasks with a due date from today onward, soonest first. */

@@ -4544,3 +4544,157 @@ a.btn-metal {
         gap: var(--space-5);
     }
 }
+
+/* ── Commitment rewards ─────────────────────────────────────────────────── */
+/* A framed avatar: the metal shows through a padding ring around the photo. */
+.avatar--frame {
+    --frame: var(--frame-gold);
+    --frame-glow: var(--frame-glow-gold);
+    border: 3px solid transparent;
+    background:
+        linear-gradient(160deg, var(--gold-900), var(--bg-700)) padding-box,
+        var(--frame) border-box;
+    box-shadow: 0 0 14px var(--frame-glow);
+}
+.avatar--frame-bronze,
+.profile-hero__avatar--bronze {
+    --frame: var(--frame-bronze);
+    --frame-glow: var(--frame-glow-bronze);
+}
+.avatar--frame-silver,
+.profile-hero__avatar--silver {
+    --frame: var(--frame-silver);
+    --frame-glow: var(--frame-glow-silver);
+}
+.avatar--frame-gold,
+.profile-hero__avatar--gold {
+    --frame: var(--frame-gold);
+    --frame-glow: var(--frame-glow-gold);
+}
+.avatar--frame-royal,
+.profile-hero__avatar--royal {
+    --frame: var(--frame-royal);
+    --frame-glow: var(--frame-glow-royal);
+}
+.profile-hero__avatar[class*='profile-hero__avatar--'] {
+    border: 6px solid transparent;
+    background:
+        linear-gradient(var(--bg-900), var(--bg-900)) padding-box,
+        var(--frame) border-box;
+    box-shadow:
+        0 0 40px var(--frame-glow),
+        inset 0 0 22px rgba(0, 0, 0, 0.8);
+}
+.rewards-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+}
+.rewards-summary__points {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: none;
+    padding: var(--space-3) var(--space-5);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    background: var(--surface-sunken);
+    color: var(--gold-200);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+}
+.rewards-summary p {
+    color: var(--text-muted);
+}
+.reward-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-3);
+}
+.reward-card {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--space-2);
+    min-block-size: 112px;
+    padding: var(--space-4) var(--space-3);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+    color: var(--text);
+    text-align: center;
+    transition: border-color var(--motion-fast);
+}
+.reward-card:hover:not(:disabled) {
+    border-color: var(--line-strong);
+}
+.reward-card small {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+}
+.reward-card--on {
+    border-color: var(--gold-300);
+}
+.reward-card--on small {
+    color: var(--gold-300);
+}
+.reward-card--locked {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.reward-card__title {
+    color: var(--gold-200);
+    font-size: var(--text-lg);
+}
+
+/* ── Signed-in devices and staff permissions ────────────────────────────── */
+.device-list {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.device-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+}
+.device-row > svg {
+    flex: none;
+    color: var(--gold-300);
+}
+.device-row > span:first-of-type {
+    flex: 1;
+    display: grid;
+    gap: 2px;
+    min-inline-size: 0;
+}
+.device-row small {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+}
+.perm-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+}
+.perm-list legend {
+    padding-inline: var(--space-2);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+.bell__item .bell__text {
+    white-space: normal;
+}

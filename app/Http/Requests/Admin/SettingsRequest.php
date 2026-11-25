@@ -8,7 +8,7 @@ class SettingsRequest extends ApiRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('admin');
+        return $this->user()->can('area', 'content');
     }
 
     public function rules(): array

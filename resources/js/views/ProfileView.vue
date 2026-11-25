@@ -6,6 +6,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Crown,
+    Gift,
     House,
     LogOut,
     Mail,
@@ -17,12 +18,14 @@ import {
 } from 'lucide-vue-next'
 import { computed, nextTick, reactive, ref, type Component } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ProfileRewards from '../components/profile/ProfileRewards.vue'
 import ProfileSecurity from '../components/profile/ProfileSecurity.vue'
 import ProfileSettings from '../components/profile/ProfileSettings.vue'
 import ProfileStats from '../components/profile/ProfileStats.vue'
 import { ApiError } from '../data/http'
 import { isRtl, t } from '../i18n'
 import { fileToAvatar } from '../lib/image'
+import { roleName } from '../lib/roles'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
@@ -34,22 +37,26 @@ const route = useRoute()
 const router = useRouter()
 
 const user = computed(() => auth.user!)
-type Section = 'settings' | 'security' | 'stats'
+type Section = 'settings' | 'security' | 'stats' | 'rewards'
 const section = computed(() => (route.params.section || null) as Section | null)
 const sections: { id: Section; icon: Component }[] = [
     { id: 'settings', icon: Settings },
     { id: 'security', icon: ShieldCheck },
     { id: 'stats', icon: BarChart3 },
+    { id: 'rewards', icon: Gift },
 ]
-const panels: Record<Section, Component> = { settings: ProfileSettings, security: ProfileSecurity, stats: ProfileStats }
+const panels: Record<Section, Component> = {
+    settings: ProfileSettings,
+    security: ProfileSecurity,
+    stats: ProfileStats,
+    rewards: ProfileRewards,
+}
 
 /** "Back" points against the reading direction; rows open in the reading direction. */
 const BackIcon = computed(() => (isRtl.value ? ChevronRight : ChevronLeft))
 const OpenIcon = computed(() => (isRtl.value ? ChevronLeft : ChevronRight))
-const roleLabel = computed(() =>
-    user.value.role === 'admin' ? t('role.admin') : user.value.isPremium ? t('role.premium') : t('role.user'),
-)
-const verified = computed(() => user.value.role === 'admin' || user.value.isPremium)
+const roleLabel = computed(() => roleName(user.value))
+const verified = computed(() => user.value.role !== 'user' || user.value.isPremium)
 
 function goBack(): void {
     if (section.value) void router.push({ name: 'profile' })
@@ -162,6 +169,7 @@ async function signOut(): Promise<void> {
                 <button
                     type="button"
                     class="profile-hero__avatar"
+                    :class="user.frame !== 'none' ? `profile-hero__avatar--${user.frame}` : ''"
                     :aria-label="t('profile.changeAvatar')"
                     @click="fileInput?.click()"
                 >
@@ -213,6 +221,9 @@ async function signOut(): Promise<void> {
                 >
                     <component :is="item.icon" :size="24" class="profile-row__icon" aria-hidden="true" />
                     <span class="profile-row__label">{{ t(`profile.section.${item.id}`) }}</span>
+                    <span v-if="item.id === 'rewards'" class="profile-row__value">{{
+                        t('rewards.count', { n: user.points })
+                    }}</span>
                     <component :is="OpenIcon" :size="20" class="profile-row__open" aria-hidden="true" />
                 </RouterLink>
             </div>

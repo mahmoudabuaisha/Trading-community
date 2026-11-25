@@ -27,7 +27,7 @@ const routes: RouteRecordRaw[] = [
             { path: 'achievements', name: 'achievements', component: () => import('../views/AchievementsView.vue') },
             { path: 'growth', name: 'growth', component: () => import('../views/GrowthView.vue') },
             {
-                path: 'profile/:section(settings|security|stats)?',
+                path: 'profile/:section(settings|security|stats|rewards)?',
                 name: 'profile',
                 component: () => import('../views/ProfileView.vue'),
             },
@@ -57,7 +57,7 @@ router.beforeEach(async (to) => {
     const auth = useAuthStore()
     await auth.ensureLoaded()
     if (to.meta.auth && !auth.user) return { name: 'auth', query: { next: to.fullPath } }
-    if (to.meta.admin && !auth.isAdmin) return { name: 'overview' }
+    if (to.meta.admin && !auth.isStaff) return { name: 'overview' }
     if (to.meta.guest && auth.user) return { name: 'overview' }
     return true
 })

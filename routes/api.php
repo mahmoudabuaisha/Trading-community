@@ -52,6 +52,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::put('profile', [ProfileController::class, 'update']);
     Route::put('profile/password', [ProfileController::class, 'password'])->middleware('throttle:6,1');
     Route::post('profile/sign-out-others', [ProfileController::class, 'signOutOthers']);
+    Route::get('profile/sessions', [ProfileController::class, 'sessions']);
+    Route::put('profile/preferences', [ProfileController::class, 'preferences']);
+    Route::put('profile/rewards', [ProfileController::class, 'rewards']);
     Route::post('focus-sessions', [FocusSessionController::class, 'store']);
     Route::put('reviews/{date}', [ReviewController::class, 'update'])->where('date', '\d{4}-\d{2}-\d{2}');
 
@@ -68,28 +71,28 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('messages/unread', [MessageController::class, 'unread']);
     Route::post('messages', [MessageController::class, 'store'])->middleware('throttle:20,1');
 
-    Route::middleware('role:admin')->prefix('admin')->group(function (): void {
+    Route::middleware('staff')->prefix('admin')->group(function (): void {
         Route::get('overview', [AdminOverviewController::class, 'show']);
-        Route::get('users', [AdminUserController::class, 'index']);
-        Route::patch('users/{user}', [AdminUserController::class, 'update']);
-        Route::post('users/{user}/revoke-sessions', [AdminUserController::class, 'revokeSessions']);
-        Route::get('motivations', [AdminMotivationController::class, 'index']);
-        Route::post('motivations', [AdminMotivationController::class, 'store']);
-        Route::patch('motivations/{motivation}', [AdminMotivationController::class, 'update']);
-        Route::delete('motivations/{motivation}', [AdminMotivationController::class, 'destroy']);
-        Route::get('badges', [AdminBadgeController::class, 'index']);
-        Route::post('badges', [AdminBadgeController::class, 'store']);
-        Route::patch('badges/{badge}', [AdminBadgeController::class, 'update']);
-        Route::delete('badges/{badge}', [AdminBadgeController::class, 'destroy']);
-        Route::get('settings', [AdminSettingsController::class, 'show']);
-        Route::put('settings', [AdminSettingsController::class, 'update']);
-        Route::get('threads', [AdminThreadController::class, 'index']);
-        Route::get('threads/{user}', [AdminThreadController::class, 'show']);
-        Route::post('threads/{user}', [AdminThreadController::class, 'store']);
-        Route::get('lessons', [AdminLessonController::class, 'index']);
-        Route::post('lessons', [AdminLessonController::class, 'store']);
+        Route::get('users', [AdminUserController::class, 'index'])->middleware('area:users');
+        Route::patch('users/{user}', [AdminUserController::class, 'update'])->middleware('area:users');
+        Route::post('users/{user}/revoke-sessions', [AdminUserController::class, 'revokeSessions'])->middleware('area:users');
+        Route::get('motivations', [AdminMotivationController::class, 'index'])->middleware('area:growth');
+        Route::post('motivations', [AdminMotivationController::class, 'store'])->middleware('area:growth');
+        Route::patch('motivations/{motivation}', [AdminMotivationController::class, 'update'])->middleware('area:growth');
+        Route::delete('motivations/{motivation}', [AdminMotivationController::class, 'destroy'])->middleware('area:growth');
+        Route::get('badges', [AdminBadgeController::class, 'index'])->middleware('area:badges');
+        Route::post('badges', [AdminBadgeController::class, 'store'])->middleware('area:badges');
+        Route::patch('badges/{badge}', [AdminBadgeController::class, 'update'])->middleware('area:badges');
+        Route::delete('badges/{badge}', [AdminBadgeController::class, 'destroy'])->middleware('area:badges');
+        Route::get('settings', [AdminSettingsController::class, 'show'])->middleware('area:content');
+        Route::put('settings', [AdminSettingsController::class, 'update'])->middleware('area:content');
+        Route::get('threads', [AdminThreadController::class, 'index'])->middleware('area:messages');
+        Route::get('threads/{user}', [AdminThreadController::class, 'show'])->middleware('area:messages');
+        Route::post('threads/{user}', [AdminThreadController::class, 'store'])->middleware('area:messages');
+        Route::get('lessons', [AdminLessonController::class, 'index'])->middleware('area:education');
+        Route::post('lessons', [AdminLessonController::class, 'store'])->middleware('area:education');
         // POST, not PATCH: the update carries an optional image as multipart form data.
-        Route::post('lessons/{lesson}', [AdminLessonController::class, 'update']);
-        Route::delete('lessons/{lesson}', [AdminLessonController::class, 'destroy']);
+        Route::post('lessons/{lesson}', [AdminLessonController::class, 'update'])->middleware('area:education');
+        Route::delete('lessons/{lesson}', [AdminLessonController::class, 'destroy'])->middleware('area:education');
     });
 });

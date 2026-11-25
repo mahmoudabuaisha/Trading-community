@@ -21,8 +21,13 @@ export type TaskStatus = (typeof TASK_STATUSES)[number]
 export const MOTIVATION_CATEGORIES = ['growth', 'motivation', 'announcement'] as const
 export type MotivationCategory = (typeof MOTIVATION_CATEGORIES)[number]
 
-export type Role = 'admin' | 'user'
-export type Locale = 'ar' | 'en'
+export type Role = 'admin' | 'moderator' | 'user'
+
+/** Areas of the admin center a moderator can be granted. Administrators have all of them. */
+export const ADMIN_AREAS = ['users', 'content', 'growth', 'education', 'badges', 'messages', 'audit'] as const
+export type AdminArea = (typeof ADMIN_AREAS)[number]
+export const LOCALES = ['ar', 'en', 'fr'] as const
+export type Locale = (typeof LOCALES)[number]
 
 export interface User {
     id: number
@@ -32,6 +37,13 @@ export interface User {
     nickname: string
     /** Granted by an administrator; opens subscriber-only lessons. */
     isPremium: boolean
+    permissions: AdminArea[]
+    preferences: Preferences
+    /** Commitment points: earned for every day on which all daily tasks were completed. */
+    points: number
+    /** Equipped avatar frame and title (machine keys); 'none' / null when nothing is equipped. */
+    frame: string
+    titleKey: string | null
     avatarUrl: string | null
     role: Role
     bio: string
@@ -118,6 +130,9 @@ export interface DashboardPayload {
     review: DailyReview | null
     content: SiteContent
     badges: Badge[]
+    /** Whole days the member was away before this visit; 0 when there is nothing to mention. */
+    absenceDays: number
+    rewards: RewardCatalogue
 }
 
 export interface TaskInput {
@@ -174,6 +189,7 @@ export interface AdminUser {
     email: string
     role: Role
     isPremium: boolean
+    permissions: AdminArea[]
     createdAt: string
 }
 
@@ -297,4 +313,28 @@ export interface BadgeInput {
     metric: BadgeMetric
     threshold: number
     isActive: boolean
+}
+
+/** Per-account notification choices. Times are `HH:MM` in the member's own clock, or null. */
+export interface Preferences {
+    notifyReminders: boolean
+    notifyMorning: boolean
+    notifyInactivity: boolean
+    notifySleep: boolean
+    sleepTime: string | null
+    wakeTime: string | null
+}
+
+/** What points unlock: reward key → points needed. */
+export interface RewardCatalogue {
+    pointsPerPerfectDay: number
+    frames: Record<string, number>
+    titles: Record<string, number>
+}
+
+export interface DeviceSession {
+    device: string
+    ip: string | null
+    lastActiveAt: string
+    current: boolean
 }

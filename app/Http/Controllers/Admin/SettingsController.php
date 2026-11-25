@@ -13,7 +13,7 @@ class SettingsController extends Controller
 {
     public function show(): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'content');
 
         return response()->json(['content' => Setting::content()]);
     }

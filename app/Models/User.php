@@ -23,9 +23,24 @@ class User extends Authenticatable
 
     public const ROLE_ADMIN = 'admin';
 
+    /** Staff with a chosen subset of the admin center (see PERMISSIONS). */
+    public const ROLE_MODERATOR = 'moderator';
+
     public const ROLE_USER = 'user';
 
-    public const ROLES = [self::ROLE_ADMIN, self::ROLE_USER];
+    public const ROLES = [self::ROLE_ADMIN, self::ROLE_MODERATOR, self::ROLE_USER];
+
+    /** Areas of the admin center. An administrator has all of them; a moderator has those granted. */
+    public const PERMISSIONS = ['users', 'content', 'growth', 'education', 'badges', 'messages', 'audit'];
+
+    public const DEFAULT_PREFERENCES = [
+        'notifyReminders' => true,
+        'notifyMorning' => true,
+        'notifyInactivity' => true,
+        'notifySleep' => false,
+        'sleepTime' => null,
+        'wakeTime' => null,
+    ];
 
     /** Starter categories every account gets, whichever path creates it. */
     public const DEFAULT_CATEGORIES = [
@@ -58,6 +73,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'permissions' => 'array',
+            'preferences' => 'array',
+            'last_seen_at' => 'datetime',
             'is_premium' => 'boolean',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
@@ -69,7 +87,38 @@ class User extends Authenticatable
     /** Subscriber-only lessons are open to premium members and to administrators. */
     public function canReadPremium(): bool
     {
-        return $this->is_premium || $this->isAdmin();
+        return $this->is_premium || $this->isStaff();
+    }
+
+    public function isStaff(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_MODERATOR], true);
+    }
+
+    /** May this user work in the given area of the admin center? */
+    public function hasPermission(string $area): bool
+    {
+        return $this->isAdmin() || ($this->role === self::ROLE_MODERATOR && in_array($area, $this->permissions ?? [], true));
+    }
+
+    /**
+     * The areas this user can actually use, in canonical order.
+     *
+     * @return list<string>
+     */
+    public function effectivePermissions(): array
+    {
+        return array_values(array_filter(self::PERMISSIONS, fn (string $area): bool => $this->hasPermission($area)));
+    }
+
+    /**
+     * Stored preferences merged over the defaults, so a new option is never missing.
+     *
+     * @return array<string, mixed>
+     */
+    public function preferenceValues(): array
+    {
+        return array_merge(self::DEFAULT_PREFERENCES, array_intersect_key($this->preferences ?? [], self::DEFAULT_PREFERENCES));
     }
 
     public function isAdmin(): bool

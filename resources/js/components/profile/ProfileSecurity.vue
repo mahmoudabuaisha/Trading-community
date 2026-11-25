@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { KeyRound, MonitorSmartphone } from 'lucide-vue-next'
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { ApiError } from '../../data/http'
 import { repository } from '../../data/repository'
-import { t } from '../../i18n'
+import { formatDate, t } from '../../i18n'
 import { useUiStore } from '../../stores/ui'
+import type { DeviceSession } from '../../types/domain'
 
 const ui = useUiStore()
 
@@ -12,6 +13,16 @@ const form = reactive({ current: '', next: '' })
 const errors = ref<Record<string, string[]>>({})
 const saving = ref(false)
 const endingSessions = ref(false)
+const devices = ref<DeviceSession[]>([])
+
+async function loadDevices(): Promise<void> {
+    try {
+        devices.value = await repository.sessions()
+    } catch (error) {
+        ui.failure(error)
+    }
+}
+onMounted(loadDevices)
 
 async function changePassword(): Promise<void> {
     saving.value = true
@@ -33,6 +44,7 @@ async function signOutOthers(): Promise<void> {
     endingSessions.value = true
     try {
         await repository.signOutOthers()
+        await loadDevices()
         ui.success(t('security.othersSignedOut'))
     } catch (error) {
         ui.failure(error)
@@ -95,7 +107,24 @@ async function signOutOthers(): Promise<void> {
                 </div>
                 <MonitorSmartphone :size="18" class="gold" aria-hidden="true" />
             </div>
-            <div class="actions">
+            <ul class="device-list">
+                <li v-for="(device, index) in devices" :key="index" class="device-row">
+                    <MonitorSmartphone :size="20" aria-hidden="true" />
+                    <span>
+                        <b>{{ device.device || t('security.unknownDevice') }}</b>
+                        <small>
+                            <bdi v-if="device.ip">{{ device.ip }}</bdi>
+                            {{
+                                t('security.lastActive', {
+                                    when: formatDate(device.lastActiveAt, { dateStyle: 'medium', timeStyle: 'short' }),
+                                })
+                            }}
+                        </small>
+                    </span>
+                    <span v-if="device.current" class="count-pill count-pill--ok">{{ t('security.thisDevice') }}</span>
+                </li>
+            </ul>
+            <div v-if="devices.length > 1" class="actions">
                 <button type="button" class="btn btn--outline" :disabled="endingSessions" @click="signOutOthers">
                     {{ t('security.signOutOthers') }}
                 </button>

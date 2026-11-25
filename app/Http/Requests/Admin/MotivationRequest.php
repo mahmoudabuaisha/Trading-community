@@ -10,7 +10,7 @@ class MotivationRequest extends ApiRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('admin');
+        return $this->user()->can('area', 'growth');
     }
 
     public function rules(): array

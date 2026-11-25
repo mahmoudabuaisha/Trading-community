@@ -6,6 +6,9 @@
  */
 import { request } from './http'
 import type {
+    AdminArea,
+    DeviceSession,
+    Preferences,
     Badge,
     BadgeInput,
     Habit,
@@ -66,6 +69,11 @@ export const repository = {
     changePassword: (currentPassword: string, password: string) =>
         request<void>('PUT', '/profile/password', { currentPassword, password }),
     signOutOthers: () => request<void>('POST', '/profile/sign-out-others'),
+    sessions: () => request<{ sessions: DeviceSession[] }>('GET', '/profile/sessions').then((r) => r.sessions),
+    savePreferences: (preferences: Preferences) =>
+        request<{ user: User }>('PUT', '/profile/preferences', preferences).then((r) => r.user),
+    equipRewards: (frame: string, titleKey: string | null) =>
+        request<{ user: User }>('PUT', '/profile/rewards', { frame, titleKey }).then((r) => r.user),
     logFocusSession: (minutes: number, day: string) =>
         request<{ focus: FocusTotals; newAchievements: Achievement[] }>('POST', '/focus-sessions', { minutes, day }),
     saveReview: (review: Pick<DailyReview, 'date' | 'win' | 'unfinished' | 'lesson' | 'tomorrow'>) =>
@@ -92,8 +100,10 @@ export const repository = {
     adminOverview: () => request<{ stats: AdminStats; audit: AuditEntry[] }>('GET', '/admin/overview'),
     adminUsers: (search: string, page: number) =>
         request<Paginated<AdminUser>>('GET', `/admin/users?search=${encodeURIComponent(search)}&page=${page}`),
-    adminUpdateUser: (id: number, patch: { displayName?: string; email?: string; role?: Role; isPremium?: boolean }) =>
-        request<{ user: AdminUser }>('PATCH', `/admin/users/${id}`, patch).then((r) => r.user),
+    adminUpdateUser: (
+        id: number,
+        patch: { displayName?: string; email?: string; role?: Role; isPremium?: boolean; permissions?: AdminArea[] },
+    ) => request<{ user: AdminUser }>('PATCH', `/admin/users/${id}`, patch).then((r) => r.user),
     adminRevokeSessions: (id: number) => request<void>('POST', `/admin/users/${id}/revoke-sessions`),
     adminMotivations: () =>
         request<{ motivations: Motivation[] }>('GET', '/admin/motivations').then((r) => r.motivations),

@@ -14,6 +14,7 @@ use App\Models\Badge;
 use App\Models\Motivation;
 use App\Models\Setting;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -28,6 +29,13 @@ class DashboardController extends Controller
         $day = $request->query('date', now($user->timezone)->toDateString());
         $review = $user->dailyReviews()->whereDate('date', $day)->first();
 
+        // Whole days the member stayed away before this visit (0 when they were here yesterday or today).
+        $lastDay = $user->last_seen_at?->setTimezone($user->timezone)->toDateString();
+        $absenceDays = $lastDay === null ? 0 : max(0, (int) CarbonImmutable::parse($lastDay)->diffInDays(CarbonImmutable::parse($day)) - 1);
+        if ($lastDay !== $day) {
+            $user->forceFill(['last_seen_at' => now()])->save();
+        }
+
         return response()->json([
             'user' => new UserResource($user),
             'tasks' => TaskResource::collection($user->tasks()->latest()->latest('id')->get()),
@@ -38,6 +46,8 @@ class DashboardController extends Controller
             'focus' => self::focusTotals($user, $day),
             'review' => $review ? new DailyReviewResource($review) : null,
             'content' => Setting::content(),
+            'absenceDays' => $absenceDays,
+            'rewards' => ['pointsPerPerfectDay' => (int) config('rewards.points_per_perfect_day'), 'frames' => config('rewards.frames'), 'titles' => config('rewards.titles')],
             'badges' => BadgeResource::collection(Badge::where('is_active', true)->orderBy('id')->get()),
         ]);
     }

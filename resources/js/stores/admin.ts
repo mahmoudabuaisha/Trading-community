@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { repository } from '../data/repository'
+import { useAuthStore } from './auth'
 import type {
+    AdminArea,
     AdminStats,
     AdminUser,
     AuditEntry,
@@ -107,14 +109,15 @@ export const useAdminStore = defineStore('admin', () => {
         loading.value = true
         error.value = null
         try {
+            const auth = useAuthStore()
             await Promise.all([
                 loadOverview(),
-                loadUsers(1),
-                loadMotivations(),
-                loadContent(),
-                loadLessons(),
-                loadThreads(),
-                loadBadges(),
+                auth.can('users') ? loadUsers(1) : null,
+                auth.can('growth') ? loadMotivations() : null,
+                auth.can('content') ? loadContent() : null,
+                auth.can('education') ? loadLessons() : null,
+                auth.can('messages') ? loadThreads() : null,
+                auth.can('badges') ? loadBadges() : null,
             ])
         } catch (e) {
             error.value = e
@@ -126,7 +129,7 @@ export const useAdminStore = defineStore('admin', () => {
 
     async function updateUser(
         id: number,
-        patch: { displayName?: string; email?: string; role?: Role; isPremium?: boolean },
+        patch: { displayName?: string; email?: string; role?: Role; isPremium?: boolean; permissions?: AdminArea[] },
     ): Promise<void> {
         await repository.adminUpdateUser(id, patch)
         await Promise.all([loadUsers(), loadOverview()])

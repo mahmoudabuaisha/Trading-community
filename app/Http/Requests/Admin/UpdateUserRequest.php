@@ -10,7 +10,13 @@ class UpdateUserRequest extends ApiRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('admin');
+        // Editing accounts is the "users" area; changing who is staff, and with which
+        // permissions, stays with full administrators.
+        if ($this->hasAny(['role', 'permissions'])) {
+            return $this->user()->can('admin');
+        }
+
+        return $this->user()->can('area', 'users');
     }
 
     public function rules(): array
@@ -20,6 +26,8 @@ class UpdateUserRequest extends ApiRequest
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
             'role' => ['sometimes', Rule::in(User::ROLES)],
             'isPremium' => ['sometimes', 'boolean'],
+            'permissions' => ['sometimes', 'array'],
+            'permissions.*' => ['string', Rule::in(User::PERMISSIONS)],
         ];
     }
 }

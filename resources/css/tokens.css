@@ -22,6 +22,15 @@
     --gold-metal: linear-gradient(180deg, #fbeec4 0%, #e6c683 22%, #c79a4f 52%, #9c7030 70%, #dfbd78 100%);
 
     /* Steel (logo "N", cool highlights) */
+    /* Reward frames: the ring drawn around an avatar, one metal per tier. */
+    --frame-bronze: linear-gradient(135deg, #e0a070, #8a4b22 50%, #d08b54);
+    --frame-silver: linear-gradient(135deg, #f4f5f8, #7d818c 50%, #dfe1e7);
+    --frame-gold: linear-gradient(135deg, #fbeec4, #c79a4f 45%, #9c7030 60%, #f3dca6);
+    --frame-royal: linear-gradient(135deg, #fbeec4, #b06bff 35%, #5b2bd0 60%, #f3dca6);
+    --frame-glow-bronze: rgba(208, 139, 84, 0.45);
+    --frame-glow-silver: rgba(223, 225, 231, 0.4);
+    --frame-glow-gold: rgba(232, 197, 125, 0.6);
+    --frame-glow-royal: rgba(176, 107, 255, 0.6);
     --steel-100: #f4f5f8;
     --steel-300: #b9bcc6;
     --steel-600: #5b5e68;

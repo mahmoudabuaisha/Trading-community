@@ -1,6 +1,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch, type ComputedRef } from 'vue'
 import { t } from '../i18n'
 import { browserNotificationsSupported, chime, notifyBrowser } from '../lib/notifyPrefs'
+import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
 import type { Task } from '../types/domain'
@@ -20,6 +21,7 @@ export function useReminders(): { due: ComputedRef<Task[]> } {
     const announced = new Set<number>()
     let primed = false
 
+    const auth = useAuthStore()
     const due = computed(() =>
         workspace.tasks
             .filter(
@@ -37,6 +39,8 @@ export function useReminders(): { due: ComputedRef<Task[]> } {
         [due, () => workspace.loaded],
         ([tasks, loaded]) => {
             if (!loaded) return
+            // The bell always lists due reminders; alerts are the part the member can switch off.
+            const alerts = auth.user?.preferences.notifyReminders !== false
             const fresh = tasks.filter((task) => !announced.has(task.id))
             for (const task of fresh) announced.add(task.id)
             // Reminders that were already due when the page opened are listed in the bell, not announced again.
@@ -44,6 +48,7 @@ export function useReminders(): { due: ComputedRef<Task[]> } {
                 primed = true
                 return
             }
+            if (!alerts) return
             for (const task of fresh) {
                 ui.success(t('notify.reminderToast', { title: task.title }))
                 if (notifyBrowser.value && browserNotificationsSupported() && Notification.permission === 'granted') {

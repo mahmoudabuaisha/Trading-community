@@ -14,7 +14,7 @@ class ProfileRequest extends ApiRequest
             'nickname' => ['sometimes', 'nullable', 'string', 'max:120'],
             'bio' => ['present', 'nullable', 'string', 'max:500'],
             'timezone' => ['required', 'string', 'timezone:all'],
-            'language' => ['required', Rule::in(['ar', 'en'])],
+            'language' => ['required', Rule::in(['ar', 'en', 'fr'])],
             'weeklyGoal' => ['required', 'integer', 'min:1', 'max:500'],
             'dailyFocusMinutes' => ['required', 'integer', 'min:0', 'max:1440'],
             // Only an inline image data URL is accepted — never a remote URL or script.

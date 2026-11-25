@@ -16,7 +16,7 @@ class ThreadController extends Controller
     /** Every thread with at least one message, most recent first, with its unread count. */
     public function index(): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'messages');
 
         $latestIds = Message::selectRaw('MAX(id) as id')->groupBy('user_id')->pluck('id');
         $unread = Message::unreadFor(admin: true)->selectRaw('user_id, COUNT(*) as total')->groupBy('user_id')->pluck('total', 'user_id');
@@ -33,7 +33,7 @@ class ThreadController extends Controller
 
     public function show(User $user): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'messages');
         // Opening the thread reads everything the member sent.
         $user->messages()->unreadFor(admin: true)->update(['read_at' => now()]);
 
@@ -45,7 +45,7 @@ class ThreadController extends Controller
 
     public function store(MessageRequest $request, User $user): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'messages');
         $message = $user->messages()->create(['sender_id' => $request->user()->id, 'from_admin' => true, 'body' => $request->validated('body')]);
 
         return response()->json(['message' => new MessageResource($message->load('sender'))], 201);

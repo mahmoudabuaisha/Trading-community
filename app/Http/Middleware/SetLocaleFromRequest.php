@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 /** Localise API messages from the Accept-Language header (ar | en). */
 class SetLocaleFromRequest
 {
-    public const SUPPORTED = ['ar', 'en'];
+    public const SUPPORTED = ['ar', 'en', 'fr'];
 
     public function handle(Request $request, Closure $next): Response
     {

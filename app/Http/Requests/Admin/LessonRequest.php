@@ -9,7 +9,7 @@ class LessonRequest extends ApiRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('admin');
+        return $this->user()->can('area', 'education');
     }
 
     protected function prepareForValidation(): void

@@ -16,7 +16,7 @@ class UserController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'users');
 
         $search = trim((string) $request->query('search', ''));
 
@@ -47,7 +47,7 @@ class UserController extends Controller
 
     public function revokeSessions(Request $request, User $user, AdminService $admin): Response
     {
-        Gate::authorize('admin');
+        Gate::authorize('area', 'users');
 
         $admin->revokeSessions($request->user(), $user);
 

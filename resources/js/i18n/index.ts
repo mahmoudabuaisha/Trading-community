@@ -1,14 +1,17 @@
 import { computed, ref, watchEffect } from 'vue'
-import type { Locale } from '../types/domain'
+import { LOCALES, type Locale } from '../types/domain'
 import { ar, type Messages } from './ar'
 import { en } from './en'
+import { fr } from './fr'
 
 const STORAGE_KEY = 'sn-dcc:locale:v1'
-const dictionaries: Record<Locale, Messages> = { ar, en }
+const dictionaries: Record<Locale, Messages> = { ar, en, fr }
+const DATE_LOCALES: Record<Locale, string> = { ar: 'ar-u-nu-latn', en: 'en-GB', fr: 'fr-FR' }
 
 function initialLocale(): Locale {
     try {
-        return localStorage.getItem(STORAGE_KEY) === 'en' ? 'en' : 'ar'
+        const stored = localStorage.getItem(STORAGE_KEY)
+        return LOCALES.includes(stored as Locale) ? (stored as Locale) : 'ar'
     } catch {
         return 'ar'
     }
@@ -44,5 +47,13 @@ export function t(key: string, params: Record<string, string | number> = {}): st
 /** Locale-aware date/time formatting. Arabic keeps Latin digits for consistency with inputs. */
 export function formatDate(value: Date | string, options: Intl.DateTimeFormatOptions): string {
     const date = typeof value === 'string' ? new Date(value) : value
-    return new Intl.DateTimeFormat(locale.value === 'ar' ? 'ar-u-nu-latn' : 'en-GB', options).format(date)
+    return new Intl.DateTimeFormat(DATE_LOCALES[locale.value], options).format(date)
 }
+
+/** Switch to the next interface language: Arabic → English → French → Arabic. */
+export function cycleLocale(): void {
+    setLocale(LOCALES[(LOCALES.indexOf(locale.value) + 1) % LOCALES.length])
+}
+
+/** Each language's own name, for menus. */
+export const LOCALE_NAMES: Record<Locale, string> = { ar: 'العربية', en: 'English', fr: 'Français' }

@@ -8,7 +8,7 @@ import BrandLogo from '../components/BrandLogo.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ApiError } from '../data/http'
 import { repository } from '../data/repository'
-import { locale, messages, setLocale, t } from '../i18n'
+import { cycleLocale, locale, messages, t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 import { describeError } from '../stores/ui'
 
@@ -99,13 +99,8 @@ async function submit(): Promise<void> {
         <AuthScene />
 
         <header class="auth-topbar">
-            <button
-                type="button"
-                class="chip-btn"
-                :aria-label="t('nav.switchLang')"
-                @click="setLocale(locale === 'ar' ? 'en' : 'ar')"
-            >
-                {{ t('nav.langButton') }}
+            <button type="button" class="chip-btn" :aria-label="t('nav.switchLang')" @click="cycleLocale()">
+                {{ locale.toUpperCase() }}
             </button>
         </header>
 

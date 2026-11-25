@@ -15,7 +15,7 @@ class OverviewController extends Controller
 {
     public function show(): JsonResponse
     {
-        Gate::authorize('admin');
+        Gate::authorize('staff');
 
         return response()->json([
             'stats' => [
@@ -28,7 +28,10 @@ class OverviewController extends Controller
                     ->distinct()
                     ->count('user_id'),
             ],
-            'audit' => AuditResource::collection(AdminAudit::with('admin')->latest('created_at')->latest('id')->limit(30)->get()),
+            // The log of administrative actions is its own area.
+            'audit' => Gate::allows('area', 'audit')
+                ? AuditResource::collection(AdminAudit::with('admin')->latest('created_at')->latest('id')->limit(30)->get())
+                : [],
         ]);
     }
 }

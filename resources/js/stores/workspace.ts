@@ -4,6 +4,7 @@ import { repository } from '../data/repository'
 import { messages, setLocale, t } from '../i18n'
 import { completionStreak, percent, today } from '../lib/dates'
 import type {
+    RewardCatalogue,
     Badge,
     Lesson,
     SiteContent,
@@ -35,6 +36,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     const content = ref<SiteContent>({ taglineAr: null, taglineEn: null, welcomeSubAr: null, welcomeSubEn: null })
     const lessons = ref<Lesson[]>([])
     const badges = ref<Badge[]>([])
+    const absenceDays = ref(0)
+    const rewards = ref<RewardCatalogue>({ pointsPerPerfectDay: 10, frames: {}, titles: {} })
     const unread = ref<UnreadCounts>({ member: 0, admin: 0 })
     const loading = ref(false)
     const loaded = ref(false)
@@ -64,6 +67,9 @@ export const useWorkspaceStore = defineStore('workspace', () => {
             review.value = payload.review
             content.value = payload.content
             badges.value = payload.badges
+            // Mention an absence once: later refreshes in the same visit report 0.
+            if (payload.absenceDays > 0) absenceDays.value = payload.absenceDays
+            rewards.value = payload.rewards
             useAuthStore().setUser(payload.user)
             loaded.value = true
         } catch (e) {
@@ -234,6 +240,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         content,
         lessons,
         badges,
+        absenceDays,
+        rewards,
         unread,
         loading,
         loaded,

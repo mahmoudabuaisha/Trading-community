@@ -14,7 +14,7 @@ import {
     Users,
     X,
 } from 'lucide-vue-next'
-import { onMounted, reactive, ref, watch, type Component } from 'vue'
+import { computed, onMounted, reactive, ref, watch, type Component } from 'vue'
 import AdminBadges from '../../components/admin/AdminBadges.vue'
 import AdminContent from '../../components/admin/AdminContent.vue'
 import AdminLessons from '../../components/admin/AdminLessons.vue'
@@ -26,17 +26,22 @@ import UserAvatar from '../../components/UserAvatar.vue'
 import { ApiError } from '../../data/http'
 import { formatDate, messages, t } from '../../i18n'
 import { useAdminStore } from '../../stores/admin'
+import { useAuthStore } from '../../stores/auth'
 import { useUiStore } from '../../stores/ui'
 import { useWorkspaceStore } from '../../stores/workspace'
 import {
+    ADMIN_AREAS,
     MOTIVATION_CATEGORIES,
+    type AdminArea,
     type AdminUser,
     type AuditEntry,
     type Motivation,
     type MotivationCategory,
+    type Role,
 } from '../../types/domain'
 
 const admin = useAdminStore()
+const auth = useAuthStore()
 const ui = useUiStore()
 
 /** Run an admin action, surfacing success or the server's refusal. */
@@ -61,7 +66,9 @@ const tabs: { id: TabId; label: string; icon: Component }[] = [
     { id: 'messages', label: 'tabMessages', icon: Mail },
     { id: 'audit', label: 'tabAudit', icon: Shield },
 ]
-const tab = ref<TabId>('users')
+/** Only the areas this account was given; a full administrator sees them all. */
+const visibleTabs = computed(() => tabs.filter((item) => auth.can(item.id)))
+const tab = ref<TabId>(tabs.find((item) => auth.can(item.id))?.id ?? 'users')
 const workspace = useWorkspaceStore()
 
 const togglePremium = (user: AdminUser) =>
@@ -91,14 +98,34 @@ watch(
 // ── Users ────────────────────────────────────────────────────────────────
 const confirm = ref<{ message: string; label: string; action: () => Promise<unknown> } | null>(null)
 
-function askRole(user: AdminUser): void {
-    const role = user.role === 'admin' ? 'user' : 'admin'
-    confirm.value = {
-        message: t('admin.confirmRole', { name: user.displayName, role: t(`role.${role}`) }),
-        label: t(role === 'admin' ? 'admin.grant' : 'admin.revoke'),
-        action: () => run(() => admin.updateUser(user.id, { role }), 'admin.roleUpdated'),
-    }
+// Role and permissions: only a full administrator decides who helps and with what.
+const access = ref<AdminUser | null>(null)
+const accessForm = reactive({ role: 'user' as Role, permissions: [] as AdminArea[] })
+const accessDialog = ref<HTMLDialogElement | null>(null)
+const roles: Role[] = ['user', 'moderator', 'admin']
+
+function openAccess(user: AdminUser): void {
+    access.value = user
+    accessForm.role = user.role
+    accessForm.permissions = user.role === 'moderator' ? [...user.permissions] : []
+    requestAnimationFrame(() => accessDialog.value?.showModal())
 }
+
+async function saveAccess(): Promise<void> {
+    if (!access.value) return
+    const permissions = accessForm.role === 'moderator' ? accessForm.permissions : []
+    if (
+        await run(() => admin.updateUser(access.value!.id, { role: accessForm.role, permissions }), 'admin.accessSaved')
+    )
+        access.value = null
+}
+
+const roleBadge = (user: AdminUser) =>
+    user.role === 'admin'
+        ? t('admin.fullAdmin')
+        : user.role === 'moderator'
+          ? t('role.moderator')
+          : t(user.isPremium ? 'role.premium' : 'admin.member')
 
 function askRevoke(user: AdminUser): void {
     confirm.value = {
@@ -211,7 +238,10 @@ function auditDetail(entry: AuditEntry): string {
         typeof details.from === 'string' && typeof details.to === 'string' && details.from !== details.to
             ? ` · ${t(`role.${details.from}`)} → ${t(`role.${details.to}`)}`
             : ''
-    return [name + change, t('admin.auditBy', { name: entry.adminName })].filter(Boolean).join(' · ')
+    const areas = Array.isArray(details.permissions)
+        ? ` · ${details.permissions.map((area) => t(`admin.areas.${area}`)).join('، ') || t('admin.noPerms')}`
+        : ''
+    return [name + change + areas, t('admin.auditBy', { name: entry.adminName })].filter(Boolean).join(' · ')
 }
 </script>
 
@@ -257,7 +287,7 @@ function auditDetail(entry: AuditEntry): string {
 
         <nav class="tabs" :aria-label="t('nav.admin')">
             <button
-                v-for="item in tabs"
+                v-for="item in visibleTabs"
                 :key="item.id"
                 type="button"
                 :class="{ tabs__active: tab === item.id }"
@@ -311,23 +341,15 @@ function auditDetail(entry: AuditEntry): string {
                             >
                         </div>
                     </div>
-                    <span role="cell" class="count-pill" :class="{ 'count-pill--gold': user.role === 'admin' }">
+                    <span role="cell" class="count-pill" :class="{ 'count-pill--gold': user.role !== 'user' }">
                         <Crown v-if="user.role === 'admin'" :size="12" aria-hidden="true" />
-                        {{
-                            t(
-                                user.role === 'admin'
-                                    ? 'admin.fullAdmin'
-                                    : user.isPremium
-                                      ? 'role.premium'
-                                      : 'admin.member',
-                            )
-                        }}
+                        {{ roleBadge(user) }}
                     </span>
                     <span role="cell" class="muted">{{ formatDate(user.createdAt, { dateStyle: 'medium' }) }}</span>
                     <div role="cell" class="row-actions">
                         <button type="button" class="pill" @click="openEdit(user)">{{ t('common.edit') }}</button>
-                        <button type="button" class="pill" @click="askRole(user)">
-                            {{ t(user.role === 'admin' ? 'admin.revoke' : 'admin.grant') }}
+                        <button v-if="auth.isAdmin" type="button" class="pill" @click="openAccess(user)">
+                            {{ t('admin.access') }}
                         </button>
                         <button
                             v-if="user.role !== 'admin'"
@@ -338,7 +360,7 @@ function auditDetail(entry: AuditEntry): string {
                         >
                             {{ t(user.isPremium ? 'admin.premiumRevoke' : 'admin.premiumGrant') }}
                         </button>
-                        <button type="button" class="pill" @click="openMessages(user)">
+                        <button v-if="auth.can('messages')" type="button" class="pill" @click="openMessages(user)">
                             {{ t('admin.message') }}
                         </button>
                         <button type="button" class="pill" @click="askRevoke(user)">
@@ -489,6 +511,43 @@ function auditDetail(entry: AuditEntry): string {
             @confirm="runConfirm"
             @cancel="confirm = null"
         />
+
+        <dialog
+            v-if="access"
+            ref="accessDialog"
+            class="dialog"
+            @cancel.prevent="access = null"
+            @click.self="access = null"
+        >
+            <form class="dialog__body" @submit.prevent="saveAccess">
+                <div class="dialog__head">
+                    <h2>{{ t('admin.accessHead', { name: access.displayName }) }}</h2>
+                    <button type="button" class="icon-btn" :aria-label="t('common.close')" @click="access = null">
+                        <X :size="18" />
+                    </button>
+                </div>
+                <label class="field">
+                    <span>{{ t('admin.colRole') }}</span>
+                    <select v-model="accessForm.role" class="input">
+                        <option v-for="role in roles" :key="role" :value="role">{{ t(`role.${role}`) }}</option>
+                    </select>
+                    <small class="hint">{{ t(`admin.roleHint.${accessForm.role}`) }}</small>
+                </label>
+                <fieldset v-if="accessForm.role === 'moderator'" class="perm-list">
+                    <legend>{{ t('admin.permsLegend') }}</legend>
+                    <label v-for="area in ADMIN_AREAS" :key="area" class="check">
+                        <input v-model="accessForm.permissions" type="checkbox" :value="area" />
+                        {{ t(`admin.areas.${area}`) }}
+                    </label>
+                </fieldset>
+                <div class="actions">
+                    <button type="button" class="btn btn--outline" @click="access = null">
+                        {{ t('common.cancel') }}
+                    </button>
+                    <button type="submit" class="btn">{{ t('common.save') }}</button>
+                </div>
+            </form>
+        </dialog>
 
         <dialog
             v-if="editing"

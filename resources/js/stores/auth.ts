@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { ApiError } from '../data/http'
 import { repository } from '../data/repository'
-import type { User } from '../types/domain'
+import type { AdminArea, User } from '../types/domain'
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null)
@@ -11,6 +11,13 @@ export const useAuthStore = defineStore('auth', () => {
     let pending: Promise<void> | null = null
 
     const isAdmin = computed(() => user.value?.role === 'admin')
+    /** Administrators and moderators may open the admin center. */
+    const isStaff = computed(() => user.value?.role === 'admin' || user.value?.role === 'moderator')
+
+    /** May the signed-in user work in this area of the admin center? The server checks again. */
+    function can(area: AdminArea): boolean {
+        return user.value?.permissions.includes(area) ?? false
+    }
 
     /** Resolve the current session once; later callers share the same request. */
     function ensureLoaded(): Promise<void> {
@@ -49,5 +56,5 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = next
     }
 
-    return { user, ready, isAdmin, ensureLoaded, login, register, logout, setUser }
+    return { user, ready, isAdmin, isStaff, can, ensureLoaded, login, register, logout, setUser }
 })
