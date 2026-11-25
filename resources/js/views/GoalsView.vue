@@ -111,6 +111,9 @@ async function remove(goal: Goal): Promise<void> {
                 </div>
                 <div class="goal-card__foot">
                     <small>{{ t('goals.progress', { current: goal.currentValue, target: goal.targetValue }) }}</small>
+                    <RouterLink :to="{ name: 'roadmap', params: { id: goal.id } }" class="pill">{{
+                        t('journey.roadmap.open')
+                    }}</RouterLink>
                     <div>
                         <button
                             type="button"

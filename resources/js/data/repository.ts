@@ -12,7 +12,19 @@ import type {
     AdminBroadcasts,
     Badge,
     BadgeInput,
+    GoalStep,
+    Insights,
     Leaderboard,
+    Portfolio,
+    PortfolioProject,
+    PortfolioVisibility,
+    PublicPortfolio,
+    QuizQuestion,
+    SkillPath,
+    Timeline,
+    VisionBoard,
+    VisionItemKind,
+    VisionSize,
     PointsHistory,
     StoreItem,
     StoreItemInput,
@@ -83,6 +95,102 @@ export const repository = {
     buyItem: (id: number) => request<{ items: StoreItem[]; user: User }>('POST', `/store/${id}/buy`),
     equipItem: (kind: StoreKind, itemId: number | null) =>
         request<{ items: StoreItem[]; user: User }>('PUT', '/store/equip', { kind, itemId }),
+    insights: (day: string) => request<Insights>('GET', `/insights?date=${day}`),
+    timeline: () => request<Timeline>('GET', '/timeline'),
+    saveTimelineNote: (key: string, note: string) => request<void>('PUT', `/timeline/notes/${key}`, { note }),
+    addMilestone: (input: { title: string; day: string; note: string }) =>
+        request<{ id: number }>('POST', '/timeline', input),
+    updateMilestone: (id: number, patch: { title?: string; day?: string; note?: string }) =>
+        request<void>('PATCH', `/timeline/${id}`, patch),
+    deleteMilestone: (id: number) => request<void>('DELETE', `/timeline/${id}`),
+    roadmap: (goalId: number) => request<{ steps: GoalStep[] }>('GET', `/goals/${goalId}/steps`).then((r) => r.steps),
+    addStep: (goalId: number, input: { title: string; requirements?: string; parentId?: number | null }) =>
+        request<{ step: GoalStep }>('POST', `/goals/${goalId}/steps`, input).then((r) => r.step),
+    updateStep: (
+        id: number,
+        patch: { title?: string; requirements?: string; isDone?: boolean; move?: 'up' | 'down' },
+    ) => request<{ steps: GoalStep[] }>('PATCH', `/goal-steps/${id}`, patch).then((r) => r.steps),
+    deleteStep: (id: number) => request<void>('DELETE', `/goal-steps/${id}`),
+    backupStatus: () =>
+        request<{ lastBackupAt: string | null; ok: boolean | null; serverTime: string }>(
+            'GET',
+            '/profile/backup-status',
+        ),
+
+    visionBoards: () => request<{ boards: VisionBoard[] }>('GET', '/vision-boards').then((r) => r.boards),
+    createBoard: (input: Pick<VisionBoard, 'title' | 'area' | 'color'>) =>
+        request<{ board: VisionBoard }>('POST', '/vision-boards', input).then((r) => r.board),
+    updateBoard: (id: number, patch: Partial<Pick<VisionBoard, 'title' | 'area' | 'color'>> & { order?: number[] }) =>
+        request<{ board: VisionBoard }>('PATCH', `/vision-boards/${id}`, patch).then((r) => r.board),
+    deleteBoard: (id: number) => request<void>('DELETE', `/vision-boards/${id}`),
+    addVisionItem: (
+        boardId: number,
+        input: { kind: VisionItemKind; text?: string; goalId?: number | null; image?: Blob | null },
+    ) => {
+        const form = new FormData()
+        form.set('kind', input.kind)
+        if (input.text) form.set('text', input.text)
+        if (input.goalId) form.set('goalId', String(input.goalId))
+        if (input.image) form.set('image', input.image, 'vision.jpg')
+        return request<{ board: VisionBoard }>('POST', `/vision-boards/${boardId}/items`, form).then((r) => r.board)
+    },
+    updateVisionItem: (id: number, patch: { text?: string; size?: VisionSize; goalId?: number | null }) =>
+        request<{ board: VisionBoard }>('PATCH', `/vision-items/${id}`, patch).then((r) => r.board),
+    deleteVisionItem: (id: number) => request<void>('DELETE', `/vision-items/${id}`),
+
+    skills: () => request<{ paths: SkillPath[] }>('GET', '/skills').then((r) => r.paths),
+    attemptLevel: (id: number, answers?: number[]) =>
+        request<{ passed: boolean; score: number; needed: number; paths: SkillPath[] }>(
+            'POST',
+            `/skill-levels/${id}/attempt`,
+            answers ? { answers } : {},
+        ),
+    adminSkillPaths: () => request<{ paths: SkillPath[] }>('GET', '/admin/skill-paths').then((r) => r.paths),
+    adminSavePath: (id: number | null, input: { title?: string; description?: string; isActive?: boolean }) =>
+        request<{ paths: SkillPath[] }>(
+            id === null ? 'POST' : 'PATCH',
+            id === null ? '/admin/skill-paths' : `/admin/skill-paths/${id}`,
+            input,
+        ).then((r) => r.paths),
+    adminDeletePath: (id: number) => request<void>('DELETE', `/admin/skill-paths/${id}`),
+    adminSaveLevel: (
+        pathId: number,
+        id: number | null,
+        input: {
+            title?: string
+            description?: string
+            challenge?: string
+            lessonId?: number | null
+            quiz?: QuizQuestion[]
+            move?: 'up' | 'down'
+        },
+    ) =>
+        request<{ paths: SkillPath[] }>(
+            id === null ? 'POST' : 'PATCH',
+            id === null ? `/admin/skill-paths/${pathId}/levels` : `/admin/skill-paths/${pathId}/levels/${id}`,
+            input,
+        ).then((r) => r.paths),
+    adminDeleteLevel: (pathId: number, id: number) =>
+        request<void>('DELETE', `/admin/skill-paths/${pathId}/levels/${id}`),
+
+    portfolio: () => request<Portfolio>('GET', '/portfolio'),
+    saveProject: (
+        id: number | null,
+        input: Partial<Omit<PortfolioProject, 'id' | 'imageUrl'>> & { image?: Blob | null; removeImage?: boolean },
+    ) => {
+        const form = new FormData()
+        for (const key of ['title', 'description', 'category', 'link', 'completedOn'] as const) {
+            if (input[key] !== undefined) form.set(key, input[key] ?? '')
+        }
+        input.skills?.forEach((skill, index) => form.set(`skills[${index}]`, skill))
+        if (input.removeImage) form.set('removeImage', '1')
+        if (input.image) form.set('image', input.image, 'project.jpg')
+        return request<Portfolio>('POST', id === null ? '/portfolio' : `/portfolio/${id}`, form)
+    },
+    deleteProject: (id: number) => request<void>('DELETE', `/portfolio/${id}`),
+    portfolioSettings: (patch: { visibility?: PortfolioVisibility; newLink?: boolean }) =>
+        request<Portfolio>('PUT', '/portfolio-settings', patch),
+    publicPortfolio: (slug: string) => request<PublicPortfolio>('GET', `/public/portfolio/${slug}`),
     leaderboard: (day: string) => request<Leaderboard>('GET', `/leaderboard?date=${day}`),
     logFocusSession: (minutes: number, day: string) =>
         request<{ focus: FocusTotals; newAchievements: Achievement[] }>('POST', '/focus-sessions', { minutes, day }),

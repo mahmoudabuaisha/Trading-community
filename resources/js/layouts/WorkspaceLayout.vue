@@ -14,6 +14,7 @@ import {
     Menu,
     PanelLeftClose,
     PanelLeftOpen,
+    Rocket,
     Shield,
     ShoppingBag,
     Sparkles,
@@ -45,6 +46,8 @@ const router = useRouter()
 
 const { tagline } = useSiteCopy()
 const navOpen = ref(false)
+/** Pages reached from the growth hub; they keep its sidebar entry lit. */
+const JOURNEY_PAGES = ['insights', 'timeline', 'vision', 'skills', 'portfolio']
 let stopTheme: () => void = () => undefined
 
 // Desktop: the sidebar can be tucked away to give the page its full width. The choice is remembered.
@@ -83,7 +86,10 @@ const navItems = computed<NavItem[]>(() => {
         to: { name, params },
         icon,
         active:
-            (route.name === name || (name === 'education' && route.name === 'lesson')) &&
+            (route.name === name ||
+                (name === 'education' && route.name === 'lesson') ||
+                (name === 'goals' && route.name === 'roadmap') ||
+                (name === 'journey' && JOURNEY_PAGES.includes(String(route.name)))) &&
             (!params || params.period === period),
     })
     return [
@@ -94,6 +100,7 @@ const navItems = computed<NavItem[]>(() => {
         item('yearly', 'tasks', Flag, { period: 'yearly' }),
         item('goals', 'goals', TrendingUp),
         item('habits', 'habits', ListChecks),
+        item('journey', 'journey', Rocket),
         item('achievements', 'achievements', Award),
         item('leaderboard', 'leaderboard', Trophy),
         item('store', 'store', ShoppingBag),

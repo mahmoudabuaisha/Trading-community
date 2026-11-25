@@ -28,6 +28,7 @@ class UserResource extends JsonResource
             'avatarUrl' => $this->avatar_url,
             'role' => $this->role,
             'bio' => $this->bio,
+            'specialties' => $this->specialties ?? [],
             'timezone' => $this->timezone,
             'language' => $this->language,
             'weeklyGoal' => $this->weekly_goal,

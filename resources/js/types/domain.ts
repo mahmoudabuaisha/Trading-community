@@ -50,6 +50,7 @@ export interface User {
     avatarUrl: string | null
     role: Role
     bio: string
+    specialties: Specialty[]
     timezone: string
     language: Locale
     weeklyGoal: number
@@ -163,6 +164,7 @@ export interface GoalInput {
 }
 
 export interface ProfileInput {
+    specialties?: Specialty[]
     displayName: string
     surname: string
     nickname: string
@@ -413,4 +415,175 @@ export interface DeviceSession {
     ip: string | null
     lastActiveAt: string
     current: boolean
+}
+
+// ── Growth journey ──────────────────────────────────────────────────────
+
+/** What a member can say they do (machine keys; labels live in i18n under `specialty`). */
+export const SPECIALTIES = [
+    'student_school',
+    'student_university',
+    'trader_learning',
+    'trader_beginner',
+    'trader_pro',
+    'merchant',
+    'freelancer',
+    'employee',
+    'business_owner',
+    'content_creator',
+    'other',
+] as const
+export type Specialty = (typeof SPECIALTIES)[number]
+
+export type DayPart = 'morning' | 'afternoon' | 'evening' | 'night'
+
+export interface PeriodTotals {
+    tasksCompleted: number
+    completionRate: number
+    activeDays: number
+    focusMinutes: number
+    habitChecks: number
+}
+
+/** "Performance DNA": how the member works, as numbers and machine keys. Weekday 0 is Monday. */
+export interface Insights {
+    windowDays: number
+    enoughData: boolean
+    totalCompleted: number
+    byWeekday: number[]
+    byHour: number[]
+    byPart: Record<DayPart, number>
+    bestWeekday: number | null
+    weakWeekday: number | null
+    bestPart: DayPart | null
+    byPriority: Record<string, { total: number; done: number }>
+    byCategory: { name: string; total: number; done: number }[]
+    onTime: { total: number; onTime: number }
+    current: PeriodTotals
+    previous: PeriodTotals
+    weeks: { start: string; completed: number }[]
+    mood: { highDays: number; lowDays: number } | null
+    streak: number
+    tips: { key: string; params: Record<string, string | number> }[]
+}
+
+export type TimelineKind = 'joined' | 'achievement' | 'badge' | 'goal' | 'skill' | 'project' | 'purchase' | 'custom'
+
+export interface TimelineEvent {
+    key: string
+    kind: TimelineKind
+    day: string
+    title: string | null
+    note: string
+    /** Built-in achievement key, for its translated title. */
+    ref?: string
+    /** Set on milestones the member added themselves. */
+    entryId?: number
+}
+
+export interface Timeline {
+    events: TimelineEvent[]
+    stages: { month: string; tasks: number; points: number }[]
+}
+
+/** A stage of a goal's roadmap (parentId null) or a step inside a stage. */
+export interface GoalStep {
+    id: number
+    parentId: number | null
+    title: string
+    requirements: string
+    isDone: boolean
+    position: number
+}
+
+export const VISION_AREAS = [
+    'personal',
+    'career',
+    'finance',
+    'health',
+    'family',
+    'learning',
+    'travel',
+    'other',
+] as const
+export const VISION_COLORS = ['gold', 'emerald', 'sapphire', 'ruby', 'amethyst', 'silver'] as const
+export type VisionItemKind = 'image' | 'quote' | 'dream'
+export type VisionSize = 'sm' | 'md' | 'lg'
+
+export interface VisionItem {
+    id: number
+    kind: VisionItemKind
+    text: string
+    size: VisionSize
+    goalId: number | null
+    imageUrl: string | null
+}
+
+export interface VisionBoard {
+    id: number
+    title: string
+    area: (typeof VISION_AREAS)[number]
+    color: (typeof VISION_COLORS)[number]
+    items: VisionItem[]
+}
+
+export interface QuizQuestion {
+    question: string
+    options: string[]
+    /** Index of the right option; only administrators receive it. */
+    answer?: number
+}
+
+export interface SkillLevel {
+    id: number
+    title: string
+    description: string
+    challenge: string
+    lessonId: number | null
+    quiz: QuizQuestion[]
+    passed: boolean
+    unlocked: boolean
+}
+
+export interface SkillPath {
+    id: number
+    title: string
+    description: string
+    isActive: boolean
+    levels: SkillLevel[]
+}
+
+export const PORTFOLIO_CATEGORIES = [
+    'trading',
+    'business',
+    'design',
+    'programming',
+    'writing',
+    'marketing',
+    'study',
+    'other',
+] as const
+export const PORTFOLIO_VISIBILITIES = ['private', 'members', 'public'] as const
+export type PortfolioVisibility = (typeof PORTFOLIO_VISIBILITIES)[number]
+
+export interface PortfolioProject {
+    id: number
+    title: string
+    description: string
+    category: (typeof PORTFOLIO_CATEGORIES)[number]
+    skills: string[]
+    link: string | null
+    imageUrl: string | null
+    completedOn: string | null
+}
+
+export interface Portfolio {
+    projects: PortfolioProject[]
+    visibility: PortfolioVisibility
+    slug: string | null
+}
+
+export interface PublicPortfolio {
+    owner: { displayName: string; avatarUrl: string | null; bio: string; specialties: Specialty[] }
+    projects: PortfolioProject[]
 }

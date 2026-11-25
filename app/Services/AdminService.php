@@ -258,6 +258,12 @@ class AdminService
         });
     }
 
+    /** Write an audit row for an action that needs no other bookkeeping. */
+    public function record(User $admin, string $action, string $name): void
+    {
+        $this->audit($admin, $action, null, ['name' => $name]);
+    }
+
     private function audit(User $admin, string $action, ?User $target, array $details): void
     {
         AdminAudit::create([

@@ -32,7 +32,7 @@
     --frame-royal: linear-gradient(135deg, #fbeec4, #b06bff 35%, #5b2bd0 60%, #f3dca6);
     --frame-glow-bronze: rgba(208, 139, 84, 0.45);
     --frame-glow-silver: rgba(223, 225, 231, 0.4);
-    --frame-glow-gold: rgb(var(--accent-light-rgb) / 0.6);
+    --frame-glow-gold: rgba(232, 197, 125, 0.6);
     --frame-glow-royal: rgba(176, 107, 255, 0.6);
     --frame-diamond: linear-gradient(135deg, #ffffff, #9fe8ff 30%, #5aa7e8 55%, #e6fbff 80%, #ffffff);
     --frame-glow-diamond: rgba(159, 232, 255, 0.65);
@@ -129,7 +129,7 @@
  * Themes bought in the store. Each one swaps the accent ramp; everything that
  * reads the gold tokens follows. The logo and the mountain stay as they are.
  */
-:root[data-theme='emerald'] {
+[data-theme='emerald'] {
     --gold-200: #b8f0d2;
     --gold-300: #7fe0b0;
     --gold-500: #3fc48a;
@@ -140,7 +140,7 @@
     --gold-gradient: linear-gradient(100deg, #b8f0d2 0%, #3fc48a 45%, #1f7a55 100%);
     --gold-metal: linear-gradient(180deg, #ffffff 0%, #b8f0d2 22%, #3fc48a 52%, #1f7a55 70%, #7fe0b0 100%);
 }
-:root[data-theme='sapphire'] {
+[data-theme='sapphire'] {
     --gold-200: #bcd8ff;
     --gold-300: #8fbcff;
     --gold-500: #5a94f0;
@@ -151,7 +151,7 @@
     --gold-gradient: linear-gradient(100deg, #bcd8ff 0%, #5a94f0 45%, #2f5aa8 100%);
     --gold-metal: linear-gradient(180deg, #ffffff 0%, #bcd8ff 22%, #5a94f0 52%, #2f5aa8 70%, #8fbcff 100%);
 }
-:root[data-theme='ruby'] {
+[data-theme='ruby'] {
     --gold-200: #ffc2cc;
     --gold-300: #ff8fa3;
     --gold-500: #e8566f;
@@ -162,7 +162,7 @@
     --gold-gradient: linear-gradient(100deg, #ffc2cc 0%, #e8566f 45%, #9c2b40 100%);
     --gold-metal: linear-gradient(180deg, #ffffff 0%, #ffc2cc 22%, #e8566f 52%, #9c2b40 70%, #ff8fa3 100%);
 }
-:root[data-theme='amethyst'] {
+[data-theme='amethyst'] {
     --gold-200: #dcc8ff;
     --gold-300: #c19bff;
     --gold-500: #9a6bf0;
@@ -173,7 +173,7 @@
     --gold-gradient: linear-gradient(100deg, #dcc8ff 0%, #9a6bf0 45%, #5f3aa8 100%);
     --gold-metal: linear-gradient(180deg, #ffffff 0%, #dcc8ff 22%, #9a6bf0 52%, #5f3aa8 70%, #c19bff 100%);
 }
-:root[data-theme='silver'] {
+[data-theme='silver'] {
     --gold-200: #eef0f5;
     --gold-300: #d5d8e0;
     --gold-500: #a9aebb;

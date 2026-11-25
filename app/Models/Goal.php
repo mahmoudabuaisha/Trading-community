@@ -6,6 +6,7 @@ use Database\Factories\GoalFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Goal extends Model
 {
@@ -43,6 +44,11 @@ class Goal extends Model
             $goal->current_value = max(0, min($goal->target_value, (int) $goal->current_value));
             $goal->status = $goal->current_value >= $goal->target_value ? self::STATUS_COMPLETED : self::STATUS_ACTIVE;
         });
+    }
+
+    public function steps(): HasMany
+    {
+        return $this->hasMany(GoalStep::class)->orderBy('position')->orderBy('id');
     }
 
     public function user(): BelongsTo

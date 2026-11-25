@@ -7,7 +7,7 @@ import { LOCALE_NAMES, t } from '../../i18n'
 import { useAuthStore } from '../../stores/auth'
 import { useUiStore } from '../../stores/ui'
 import { useWorkspaceStore } from '../../stores/workspace'
-import { LOCALES } from '../../types/domain'
+import { LOCALES, SPECIALTIES } from '../../types/domain'
 
 const auth = useAuthStore()
 const workspace = useWorkspaceStore()
@@ -20,6 +20,7 @@ const form = reactive({
     weeklyGoal: user.weeklyGoal,
     dailyFocusMinutes: user.dailyFocusMinutes,
     bio: user.bio,
+    specialties: [...user.specialties],
 })
 const errors = ref<Record<string, string[]>>({})
 const saving = ref(false)
@@ -84,6 +85,19 @@ async function save(): Promise<void> {
                         errors.dailyFocusMinutes[0]
                     }}</small>
                 </label>
+                <fieldset class="perm-list field--wide">
+                    <legend>{{ t('specialty.legend') }}</legend>
+                    <label v-for="key in SPECIALTIES" :key="key" class="check">
+                        <input
+                            v-model="form.specialties"
+                            type="checkbox"
+                            :value="key"
+                            :disabled="form.specialties.length >= 4 && !form.specialties.includes(key)"
+                        />
+                        {{ t(`specialty.${key}`) }}
+                    </label>
+                    <small v-if="errors.specialties" class="field__error">{{ errors.specialties[0] }}</small>
+                </fieldset>
                 <label class="field field--wide">
                     <span>{{ t('profile.bio') }}</span>
                     <textarea

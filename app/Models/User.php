@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
  * `role` and `is_premium` are deliberately NOT fillable: they can only change through
  * App\Services\AdminService, never through mass assignment at sign-up.
  */
-#[Fillable(['display_name', 'surname', 'nickname', 'email', 'password', 'avatar_url', 'bio', 'timezone', 'language', 'weekly_goal', 'daily_focus_minutes'])]
+#[Fillable(['display_name', 'surname', 'nickname', 'email', 'password', 'avatar_url', 'bio', 'timezone', 'language', 'weekly_goal', 'daily_focus_minutes', 'specialties'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -76,6 +76,7 @@ class User extends Authenticatable
             'permissions' => 'array',
             'preferences' => 'array',
             'equipped' => 'array',
+            'specialties' => 'array',
             'last_seen_at' => 'datetime',
             'is_premium' => 'boolean',
             'email_verified_at' => 'datetime',
@@ -125,6 +126,27 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    /** What a member can say they do; shown on their profile. */
+    public const SPECIALTIES = [
+        'student_school', 'student_university', 'trader_learning', 'trader_beginner', 'trader_pro',
+        'merchant', 'freelancer', 'employee', 'business_owner', 'content_creator', 'other',
+    ];
+
+    public function visionBoards(): HasMany
+    {
+        return $this->hasMany(VisionBoard::class);
+    }
+
+    public function timelineEntries(): HasMany
+    {
+        return $this->hasMany(TimelineEntry::class);
+    }
+
+    public function portfolioProjects(): HasMany
+    {
+        return $this->hasMany(PortfolioProject::class);
     }
 
     public function categories(): HasMany

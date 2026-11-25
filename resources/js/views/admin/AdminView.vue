@@ -20,6 +20,7 @@ import AdminBadges from '../../components/admin/AdminBadges.vue'
 import AdminContent from '../../components/admin/AdminContent.vue'
 import AdminLessons from '../../components/admin/AdminLessons.vue'
 import AdminMessages from '../../components/admin/AdminMessages.vue'
+import AdminSkills from '../../components/admin/AdminSkills.vue'
 import AdminStore from '../../components/admin/AdminStore.vue'
 import AdminBroadcasts from '../../components/admin/AdminBroadcasts.vue'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
@@ -478,6 +479,8 @@ function auditDetail(entry: AuditEntry): string {
         </div>
 
         <AdminLessons v-if="tab === 'education'" />
+
+        <AdminSkills v-if="tab === 'education'" />
 
         <AdminBadges v-if="tab === 'badges'" />
 

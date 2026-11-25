@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Validation\Rule;
 
 class ProfileRequest extends ApiRequest
@@ -16,6 +17,8 @@ class ProfileRequest extends ApiRequest
             'timezone' => ['required', 'string', 'timezone:all'],
             'language' => ['required', Rule::in(['ar', 'en', 'fr'])],
             'weeklyGoal' => ['required', 'integer', 'min:1', 'max:500'],
+            'specialties' => ['sometimes', 'array', 'max:4'],
+            'specialties.*' => ['string', 'distinct', Rule::in(User::SPECIALTIES)],
             'dailyFocusMinutes' => ['required', 'integer', 'min:0', 'max:1440'],
             // Only an inline image data URL is accepted — never a remote URL or script.
             'avatarUrl' => ['present', 'nullable', 'string', 'max:520000', 'regex:/^(data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+|\/media\/store\/[A-Za-z0-9_-]+\.(jpg|jpeg|png|webp))$/'],

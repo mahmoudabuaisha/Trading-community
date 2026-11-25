@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { KeyRound, MonitorSmartphone } from 'lucide-vue-next'
+import { DatabaseBackup, Download, KeyRound, MonitorSmartphone, RefreshCw } from 'lucide-vue-next'
 import { onMounted, reactive, ref } from 'vue'
 import { ApiError } from '../../data/http'
 import { repository } from '../../data/repository'
@@ -14,6 +14,9 @@ const errors = ref<Record<string, string[]>>({})
 const saving = ref(false)
 const endingSessions = ref(false)
 const devices = ref<DeviceSession[]>([])
+const backup = ref<{ lastBackupAt: string | null; ok: boolean | null } | null>(null)
+/** Everything is saved on the server as it is entered, so this page load is the latest sync. */
+const syncedAt = new Date()
 
 async function loadDevices(): Promise<void> {
     try {
@@ -22,7 +25,13 @@ async function loadDevices(): Promise<void> {
         ui.failure(error)
     }
 }
-onMounted(loadDevices)
+onMounted(() => {
+    void loadDevices()
+    repository.backupStatus().then(
+        (status) => (backup.value = status),
+        () => undefined,
+    )
+})
 
 async function changePassword(): Promise<void> {
     saving.value = true
@@ -130,6 +139,56 @@ async function signOutOthers(): Promise<void> {
                 </button>
             </div>
             <p class="hint">{{ t('security.privacyNote') }}</p>
+        </div>
+
+        <div class="panel">
+            <div class="section-head">
+                <div>
+                    <h3>{{ t('backup.head') }}</h3>
+                    <p>{{ t('backup.sub') }}</p>
+                </div>
+                <DatabaseBackup :size="18" class="gold" aria-hidden="true" />
+            </div>
+            <ul class="device-list">
+                <li class="device-row">
+                    <RefreshCw :size="18" aria-hidden="true" />
+                    <span>
+                        <b>{{ t('backup.sync') }}</b>
+                        <small>{{
+                            t('backup.syncAt', {
+                                when: formatDate(syncedAt, { dateStyle: 'medium', timeStyle: 'short' }),
+                            })
+                        }}</small>
+                    </span>
+                    <span class="count-pill count-pill--ok">{{ t('backup.synced') }}</span>
+                </li>
+                <li class="device-row">
+                    <DatabaseBackup :size="18" aria-hidden="true" />
+                    <span>
+                        <b>{{ t('backup.server') }}</b>
+                        <small>{{
+                            backup?.lastBackupAt
+                                ? t('backup.serverAt', {
+                                      when: formatDate(backup.lastBackupAt, {
+                                          dateStyle: 'medium',
+                                          timeStyle: 'short',
+                                      }),
+                                  })
+                                : t('backup.serverNone')
+                        }}</small>
+                    </span>
+                    <span v-if="backup?.ok === false" class="count-pill count-pill--alert">{{
+                        t('backup.failed')
+                    }}</span>
+                    <span v-else-if="backup?.lastBackupAt" class="count-pill count-pill--ok">{{ t('backup.ok') }}</span>
+                </li>
+            </ul>
+            <div class="actions">
+                <a class="btn" href="/api/profile/export" download
+                    ><Download :size="15" aria-hidden="true" /> {{ t('backup.download') }}</a
+                >
+            </div>
+            <p class="hint">{{ t('backup.note') }}</p>
         </div>
     </div>
 </template>

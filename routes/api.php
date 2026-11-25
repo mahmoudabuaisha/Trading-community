@@ -14,13 +14,17 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FocusSessionController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\HabitController;
+use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SkillController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\VisionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,6 +44,9 @@ Route::prefix('auth')->group(function (): void {
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
+
+// A shared portfolio link works without an account when its owner made it public.
+Route::get('public/portfolio/{slug}', [PortfolioController::class, 'show'])->where('slug', '[a-z0-9]{20}')->middleware('throttle:60,1');
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'show']);
@@ -63,6 +70,36 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('store/{item}/buy', [StoreController::class, 'buy'])->middleware('throttle:30,1');
     Route::put('store/equip', [StoreController::class, 'equip']);
     Route::get('leaderboard', [LeaderboardController::class, 'show']);
+
+    Route::get('insights', [JourneyController::class, 'insights']);
+    Route::get('timeline', [JourneyController::class, 'timeline']);
+    Route::put('timeline/notes/{key}', [JourneyController::class, 'note'])->where('key', '[a-z]+(:[A-Za-z0-9_]+)?');
+    Route::post('timeline', [JourneyController::class, 'addMilestone']);
+    Route::patch('timeline/{entry}', [JourneyController::class, 'updateMilestone']);
+    Route::delete('timeline/{entry}', [JourneyController::class, 'deleteMilestone']);
+    Route::get('goals/{goal}/steps', [JourneyController::class, 'roadmap']);
+    Route::post('goals/{goal}/steps', [JourneyController::class, 'addStep']);
+    Route::patch('goal-steps/{step}', [JourneyController::class, 'updateStep']);
+    Route::delete('goal-steps/{step}', [JourneyController::class, 'deleteStep']);
+    Route::get('profile/export', [JourneyController::class, 'export'])->middleware('throttle:10,1');
+    Route::get('profile/backup-status', [JourneyController::class, 'backupStatus']);
+
+    Route::get('vision-boards', [VisionController::class, 'index']);
+    Route::post('vision-boards', [VisionController::class, 'storeBoard']);
+    Route::patch('vision-boards/{board}', [VisionController::class, 'updateBoard']);
+    Route::delete('vision-boards/{board}', [VisionController::class, 'destroyBoard']);
+    Route::post('vision-boards/{board}/items', [VisionController::class, 'storeItem']);
+    Route::patch('vision-items/{item}', [VisionController::class, 'updateItem']);
+    Route::delete('vision-items/{item}', [VisionController::class, 'destroyItem']);
+
+    Route::get('skills', [SkillController::class, 'index']);
+    Route::post('skill-levels/{level}/attempt', [SkillController::class, 'attempt'])->middleware('throttle:30,1');
+
+    Route::get('portfolio', [PortfolioController::class, 'index']);
+    Route::post('portfolio', [PortfolioController::class, 'store']);
+    Route::post('portfolio/{project}', [PortfolioController::class, 'update'])->whereNumber('project');
+    Route::delete('portfolio/{project}', [PortfolioController::class, 'destroy']);
+    Route::put('portfolio-settings', [PortfolioController::class, 'settings']);
     Route::post('focus-sessions', [FocusSessionController::class, 'store']);
     Route::put('reviews/{date}', [ReviewController::class, 'update'])->where('date', '\d{4}-\d{2}-\d{2}');
 
@@ -101,6 +138,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('broadcasts', [AdminBroadcastController::class, 'send'])->middleware('area:growth');
         Route::put('broadcasts/schedule/{day}', [AdminBroadcastController::class, 'schedule'])->middleware('area:growth')->where('day', '\\d{4}-\\d{2}-\\d{2}');
         Route::delete('broadcasts/{broadcast}', [AdminBroadcastController::class, 'destroy'])->middleware('area:growth');
+        Route::get('skill-paths', [SkillController::class, 'adminIndex'])->middleware('area:education');
+        Route::post('skill-paths', [SkillController::class, 'savePath'])->middleware('area:education');
+        Route::patch('skill-paths/{path}', [SkillController::class, 'savePath'])->middleware('area:education');
+        Route::delete('skill-paths/{path}', [SkillController::class, 'destroyPath'])->middleware('area:education');
+        Route::post('skill-paths/{path}/levels', [SkillController::class, 'saveLevel'])->middleware('area:education');
+        Route::patch('skill-paths/{path}/levels/{level}', [SkillController::class, 'saveLevel'])->middleware('area:education');
+        Route::delete('skill-paths/{path}/levels/{level}', [SkillController::class, 'destroyLevel'])->middleware('area:education');
         Route::get('settings', [AdminSettingsController::class, 'show'])->middleware('area:content');
         Route::put('settings', [AdminSettingsController::class, 'update'])->middleware('area:content');
         Route::get('threads', [AdminThreadController::class, 'index'])->middleware('area:messages');

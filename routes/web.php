@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LessonController;
+use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\StoreController;
 use App\Models\Lesson;
 use App\Models\StoreItem;
@@ -15,5 +16,6 @@ Route::view('/reset-password/{token}', 'app')->name('password.reset');
 
 Route::get('/media/'.Lesson::IMAGE_DIRECTORY.'/{file}', [LessonController::class, 'image'])->where('file', '[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)');
 Route::get('/media/'.StoreItem::IMAGE_DIRECTORY.'/{file}', [StoreController::class, 'image'])->where('file', '[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)');
+Route::get('/media/{directory}/{file}', [PortfolioController::class, 'media'])->where('directory', 'vision|portfolio')->where('file', '[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)');
 
 Route::view('/{any?}', 'app')->where('any', '^(?!api|sanctum|up|build|storage|media).*$');

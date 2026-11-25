@@ -165,6 +165,14 @@ async function signOut(): Promise<void> {
                         <Mail :size="20" aria-hidden="true" /> <bdi>{{ user.email }}</bdi>
                     </p>
                     <p class="profile-hero__role"><Crown :size="22" aria-hidden="true" /> {{ roleLabel }}</p>
+                    <p v-if="user.specialties.length" class="profile-hero__tags">
+                        <span v-for="key in user.specialties" :key="key" class="count-pill count-pill--gold">{{
+                            t(`specialty.${key}`)
+                        }}</span>
+                    </p>
+                    <RouterLink v-else :to="{ name: 'profile', params: { section: 'settings' } }" class="pill">{{
+                        t('specialty.choose')
+                    }}</RouterLink>
                 </div>
                 <button
                     type="button"

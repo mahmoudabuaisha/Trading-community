@@ -3,6 +3,12 @@ import { useAuthStore } from '../stores/auth'
 import { PERIOD_TYPES } from '../types/domain'
 
 const routes: RouteRecordRaw[] = [
+    // A shared portfolio link: open to visitors and members alike.
+    {
+        path: '/p/:slug([a-z0-9]{20})',
+        name: 'public-portfolio',
+        component: () => import('../views/PublicPortfolioView.vue'),
+    },
     { path: '/', name: 'auth', component: () => import('../views/AuthView.vue'), meta: { guest: true } },
     {
         path: '/reset-password/:token',
@@ -33,6 +39,25 @@ const routes: RouteRecordRaw[] = [
             },
             { path: 'education', name: 'education', component: () => import('../views/EducationView.vue') },
             { path: 'education/:id(\\d+)', name: 'lesson', component: () => import('../views/LessonView.vue') },
+            { path: 'goals/:id(\\d+)', name: 'roadmap', component: () => import('../views/journey/RoadmapView.vue') },
+            { path: 'journey', name: 'journey', component: () => import('../views/journey/JourneyView.vue') },
+            {
+                path: 'journey/insights',
+                name: 'insights',
+                component: () => import('../views/journey/InsightsView.vue'),
+            },
+            {
+                path: 'journey/timeline',
+                name: 'timeline',
+                component: () => import('../views/journey/TimelineView.vue'),
+            },
+            { path: 'journey/vision', name: 'vision', component: () => import('../views/journey/VisionView.vue') },
+            { path: 'journey/skills', name: 'skills', component: () => import('../views/journey/SkillsView.vue') },
+            {
+                path: 'journey/portfolio',
+                name: 'portfolio',
+                component: () => import('../views/journey/PortfolioView.vue'),
+            },
             { path: 'store', name: 'store', component: () => import('../views/StoreView.vue') },
             { path: 'leaderboard', name: 'leaderboard', component: () => import('../views/LeaderboardView.vue') },
             { path: 'messages', name: 'messages', component: () => import('../views/MessagesView.vue') },

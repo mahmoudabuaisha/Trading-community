@@ -24,6 +24,8 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Store | Items priced in points and managed by administrators: titles, avatar frames, colour themes for the whole app, and profile photos |
 | Honour board | Today's top finishers, the most committed members of the week, and the most points overall and this month |
 | Broadcasts | Administrators send a notification to every member on the spot, or schedule one message per day for the week |
+| Growth journey | Performance DNA (best day and time, on-time rate, 30-day comparison, rule-based tips), a growth timeline of automatic milestones with personal notes, goal roadmaps (stages, steps, next step), vision boards (images, quotes, dreams linked to goals), admin-written skill paths with levels, quizzes and challenges, and a portfolio shareable by link with privacy settings |
+| Backup | Members download all their data as JSON; `deploy/backup.sh` backs the database and uploads up nightly and reports its status in the app |
 | Admin center | Platform stats, user search, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log. A full administrator can appoint moderators and choose which areas each one manages; the server enforces it per area |
 
 ## Stack
