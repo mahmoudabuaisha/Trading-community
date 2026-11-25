@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BadgeController as AdminBadgeController;
 use App\Http\Controllers\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Admin\MotivationController as AdminMotivationController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
@@ -42,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('tasks', [TaskController::class, 'store']);
     Route::patch('tasks/{task}', [TaskController::class, 'update']);
     Route::delete('tasks/{task}', [TaskController::class, 'destroy']);
+    Route::post('tasks/{task}/dismiss-reminder', [TaskController::class, 'dismissReminder']);
 
     Route::post('goals', [GoalController::class, 'store']);
     Route::patch('goals/{goal}', [GoalController::class, 'update']);
@@ -73,6 +75,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('motivations', [AdminMotivationController::class, 'store']);
         Route::patch('motivations/{motivation}', [AdminMotivationController::class, 'update']);
         Route::delete('motivations/{motivation}', [AdminMotivationController::class, 'destroy']);
+        Route::get('badges', [AdminBadgeController::class, 'index']);
+        Route::post('badges', [AdminBadgeController::class, 'store']);
+        Route::patch('badges/{badge}', [AdminBadgeController::class, 'update']);
+        Route::delete('badges/{badge}', [AdminBadgeController::class, 'destroy']);
         Route::get('settings', [AdminSettingsController::class, 'show']);
         Route::put('settings', [AdminSettingsController::class, 'update']);
         Route::get('threads', [AdminThreadController::class, 'index']);

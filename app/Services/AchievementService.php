@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Achievement;
+use App\Models\Badge;
 use App\Models\Goal;
+use App\Models\HabitCheck;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -30,6 +32,7 @@ class AchievementService
     {
         $owned = $user->achievements()->pluck('key')->all();
         $earned = [];
+        $streak = null;
 
         $completedTasks = $user->tasks()->where('status', Task::STATUS_COMPLETED)->count();
         foreach (self::TASK_MILESTONES as $key => $threshold) {
@@ -53,6 +56,24 @@ class AchievementService
 
         if ((int) $user->focusSessions()->sum('minutes') >= self::FOCUS_MINUTES_MILESTONE) {
             $earned[] = 'focus_600';
+        }
+
+        // Badges defined by administrators: each compares one running total with its threshold.
+        foreach (Badge::where('is_active', true)->get() as $badge) {
+            if (in_array($badge->achievementKey(), $owned, true)) {
+                continue;
+            }
+            $value = match ($badge->metric) {
+                'tasks_completed' => $completedTasks,
+                'streak_days' => $streak ??= $this->currentStreak($user),
+                'focus_minutes' => (int) $user->focusSessions()->sum('minutes'),
+                'goals_completed' => $user->goals()->where('status', Goal::STATUS_COMPLETED)->count(),
+                'habit_checks' => HabitCheck::whereIn('habit_id', $user->habits()->select('id'))->count(),
+                default => 0,
+            };
+            if ($value >= $badge->threshold) {
+                $earned[] = $badge->achievementKey();
+            }
         }
 
         $created = [];

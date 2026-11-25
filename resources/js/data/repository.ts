@@ -6,6 +6,8 @@
  */
 import { request } from './http'
 import type {
+    Badge,
+    BadgeInput,
     Habit,
     HabitMonth,
     MoodEntry,
@@ -54,6 +56,8 @@ export const repository = {
     updateTask: (id: number, patch: Partial<TaskInput> & { status?: TaskStatus }) =>
         request<{ task: Task; newAchievements: Achievement[] }>('PATCH', `/tasks/${id}`, patch),
     deleteTask: (id: number) => request<void>('DELETE', `/tasks/${id}`),
+    dismissReminder: (id: number) =>
+        request<{ task: Task }>('POST', `/tasks/${id}/dismiss-reminder`).then((r) => r.task),
     createGoal: (input: GoalInput) => request<{ goal: Goal }>('POST', '/goals', input).then((r) => r.goal),
     updateGoal: (id: number, patch: { currentValue: number }) =>
         request<{ goal: Goal; newAchievements: Achievement[] }>('PATCH', `/goals/${id}`, patch),
@@ -95,6 +99,14 @@ export const repository = {
     adminUpdateMotivation: (id: number, patch: Partial<MotivationInput>) =>
         request<{ motivation: Motivation }>('PATCH', `/admin/motivations/${id}`, patch).then((r) => r.motivation),
     adminDeleteMotivation: (id: number) => request<void>('DELETE', `/admin/motivations/${id}`),
+    adminBadges: () => request<{ badges: Badge[] }>('GET', '/admin/badges').then((r) => r.badges),
+    adminSaveBadge: (id: number | null, input: Partial<BadgeInput>) =>
+        request<{ badge: Badge }>(
+            id === null ? 'POST' : 'PATCH',
+            id === null ? '/admin/badges' : `/admin/badges/${id}`,
+            input,
+        ).then((r) => r.badge),
+    adminDeleteBadge: (id: number) => request<void>('DELETE', `/admin/badges/${id}`),
     adminContent: () => request<{ content: SiteContent }>('GET', '/admin/settings').then((r) => r.content),
     adminSaveContent: (content: SiteContent) =>
         request<{ content: SiteContent }>('PUT', '/admin/settings', content).then((r) => r.content),

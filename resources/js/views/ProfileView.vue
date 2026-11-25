@@ -3,6 +3,7 @@ import type { ChartConfiguration } from 'chart.js'
 import { Activity, Camera, CircleCheckBig, Clock3, Pencil, Target } from 'lucide-vue-next'
 import { computed, reactive, ref } from 'vue'
 import ChartCanvas from '../components/ChartCanvas.vue'
+import NotificationSettings from '../components/NotificationSettings.vue'
 import StatCard from '../components/StatCard.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { ApiError } from '../data/http'
@@ -329,6 +330,8 @@ const languages: Locale[] = ['ar', 'en']
                 </button>
             </div>
         </form>
+
+        <NotificationSettings />
 
         <div class="section-head">
             <div>

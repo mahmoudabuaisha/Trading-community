@@ -7,6 +7,7 @@ use App\Http\Resources\HabitResource;
 use App\Models\Habit;
 use App\Models\HabitCheck;
 use App\Models\MoodEntry;
+use App\Services\AchievementService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -72,6 +73,8 @@ class HabitController extends Controller
 
         if ($done) {
             $habit->checks()->firstOrCreate(['day' => $day]);
+            // Habit badges are awarded quietly here; the member sees them on the next refresh.
+            app(AchievementService::class)->evaluate($request->user());
         } else {
             $habit->checks()->whereDate('day', $day)->delete();
         }

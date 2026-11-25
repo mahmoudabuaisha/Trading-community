@@ -40,4 +40,13 @@ class TaskController extends Controller
 
         return response()->noContent();
     }
+
+    /** The owner has seen this reminder; it stops showing until a new time is set. */
+    public function dismissReminder(Task $task): JsonResponse
+    {
+        Gate::authorize('update', $task);
+        $task->forceFill(['reminder_dismissed_at' => now()])->save();
+
+        return response()->json(['task' => new TaskResource($task)]);
+    }
 }

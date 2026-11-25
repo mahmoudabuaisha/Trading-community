@@ -3,7 +3,7 @@ import { X } from 'lucide-vue-next'
 import { onMounted, reactive, ref } from 'vue'
 import { ApiError } from '../data/http'
 import { t } from '../i18n'
-import { parseDay, periodRange, today } from '../lib/dates'
+import { fromLocalInput, parseDay, periodRange, toLocalInput, today } from '../lib/dates'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
 import {
@@ -38,6 +38,7 @@ const form = reactive({
     status: (props.task?.status ?? 'pending') as TaskStatus,
     dueDate: props.task ? (props.task.dueDate ?? '') : props.anchorDay || today(),
     categoryId: props.task?.categoryId ?? null,
+    remindAt: toLocalInput(props.task?.remindAt ?? null),
 })
 
 onMounted(() => dialog.value?.showModal())
@@ -58,6 +59,7 @@ async function submit(): Promise<void> {
         dueDate: form.dueDate || null,
         priority: form.priority,
         categoryId: form.categoryId,
+        remindAt: fromLocalInput(form.remindAt),
     }
     try {
         if (props.task) await workspace.updateTask(props.task.id, { ...input, status: form.status })
@@ -141,6 +143,12 @@ async function submit(): Promise<void> {
                     <span>{{ t('tasks.fDue') }}</span>
                     <input v-model="form.dueDate" class="input" type="date" />
                     <small v-if="fieldErrors.dueDate" class="field__error">{{ fieldErrors.dueDate[0] }}</small>
+                </label>
+                <label class="field">
+                    <span>{{ t('tasks.fRemind') }}</span>
+                    <input v-model="form.remindAt" class="input" type="datetime-local" />
+                    <small v-if="fieldErrors.remindAt" class="field__error">{{ fieldErrors.remindAt[0] }}</small>
+                    <small v-else class="hint">{{ t('tasks.fRemindHint') }}</small>
                 </label>
                 <label v-if="task" class="field">
                     <span>{{ t('tasks.fStatus') }}</span>

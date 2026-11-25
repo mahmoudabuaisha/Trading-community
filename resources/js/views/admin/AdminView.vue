@@ -15,6 +15,7 @@ import {
     X,
 } from 'lucide-vue-next'
 import { onMounted, reactive, ref, watch, type Component } from 'vue'
+import AdminBadges from '../../components/admin/AdminBadges.vue'
 import AdminContent from '../../components/admin/AdminContent.vue'
 import AdminLessons from '../../components/admin/AdminLessons.vue'
 import AdminMessages from '../../components/admin/AdminMessages.vue'
@@ -50,12 +51,13 @@ async function run(action: () => Promise<void>, successKey?: string): Promise<bo
     }
 }
 
-type TabId = 'users' | 'content' | 'growth' | 'education' | 'messages' | 'audit'
+type TabId = 'users' | 'content' | 'growth' | 'education' | 'badges' | 'messages' | 'audit'
 const tabs: { id: TabId; label: string; icon: Component }[] = [
     { id: 'users', label: 'tabUsers', icon: Users },
     { id: 'content', label: 'tabContent', icon: Type },
     { id: 'growth', label: 'tabGrowth', icon: Sparkles },
     { id: 'education', label: 'tabEducation', icon: GraduationCap },
+    { id: 'badges', label: 'tabBadges', icon: Award },
     { id: 'messages', label: 'tabMessages', icon: Mail },
     { id: 'audit', label: 'tabAudit', icon: Shield },
 ]
@@ -425,6 +427,8 @@ function auditDetail(entry: AuditEntry): string {
         </div>
 
         <AdminLessons v-if="tab === 'education'" />
+
+        <AdminBadges v-if="tab === 'badges'" />
 
         <AdminMessages v-if="tab === 'messages'" />
 

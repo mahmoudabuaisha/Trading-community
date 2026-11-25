@@ -14,6 +14,8 @@ import type {
     SiteContent,
     Thread,
     ThreadUser,
+    Badge,
+    BadgeInput,
 } from '../types/domain'
 
 export const useAdminStore = defineStore('admin', () => {
@@ -24,6 +26,7 @@ export const useAdminStore = defineStore('admin', () => {
     const motivations = ref<Motivation[]>([])
     const content = ref<SiteContent>({ taglineAr: null, taglineEn: null, welcomeSubAr: null, welcomeSubEn: null })
     const lessons = ref<Lesson[]>([])
+    const badges = ref<Badge[]>([])
     const threads = ref<Thread[]>([])
     const activeThread = ref<{ user: ThreadUser; messages: Message[] } | null>(null)
     const search = ref('')
@@ -69,6 +72,20 @@ export const useAdminStore = defineStore('admin', () => {
         await Promise.all([loadLessons(), loadOverview()])
     }
 
+    async function loadBadges(): Promise<void> {
+        badges.value = await repository.adminBadges()
+    }
+
+    async function saveBadge(id: number | null, input: Partial<BadgeInput>): Promise<void> {
+        await repository.adminSaveBadge(id, input)
+        await Promise.all([loadBadges(), loadOverview()])
+    }
+
+    async function deleteBadge(id: number): Promise<void> {
+        await repository.adminDeleteBadge(id)
+        await Promise.all([loadBadges(), loadOverview()])
+    }
+
     async function loadThreads(): Promise<void> {
         threads.value = await repository.adminThreads()
     }
@@ -97,6 +114,7 @@ export const useAdminStore = defineStore('admin', () => {
                 loadContent(),
                 loadLessons(),
                 loadThreads(),
+                loadBadges(),
             ])
         } catch (e) {
             error.value = e
@@ -135,6 +153,7 @@ export const useAdminStore = defineStore('admin', () => {
         motivations,
         content,
         lessons,
+        badges,
         threads,
         activeThread,
         search,
@@ -149,6 +168,8 @@ export const useAdminStore = defineStore('admin', () => {
         saveContent,
         saveLesson,
         deleteLesson,
+        saveBadge,
+        deleteBadge,
         loadThreads,
         openThread,
         sendMessage,

@@ -91,3 +91,17 @@ export function dailyScore(
 export function percent(done: number, total: number): number {
     return total ? Math.round((done / total) * 100) : 0
 }
+
+/** An instant as the value of a `datetime-local` input (local time, minute precision). */
+export function toLocalInput(iso: string | null): string {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return `${ymd(d)}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+/** The instant a `datetime-local` value names in the viewer's time zone, or null when empty or invalid. */
+export function fromLocalInput(value: string): string | null {
+    if (!value) return null
+    const d = new Date(value)
+    return Number.isNaN(d.getTime()) ? null : d.toISOString()
+}

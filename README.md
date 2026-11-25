@@ -13,7 +13,8 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Plans | Daily, weekly, monthly and yearly task lists with period navigation, filters, priorities, categories, due dates, undoable delete |
 | Goals | Measurable goals per period with progress steps |
 | Habit tracker | Monthly grid of habits by week with daily totals, per-habit goals and analysis, a consistency chart, daily mood and motivation ratings with weekly averages, and monthly notes |
-| Achievements | Badges awarded automatically (first task, 10/50/100 tasks, 7/30-day streaks, first goal, 10 focus hours) |
+| Reminders | A reminder time on any task; due reminders appear in the notification bell with a toast and optional chime, and as browser notifications on HTTPS |
+| Achievements | Extra badges defined by administrators (metric + threshold), plus badges awarded automatically (first task, 10/50/100 tasks, 7/30-day streaks, first goal, 10 focus hours) |
 | Growth & motivation | Library of texts published by administrators |
 | Education | Lessons (title, text, image) published by administrators |
 | Messages | A private thread between each member and the administrators, with unread badges |

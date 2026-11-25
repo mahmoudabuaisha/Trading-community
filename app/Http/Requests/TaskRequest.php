@@ -30,6 +30,8 @@ class TaskRequest extends ApiRequest
             'periodStart' => [$required, 'date_format:Y-m-d'],
             'periodEnd' => [$required, 'date_format:Y-m-d', ...($start ? ["after_or_equal:$start"] : [])],
             'dueDate' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
+            // An instant (ISO 8601); null removes the reminder.
+            'remindAt' => ['sometimes', 'nullable', 'date'],
             'priority' => ['sometimes', Rule::in(Task::PRIORITIES)],
             'status' => ['sometimes', Rule::in(Task::STATUSES)],
             // A task may only be filed under one of the caller's own categories.

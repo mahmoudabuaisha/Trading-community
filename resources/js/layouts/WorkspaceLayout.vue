@@ -25,6 +25,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch, type Component } from
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import BrandLogo from '../components/BrandLogo.vue'
 import EmptyState from '../components/EmptyState.vue'
+import NotificationBell from '../components/NotificationBell.vue'
 import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { useSiteCopy } from '../lib/content'
@@ -152,56 +153,58 @@ async function signOut(): Promise<void> {
         </button>
 
         <aside class="sidebar" :aria-label="t('nav.main')" :inert="collapsed && !navOpen">
-            <RouterLink :to="{ name: 'overview' }" class="sidebar__logo" :aria-label="t('nav.overview')">
-                <BrandLogo label="SN Tasks" />
-            </RouterLink>
+            <div class="sidebar__scroll">
+                <RouterLink :to="{ name: 'overview' }" class="sidebar__logo" :aria-label="t('nav.overview')">
+                    <BrandLogo label="SN Tasks" />
+                </RouterLink>
 
-            <nav class="sidebar__nav">
-                <RouterLink
-                    v-for="item in navItems"
-                    :key="item.key"
-                    :to="item.to"
-                    class="nav-item"
-                    :class="{ 'nav-item--active': item.active }"
-                    :aria-current="item.active ? 'page' : undefined"
-                >
-                    <span class="nav-item__icon"><component :is="item.icon" :size="20" aria-hidden="true" /></span>
-                    <span>{{ t(`nav.${item.key}`) }}</span>
-                    <i v-if="item.key === 'achievements' && workspace.achievements.length" class="nav-item__count">
-                        {{ workspace.achievements.length }}
-                    </i>
-                    <i
-                        v-if="item.key === 'messages' && workspace.unread.member"
-                        class="nav-item__count nav-item__count--alert"
+                <nav class="sidebar__nav">
+                    <RouterLink
+                        v-for="item in navItems"
+                        :key="item.key"
+                        :to="item.to"
+                        class="nav-item"
+                        :class="{ 'nav-item--active': item.active }"
+                        :aria-current="item.active ? 'page' : undefined"
                     >
-                        {{ workspace.unread.member }}
-                    </i>
-                </RouterLink>
+                        <span class="nav-item__icon"><component :is="item.icon" :size="20" aria-hidden="true" /></span>
+                        <span>{{ t(`nav.${item.key}`) }}</span>
+                        <i v-if="item.key === 'achievements' && workspace.achievements.length" class="nav-item__count">
+                            {{ workspace.achievements.length }}
+                        </i>
+                        <i
+                            v-if="item.key === 'messages' && workspace.unread.member"
+                            class="nav-item__count nav-item__count--alert"
+                        >
+                            {{ workspace.unread.member }}
+                        </i>
+                    </RouterLink>
 
-                <RouterLink
-                    v-if="auth.isAdmin"
-                    :to="{ name: 'admin' }"
-                    class="nav-item"
-                    :class="{ 'nav-item--active': route.name === 'admin' }"
-                    :aria-current="route.name === 'admin' ? 'page' : undefined"
-                >
-                    <span class="nav-item__icon"><Shield :size="20" aria-hidden="true" /></span>
-                    <span>{{ t('nav.admin') }}</span>
-                    <i v-if="workspace.unread.admin" class="nav-item__count nav-item__count--alert">{{
-                        workspace.unread.admin
-                    }}</i>
-                </RouterLink>
+                    <RouterLink
+                        v-if="auth.isAdmin"
+                        :to="{ name: 'admin' }"
+                        class="nav-item"
+                        :class="{ 'nav-item--active': route.name === 'admin' }"
+                        :aria-current="route.name === 'admin' ? 'page' : undefined"
+                    >
+                        <span class="nav-item__icon"><Shield :size="20" aria-hidden="true" /></span>
+                        <span>{{ t('nav.admin') }}</span>
+                        <i v-if="workspace.unread.admin" class="nav-item__count nav-item__count--alert">{{
+                            workspace.unread.admin
+                        }}</i>
+                    </RouterLink>
 
-                <button type="button" class="nav-item nav-item--button" @click="signOut">
-                    <span class="nav-item__icon"><LogOut :size="20" aria-hidden="true" /></span>
-                    <span>{{ t('nav.signOut') }}</span>
-                </button>
-            </nav>
+                    <button type="button" class="nav-item nav-item--button" @click="signOut">
+                        <span class="nav-item__icon"><LogOut :size="20" aria-hidden="true" /></span>
+                        <span>{{ t('nav.signOut') }}</span>
+                    </button>
+                </nav>
 
-            <div class="sidebar__badge">
-                <Crown :size="22" aria-hidden="true" />
-                <b>SN TASKS</b>
-                <small>{{ t(`role.${auth.user?.role ?? 'user'}`) }}</small>
+                <div class="sidebar__badge">
+                    <Crown :size="22" aria-hidden="true" />
+                    <b>SN TASKS</b>
+                    <small>{{ t(`role.${auth.user?.role ?? 'user'}`) }}</small>
+                </div>
             </div>
         </aside>
 
@@ -227,6 +230,7 @@ async function signOut(): Promise<void> {
                             <small>{{ t(`role.${auth.user?.role ?? 'user'}`) }}</small>
                         </span>
                     </RouterLink>
+                    <NotificationBell />
                     <button
                         type="button"
                         class="chip-btn"
@@ -250,7 +254,7 @@ async function signOut(): Promise<void> {
                     >
                 </div>
 
-                <h1 class="topbar__title" :class="{ 'topbar__title--tagline': route.name === 'overview' }">
+                <h1 class="topbar__title">
                     {{ route.name === 'overview' ? tagline : pageTitle }}
                 </h1>
             </header>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { CalendarDays, Check, Pencil, Trash2 } from 'lucide-vue-next'
-import { t } from '../i18n'
+import { BellRing, CalendarDays, Check, Pencil, Trash2 } from 'lucide-vue-next'
+import { formatDate, t } from '../i18n'
 import type { Category, Task } from '../types/domain'
 import EmptyState from './EmptyState.vue'
 
@@ -40,6 +40,16 @@ const categoryOf = (task: Task) => props.categories.find((category) => category.
                     <span v-if="task.dueDate"
                         ><CalendarDays :size="12" aria-hidden="true" /><bdi>{{ task.dueDate }}</bdi></span
                     >
+                    <span v-if="task.remindAt && !task.reminderDismissedAt" class="task-meta__reminder">
+                        <BellRing :size="12" aria-hidden="true" />{{
+                            formatDate(task.remindAt, {
+                                day: 'numeric',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            })
+                        }}
+                    </span>
                 </div>
             </div>
             <span class="status-pill" :class="`status-pill--${task.status}`">{{ t(`status.${task.status}`) }}</span>

@@ -56,6 +56,9 @@ export interface Task {
     priority: TaskPriority
     status: TaskStatus
     categoryId: number | null
+    /** Instant at which the owner wants a reminder; null when none is set. */
+    remindAt: string | null
+    reminderDismissedAt: string | null
     completedAt: string | null
     createdAt: string
 }
@@ -111,6 +114,7 @@ export interface DashboardPayload {
     focus: FocusTotals
     review: DailyReview | null
     content: SiteContent
+    badges: Badge[]
 }
 
 export interface TaskInput {
@@ -122,6 +126,7 @@ export interface TaskInput {
     dueDate: string | null
     priority: TaskPriority
     categoryId: number | null
+    remindAt?: string | null
 }
 
 export interface GoalInput {
@@ -255,4 +260,32 @@ export interface HabitMonth {
     checks: { habitId: number; day: string }[]
     moods: MoodEntry[]
     note: string
+}
+
+export const BADGE_METRICS = [
+    'tasks_completed',
+    'streak_days',
+    'focus_minutes',
+    'goals_completed',
+    'habit_checks',
+] as const
+export type BadgeMetric = (typeof BADGE_METRICS)[number]
+
+/** A badge defined by an administrator; earned ones appear as achievements under `key`. */
+export interface Badge {
+    id: number
+    key: string
+    title: string
+    description: string
+    metric: BadgeMetric
+    threshold: number
+    isActive: boolean
+}
+
+export interface BadgeInput {
+    title: string
+    description: string
+    metric: BadgeMetric
+    threshold: number
+    isActive: boolean
 }

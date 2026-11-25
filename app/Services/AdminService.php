@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AdminAudit;
+use App\Models\Badge;
 use App\Models\Lesson;
 use App\Models\Motivation;
 use App\Models\Setting;
@@ -148,6 +149,33 @@ class AdminService
         DB::transaction(function () use ($admin, $lesson): void {
             $lesson->delete();
             $this->audit($admin, 'lesson_deleted', null, ['name' => $lesson->title]);
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function saveBadge(User $admin, ?Badge $badge, array $data): Badge
+    {
+        return DB::transaction(function () use ($admin, $badge, $data): Badge {
+            $creating = $badge === null;
+            $badge ??= new Badge;
+            $badge->fill($data);
+            if ($creating) {
+                $badge->created_by = $admin->id;
+            }
+            $badge->save();
+            $this->audit($admin, $creating ? 'badge_created' : 'badge_updated', null, ['name' => $badge->title]);
+
+            return $badge;
+        });
+    }
+
+    public function deleteBadge(User $admin, Badge $badge): void
+    {
+        DB::transaction(function () use ($admin, $badge): void {
+            $badge->delete();
+            $this->audit($admin, 'badge_deleted', null, ['name' => $badge->title]);
         });
     }
 

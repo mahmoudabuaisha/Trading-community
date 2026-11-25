@@ -22,6 +22,8 @@ class TaskResource extends JsonResource
             'priority' => $this->priority,
             'status' => $this->status,
             'categoryId' => $this->category_id,
+            'remindAt' => $this->remind_at?->toISOString(),
+            'reminderDismissedAt' => $this->reminder_dismissed_at?->toISOString(),
             'completedAt' => $this->completed_at?->toISOString(),
             'createdAt' => $this->created_at?->toISOString(),
         ];

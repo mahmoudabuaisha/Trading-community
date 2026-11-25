@@ -21,7 +21,7 @@ class Task extends Model
     public const STATUS_COMPLETED = 'completed';
 
     protected $fillable = [
-        'category_id', 'title', 'description', 'period_type', 'period_start', 'period_end', 'due_date', 'priority', 'status',
+        'category_id', 'title', 'description', 'period_type', 'period_start', 'period_end', 'due_date', 'priority', 'status', 'remind_at',
     ];
 
     protected $attributes = [
@@ -37,6 +37,8 @@ class Task extends Model
             'period_end' => 'date',
             'due_date' => 'date',
             'completed_at' => 'datetime',
+            'remind_at' => 'datetime',
+            'reminder_dismissed_at' => 'datetime',
         ];
     }
 
@@ -49,6 +51,10 @@ class Task extends Model
                 $task->completed_at ??= now();
             } else {
                 $task->completed_at = null;
+            }
+            // A new reminder time is a new reminder: it has not been dismissed yet.
+            if ($task->isDirty('remind_at')) {
+                $task->reminder_dismissed_at = null;
             }
         });
     }

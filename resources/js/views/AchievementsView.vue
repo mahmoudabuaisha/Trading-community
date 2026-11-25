@@ -7,11 +7,21 @@ import { useWorkspaceStore } from '../stores/workspace'
 const workspace = useWorkspaceStore()
 
 /** Every known badge, earned ones first, so members can see what is still ahead. */
+/** Every badge there is — built-in ones, then those defined by the administrators — earned ones first. */
 const badges = computed(() => {
-    const catalogue = messages.value.achievements.keys
-    return Object.entries(catalogue)
-        .map(([key, copy]) => ({ key, ...copy, earned: workspace.achievements.find((badge) => badge.key === key) }))
-        .sort((a, b) => Number(Boolean(b.earned)) - Number(Boolean(a.earned)))
+    const builtIn = Object.entries(messages.value.achievements.keys).map(([key, copy]) => ({
+        key,
+        title: copy.title,
+        text: copy.text,
+    }))
+    const custom = workspace.badges.map((badge) => ({
+        key: badge.key,
+        title: badge.title,
+        text: badge.description || `${t(`admin.metric.${badge.metric}`)} ≥ ${badge.threshold}`,
+    }))
+    return [...builtIn, ...custom]
+        .map((badge) => ({ ...badge, earned: workspace.achievements.find((earned) => earned.key === badge.key) }))
+        .sort((x, y) => Number(Boolean(y.earned)) - Number(Boolean(x.earned)))
 })
 </script>
 

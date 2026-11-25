@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AchievementResource;
+use App\Http\Resources\BadgeResource;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\DailyReviewResource;
 use App\Http\Resources\GoalResource;
 use App\Http\Resources\MotivationResource;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\UserResource;
+use App\Models\Badge;
 use App\Models\Motivation;
 use App\Models\Setting;
 use App\Models\User;
@@ -36,6 +38,7 @@ class DashboardController extends Controller
             'focus' => self::focusTotals($user, $day),
             'review' => $review ? new DailyReviewResource($review) : null,
             'content' => Setting::content(),
+            'badges' => BadgeResource::collection(Badge::where('is_active', true)->orderBy('id')->get()),
         ]);
     }
 

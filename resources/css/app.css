@@ -751,13 +751,19 @@ select.input option {
     inset-block: var(--space-3);
     left: var(--space-3);
     inline-size: calc(var(--sidebar-width) - var(--space-5));
+    padding: 0;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+.sidebar__scroll {
+    block-size: 100%;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
     padding: var(--space-5) var(--space-3);
-    border-radius: var(--radius-xl);
     overflow-y: auto;
     scrollbar-width: thin;
+    scrollbar-color: var(--gold-700) transparent;
 }
 .sidebar__logo {
     display: block;
@@ -970,11 +976,8 @@ select.input option {
     color: var(--gold-300);
 }
 .topbar__title {
-    grid-column: 1 / -1;
-    font-size: var(--text-2xl);
-}
-.topbar__title--tagline {
     position: relative;
+    grid-column: 1 / -1;
     justify-self: start;
     padding-block-end: var(--space-3);
     font-family: var(--font-script);
@@ -985,12 +988,12 @@ select.input option {
     background-clip: text;
     color: transparent;
 }
-[dir='ltr'] .topbar__title--tagline {
+[dir='ltr'] .topbar__title {
     font-family: var(--font-display);
     font-weight: 600;
     font-size: clamp(1.4rem, 2.4vw, 2.1rem);
 }
-.topbar__title--tagline::after {
+.topbar__title::after {
     content: '';
     position: absolute;
     inset-block-end: 0;
@@ -3092,6 +3095,207 @@ a.btn-metal {
     text-align: end;
     font-variant-numeric: tabular-nums;
     color: var(--text);
+}
+
+/* ── Notifications ────────────────────────────────────────────────────── */
+.bell {
+    position: relative;
+}
+.bell__button {
+    inline-size: 48px;
+    block-size: 48px;
+    border-radius: 50%;
+    border-color: var(--line-strong);
+    background: var(--glass);
+    color: var(--gold-300);
+}
+.bell__button--active svg {
+    animation: bell-ring 2.4s ease-in-out infinite;
+    transform-origin: 50% 10%;
+}
+@keyframes bell-ring {
+    0%,
+    60%,
+    100% {
+        rotate: 0deg;
+    }
+    10%,
+    30% {
+        rotate: 14deg;
+    }
+    20%,
+    40% {
+        rotate: -12deg;
+    }
+}
+.bell__count {
+    position: absolute;
+    inset-block-start: -4px;
+    inset-inline-end: -4px;
+    min-inline-size: 20px;
+    padding: 1px 5px;
+    border-radius: var(--radius-pill);
+    background: var(--red-500);
+    color: var(--bg-900);
+    font-size: 0.68rem;
+    font-style: normal;
+    font-weight: 700;
+    text-align: center;
+}
+.bell__panel {
+    position: absolute;
+    z-index: 35;
+    inset-block-start: calc(100% + var(--space-2));
+    inset-inline-start: 0;
+    inline-size: min(380px, calc(100vw - var(--space-8)));
+    max-block-size: min(70vh, 520px);
+    overflow-y: auto;
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    background: var(--bg-700);
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+    animation: rise var(--motion-base);
+}
+/* Phone: the list spans the screen instead of hanging off the bell. */
+@media (max-width: 640px) {
+    .bell__panel {
+        position: fixed;
+        inset-block-start: 84px;
+        inset-inline: var(--space-4);
+        inline-size: auto;
+    }
+}
+.bell__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block-end: var(--space-2);
+    border-block-end: 1px solid var(--line-soft);
+    color: var(--gold-200);
+}
+.bell__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+    font-size: var(--text-sm);
+}
+.bell__item > svg {
+    flex: none;
+    color: var(--gold-300);
+}
+.bell__item > span {
+    flex: 1;
+    min-inline-size: 0;
+    display: grid;
+}
+.bell__item b {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.bell__item small {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+}
+.bell__item--link:hover {
+    border-color: var(--line-strong);
+}
+.bell__empty {
+    padding: var(--space-4);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+}
+.task-meta__reminder {
+    color: var(--gold-300);
+}
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+    cursor: pointer;
+}
+.setting-row > span {
+    display: grid;
+    gap: 2px;
+}
+.setting-row small {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+}
+/* A checkbox drawn as a switch; still a real checkbox for keyboards and screen readers. */
+.switch {
+    appearance: none;
+    flex: none;
+    position: relative;
+    inline-size: 46px;
+    block-size: 26px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--bg-800);
+    cursor: pointer;
+    transition:
+        background var(--motion-fast),
+        border-color var(--motion-fast);
+}
+.switch::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 3px;
+    inset-inline-start: 3px;
+    inline-size: 18px;
+    block-size: 18px;
+    border-radius: 50%;
+    background: var(--neutral-400);
+    transition:
+        inset-inline-start var(--motion-fast),
+        background var(--motion-fast);
+}
+.switch:checked {
+    border-color: var(--gold-500);
+    background: rgba(214, 173, 98, 0.25);
+}
+.switch:checked::after {
+    inset-inline-start: 23px;
+    background: var(--gold-300);
+}
+.switch:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ── Headings ─────────────────────────────────────────────────────────── */
+/* Every page and card heading uses the same brushed-gold lettering as the home page. */
+.section-head h2,
+.section-head h3,
+.section-title h3,
+.period-header h2,
+.suite__head h2,
+.growth-hero h2,
+.goal-card h3,
+.achievement-card h3,
+.growth-reading h3,
+.dialog__head h2,
+.calendar-head h3,
+.assistant h3,
+.profile-identity h3 {
+    background: var(--gold-metal);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 /* ── Glass surfaces ───────────────────────────────────────────────────── */

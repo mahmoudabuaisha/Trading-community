@@ -4,6 +4,7 @@ import { repository } from '../data/repository'
 import { messages, setLocale, t } from '../i18n'
 import { completionStreak, percent, today } from '../lib/dates'
 import type {
+    Badge,
     Lesson,
     SiteContent,
     UnreadCounts,
@@ -33,6 +34,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     const review = ref<DailyReview | null>(null)
     const content = ref<SiteContent>({ taglineAr: null, taglineEn: null, welcomeSubAr: null, welcomeSubEn: null })
     const lessons = ref<Lesson[]>([])
+    const badges = ref<Badge[]>([])
     const unread = ref<UnreadCounts>({ member: 0, admin: 0 })
     const loading = ref(false)
     const loaded = ref(false)
@@ -61,6 +63,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
             focus.value = payload.focus
             review.value = payload.review
             content.value = payload.content
+            badges.value = payload.badges
             useAuthStore().setUser(payload.user)
             loaded.value = true
         } catch (e) {
@@ -87,9 +90,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         for (const badge of earned) {
             if (achievements.value.some((existing) => existing.id === badge.id)) continue
             achievements.value.unshift(badge)
-            const title =
-                messages.value.achievements.keys[badge.key as keyof typeof messages.value.achievements.keys]?.title
-            useUiStore().success(t('achievements.earned', { title: title ?? badge.key }))
+            useUiStore().success(t('achievements.earned', { title: badgeTitle(badge.key) }))
         }
     }
 
@@ -128,6 +129,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
                 dueDate: task.dueDate,
                 priority: task.priority,
                 categoryId: task.categoryId,
+                remindAt: task.remindAt,
             })
             if (task.status !== 'pending') await updateTask(restored.id, { status: task.status })
         }
@@ -173,6 +175,17 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         celebrate(result.newAchievements)
     }
 
+    /** Title of a badge by achievement key: admin-defined ones carry their own, built-in ones are translated. */
+    function badgeTitle(key: string): string {
+        const custom = badges.value.find((badge) => badge.key === key)
+        if (custom) return custom.title
+        return messages.value.achievements.keys[key as keyof typeof messages.value.achievements.keys]?.title ?? key
+    }
+
+    async function dismissReminder(id: number): Promise<void> {
+        replaceTask(await repository.dismissReminder(id))
+    }
+
     async function loadLessons(): Promise<void> {
         lessons.value = await repository.loadLessons()
     }
@@ -200,6 +213,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         review,
         content,
         lessons,
+        badges,
         unread,
         loading,
         loaded,
@@ -222,6 +236,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         logFocusSession,
         saveReview,
         loadLessons,
+        badgeTitle,
+        dismissReminder,
         refreshUnread,
     }
 })
