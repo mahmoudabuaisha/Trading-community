@@ -6,6 +6,8 @@ use App\Models\Habit;
 use App\Models\HabitCheck;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class HabitTest extends TestCase
@@ -45,6 +47,7 @@ class HabitTest extends TestCase
         $this->getJson('/api/habits?month=2026-11')->assertOk()
             ->assertJsonCount(2, 'habits')
             ->assertExactJson([
+                'days' => [],
                 'habits' => [
                     ['id' => $gym['id'], 'name' => 'الرياضة', 'targetDays' => 20, 'position' => $gym['position']],
                     ['id' => $read['id'], 'name' => 'القراءة', 'targetDays' => null, 'position' => $read['position']],
@@ -98,5 +101,27 @@ class HabitTest extends TestCase
         }
 
         $this->actingAs($user)->postJson('/api/habits', ['name' => 'one more'])->assertUnprocessable()->assertJsonValidationErrors('name');
+    }
+
+    public function test_a_day_holds_a_picture_and_a_note(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create(['timezone' => 'UTC']);
+        $day = now()->subDay()->toDateString();
+        $month = substr($day, 0, 7);
+
+        $entry = $this->actingAs($user)->post("/api/habit-days/{$day}", ['note' => 'يوم ممتاز', 'image' => UploadedFile::fake()->image('d.jpg')])->assertOk()->json('entry');
+        $this->assertSame('يوم ممتاز', $entry['note']);
+        $this->assertStringStartsWith('/media/days/', $entry['imageUrl']);
+        $this->getJson("/api/habits?month={$month}")->assertJsonCount(1, 'days')->assertJsonPath('days.0.day', $day);
+        // Nobody else sees it, and tomorrow cannot be written yet.
+        $this->actingAs(User::factory()->create())->getJson("/api/habits?month={$month}")->assertJsonCount(0, 'days');
+        $this->actingAs($user)->postJson('/api/habit-days/'.now()->addDays(2)->toDateString(), ['note' => 'x'])->assertUnprocessable();
+
+        // Changing the note keeps the picture; removing both removes the entry and its file.
+        $this->postJson("/api/habit-days/{$day}", ['note' => 'معدّلة'])->assertOk()->assertJsonPath('entry.imageUrl', $entry['imageUrl']);
+        $this->postJson("/api/habit-days/{$day}", ['note' => '', 'removeImage' => true])->assertOk()->assertJsonPath('entry', null);
+        $this->assertSame(0, $user->dayEntries()->count());
+        $this->assertSame([], Storage::disk('public')->allFiles('days'));
     }
 }

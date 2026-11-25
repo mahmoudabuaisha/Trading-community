@@ -222,6 +222,7 @@ class JourneyController extends Controller
             'habits' => $user->habits()->get()->makeHidden('user_id'),
             'habitChecks' => DB::table('habit_checks')->whereIn('habit_id', $user->habits()->select('id'))->get(['habit_id', 'day']),
             'moods' => $user->moodEntries()->get(['day', 'mood', 'motivation']),
+            'dayEntries' => $user->dayEntries()->get()->map(fn ($entry): array => $entry->toApi()),
             'habitNotes' => $user->habitNotes()->get()->makeHidden(['id', 'user_id']),
             'reviews' => $user->dailyReviews()->get()->makeHidden(['id', 'user_id']),
             'focusSessions' => $user->focusSessions()->get(['day', 'minutes']),

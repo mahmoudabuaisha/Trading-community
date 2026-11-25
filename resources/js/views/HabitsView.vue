@@ -5,6 +5,7 @@ import {
     Check,
     ChevronLeft,
     ChevronRight,
+    ImagePlus,
     ListChecks,
     NotebookPen,
     Pencil,
@@ -67,6 +68,55 @@ async function attempt(action: () => Promise<void>): Promise<boolean> {
         ui.failure(error)
         return false
     }
+}
+
+// ── A day's picture and note ─────────────────────────────────────────────
+const dayDialog = ref<HTMLDialogElement | null>(null)
+const dayFile = ref<HTMLInputElement | null>(null)
+const dayForm = reactive({
+    key: '',
+    label: '',
+    note: '',
+    image: null as File | null,
+    preview: null as string | null,
+    removeImage: false,
+    saving: false,
+})
+
+async function openDay(key: string, date: Date): Promise<void> {
+    const entry = store.dayEntries.get(key)
+    Object.assign(dayForm, {
+        key,
+        label: formatDate(date, { weekday: 'long', day: 'numeric', month: 'long' }),
+        note: entry?.note ?? '',
+        image: null,
+        preview: entry?.imageUrl ?? null,
+        removeImage: false,
+    })
+    await nextTick()
+    dayDialog.value?.showModal()
+}
+
+function pickDayImage(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0] ?? null
+    input.value = ''
+    if (!file) return
+    if (dayForm.preview?.startsWith('blob:')) URL.revokeObjectURL(dayForm.preview)
+    Object.assign(dayForm, { image: file, preview: URL.createObjectURL(file), removeImage: false })
+}
+
+async function saveDay(): Promise<void> {
+    dayForm.saving = true
+    const saved = await attempt(() =>
+        store.saveDay(dayForm.key, {
+            note: dayForm.note.trim(),
+            image: dayForm.image,
+            removeImage: dayForm.removeImage,
+        }),
+    )
+    dayForm.saving = false
+    if (saved) dayForm.key = ''
 }
 
 const toggle = (habit: Habit, day: string) => attempt(() => store.toggle(habit.id, day))
@@ -308,10 +358,32 @@ onMounted(() => void store.load())
                                 v-for="day in days"
                                 :key="day.key"
                                 scope="col"
-                                class="habit-grid__num"
+                                class="habit-grid__num habit-grid__num--day"
                                 :class="[`week-${day.week}`, { 'is-today': day.key === todayKey }]"
                             >
-                                {{ day.number }}
+                                <button
+                                    type="button"
+                                    class="day-cell"
+                                    :class="{
+                                        'day-cell--image': store.dayEntries.get(day.key)?.imageUrl,
+                                        'day-cell--note': store.dayEntries.get(day.key)?.note,
+                                    }"
+                                    :style="
+                                        store.dayEntries.get(day.key)?.imageUrl
+                                            ? { backgroundImage: `url(${store.dayEntries.get(day.key)!.imageUrl})` }
+                                            : undefined
+                                    "
+                                    :disabled="isFuture(day.key)"
+                                    :aria-label="
+                                        t('habits.dayOpen', {
+                                            day: formatDate(day.date, { day: 'numeric', month: 'long' }),
+                                        })
+                                    "
+                                    :title="store.dayEntries.get(day.key)?.note || t('habits.dayHint')"
+                                    @click="openDay(day.key, day.date)"
+                                >
+                                    <span>{{ day.number }}</span>
+                                </button>
                             </th>
                         </tr>
                     </thead>
@@ -632,6 +704,70 @@ onMounted(() => void store.load())
                         {{ t('common.cancel') }}
                     </button>
                     <button type="submit" class="btn">{{ t('common.save') }}</button>
+                </div>
+            </form>
+        </dialog>
+        <dialog
+            v-if="dayForm.key"
+            ref="dayDialog"
+            class="dialog"
+            @cancel.prevent="dayForm.key = ''"
+            @click.self="dayForm.key = ''"
+        >
+            <form class="dialog__body" @submit.prevent="saveDay">
+                <div class="dialog__head">
+                    <h2>{{ dayForm.label }}</h2>
+                    <button type="button" class="icon-btn" :aria-label="t('common.close')" @click="dayForm.key = ''">
+                        <X :size="18" />
+                    </button>
+                </div>
+                <img
+                    v-if="dayForm.preview && !dayForm.removeImage"
+                    :src="dayForm.preview"
+                    alt=""
+                    class="day-dialog__image"
+                />
+                <div class="head-actions">
+                    <button type="button" class="btn btn--outline" @click="dayFile?.click()">
+                        <ImagePlus :size="15" aria-hidden="true" />
+                        {{
+                            t(dayForm.preview && !dayForm.removeImage ? 'habits.dayChangeImage' : 'habits.dayAddImage')
+                        }}
+                    </button>
+                    <button
+                        v-if="dayForm.preview && !dayForm.removeImage"
+                        type="button"
+                        class="pill"
+                        @click="((dayForm.removeImage = true), (dayForm.image = null))"
+                    >
+                        {{ t('habits.dayRemoveImage') }}
+                    </button>
+                    <input
+                        ref="dayFile"
+                        class="sr-only"
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        tabindex="-1"
+                        @change="pickDayImage"
+                    />
+                </div>
+                <label class="field">
+                    <span>{{ t('habits.dayNote') }}</span>
+                    <textarea
+                        v-model="dayForm.note"
+                        class="input"
+                        rows="4"
+                        maxlength="1000"
+                        :placeholder="t('habits.dayNotePh')"
+                    />
+                </label>
+                <div class="actions">
+                    <button type="button" class="btn btn--outline" @click="dayForm.key = ''">
+                        {{ t('common.cancel') }}
+                    </button>
+                    <button type="submit" class="btn" :disabled="dayForm.saving">
+                        {{ dayForm.saving ? t('common.saving') : t('common.save') }}
+                    </button>
                 </div>
             </form>
         </dialog>

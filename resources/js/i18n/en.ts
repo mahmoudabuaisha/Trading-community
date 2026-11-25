@@ -175,6 +175,13 @@ export const en: Messages = {
         emptyText: 'Lessons published by the admins will appear here.',
     },
     habits: {
+        dayOpen: 'Picture and note for {day}',
+        dayHint: 'Tap to add a picture or a note to this day',
+        dayAddImage: 'Add picture',
+        dayChangeImage: 'Change picture',
+        dayRemoveImage: 'Remove picture',
+        dayNote: "The day's note",
+        dayNotePh: 'What happened on this day?',
         head: 'Pro habit tracker',
         sub: 'Build positive habits day by day: log your commitment, follow your progress in numbers and charts, and compare goals with results.',
         prevMonth: 'Previous month',

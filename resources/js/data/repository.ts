@@ -10,6 +10,7 @@ import type {
     DeviceSession,
     Preferences,
     AdminBroadcasts,
+    DayEntry,
     Badge,
     BadgeInput,
     GoalStep,
@@ -198,6 +199,13 @@ export const repository = {
         request<{ review: DailyReview }>('PUT', `/reviews/${review.date}`, review).then((r) => r.review),
 
     loadHabits: (month: string) => request<HabitMonth>('GET', `/habits?month=${month}`),
+    saveDayEntry: (day: string, input: { note: string; image?: Blob | null; removeImage?: boolean }) => {
+        const form = new FormData()
+        form.set('note', input.note)
+        if (input.removeImage) form.set('removeImage', '1')
+        if (input.image) form.set('image', input.image, 'day.jpg')
+        return request<{ entry: DayEntry | null }>('POST', `/habit-days/${day}`, form).then((r) => r.entry)
+    },
     createHabit: (name: string, targetDays: number | null) =>
         request<{ habit: Habit }>('POST', '/habits', { name, targetDays }).then((r) => r.habit),
     updateHabit: (id: number, patch: { name?: string; targetDays?: number | null }) =>

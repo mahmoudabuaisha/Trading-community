@@ -5467,3 +5467,52 @@ a.btn-metal {
     flex-wrap: wrap;
     gap: var(--space-2);
 }
+
+/* A date of the habit tracker: tap it to pin a picture (shown behind the number) and a note. */
+.habit-grid__num--day {
+    block-size: 40px;
+    padding: 0;
+}
+.day-cell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 100%;
+    min-inline-size: 28px;
+    border: 0;
+    background: transparent center / cover no-repeat;
+    color: inherit;
+    font: inherit;
+}
+.day-cell:hover:not(:disabled) {
+    background-color: rgb(var(--accent-rgb) / 0.2);
+}
+.day-cell:disabled {
+    cursor: default;
+}
+.day-cell--image span {
+    padding-inline: 3px;
+    border-radius: var(--radius-sm);
+    background: rgb(0 0 0 / 0.6);
+    color: var(--steel-100);
+    font-weight: 700;
+}
+/* A small gold dot marks a day that has a note. */
+.day-cell--note::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 2px;
+    inset-inline-end: 2px;
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 50%;
+    background: var(--gold-300);
+}
+.day-dialog__image {
+    inline-size: 100%;
+    max-block-size: 320px;
+    border-radius: var(--radius-md);
+    object-fit: contain;
+    background: var(--surface-sunken);
+}

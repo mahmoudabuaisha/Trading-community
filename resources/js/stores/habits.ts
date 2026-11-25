@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { repository } from '../data/repository'
 import { checkKey, monthKey } from '../lib/habits'
-import type { Habit, MoodEntry } from '../types/domain'
+import type { DayEntry, Habit, MoodEntry } from '../types/domain'
 
 /** One month of the habit tracker: habits, done-days, mood ratings and the month's note. */
 export const useHabitsStore = defineStore('habits', () => {
@@ -12,6 +12,8 @@ export const useHabitsStore = defineStore('habits', () => {
     const checks = ref(new Set<string>())
     const moods = ref(new Map<string, MoodEntry>())
     const note = ref('')
+    /** Pictures and notes pinned to days of this month, by day. */
+    const dayEntries = ref(new Map<string, DayEntry>())
     const loading = ref(false)
     const error = ref<unknown>(null)
 
@@ -29,6 +31,7 @@ export const useHabitsStore = defineStore('habits', () => {
             checks.value = new Set(data.checks.map((check) => checkKey(check.habitId, check.day)))
             moods.value = new Map(data.moods.map((entry) => [entry.day, entry]))
             note.value = data.note
+            dayEntries.value = new Map(data.days.map((entry) => [entry.day, entry]))
         } catch (e) {
             error.value = e
         } finally {
@@ -44,6 +47,17 @@ export const useHabitsStore = defineStore('habits', () => {
     function goToToday(): Promise<void> {
         anchor.value = new Date()
         return load()
+    }
+
+    async function saveDay(
+        day: string,
+        input: { note: string; image?: Blob | null; removeImage?: boolean },
+    ): Promise<void> {
+        const entry = await repository.saveDayEntry(day, input)
+        const next = new Map(dayEntries.value)
+        if (entry) next.set(day, entry)
+        else next.delete(day)
+        dayEntries.value = next
     }
 
     async function addHabit(name: string, targetDays: number | null): Promise<void> {
@@ -107,6 +121,8 @@ export const useHabitsStore = defineStore('habits', () => {
     }
 
     return {
+        dayEntries,
+        saveDay,
         anchor,
         habits,
         checks,

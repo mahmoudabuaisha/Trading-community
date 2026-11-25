@@ -134,6 +134,11 @@ class User extends Authenticatable
         'merchant', 'freelancer', 'employee', 'business_owner', 'content_creator', 'other',
     ];
 
+    public function dayEntries(): HasMany
+    {
+        return $this->hasMany(DayEntry::class);
+    }
+
     public function visionBoards(): HasMany
     {
         return $this->hasMany(VisionBoard::class);

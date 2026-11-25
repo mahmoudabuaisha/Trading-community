@@ -108,6 +108,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::patch('habits/{habit}', [HabitController::class, 'update']);
     Route::delete('habits/{habit}', [HabitController::class, 'destroy']);
     Route::put('habits/{habit}/checks/{day}', [HabitController::class, 'check'])->where('day', '\d{4}-\d{2}-\d{2}');
+    // POST, not PUT: the day's picture travels as multipart form data.
+    Route::post('habit-days/{day}', [HabitController::class, 'day'])->where('day', '\\d{4}-\\d{2}-\\d{2}');
     Route::put('moods/{day}', [HabitController::class, 'mood'])->where('day', '\d{4}-\d{2}-\d{2}');
     Route::put('habit-notes/{month}', [HabitController::class, 'note'])->where('month', '\d{4}-(0[1-9]|1[0-2])');
 

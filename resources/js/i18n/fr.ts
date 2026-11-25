@@ -176,6 +176,13 @@ export const fr: Messages = {
         emptyText: "Les leçons publiées par l'administration apparaîtront ici.",
     },
     habits: {
+        dayOpen: 'Image et note du {day}',
+        dayHint: 'Touchez pour ajouter une image ou une note à ce jour',
+        dayAddImage: 'Ajouter une image',
+        dayChangeImage: "Changer l'image",
+        dayRemoveImage: "Supprimer l'image",
+        dayNote: 'Note du jour',
+        dayNotePh: "Que s'est-il passé ce jour-là ?",
         head: "Suivi d'habitudes pro",
         sub: 'Construis des habitudes positives jour après jour : note ton engagement, suis ta progression en chiffres et en graphiques, et compare tes objectifs à tes résultats.',
         prevMonth: 'Mois précédent',

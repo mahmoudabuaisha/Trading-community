@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\HabitRequest;
 use App\Http\Resources\HabitResource;
+use App\Models\DayEntry;
 use App\Models\Habit;
 use App\Models\HabitCheck;
 use App\Models\MoodEntry;
@@ -13,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class HabitController extends Controller
@@ -33,6 +35,7 @@ class HabitController extends Controller
             'habits' => HabitResource::collection($habits),
             'checks' => $checks->map(fn (HabitCheck $check): array => ['habitId' => $check->habit_id, 'day' => $check->day->toDateString()]),
             'moods' => $moods->map(fn (MoodEntry $entry): array => ['day' => $entry->day->toDateString(), 'mood' => $entry->mood, 'motivation' => $entry->motivation]),
+            'days' => $user->dayEntries()->whereBetween('day', $range)->orderBy('day')->get()->map(fn (DayEntry $entry): array => $entry->toApi()),
             'note' => (string) $user->habitNotes()->where('month', $start->format('Y-m'))->value('body'),
         ]);
     }
@@ -65,6 +68,43 @@ class HabitController extends Controller
     }
 
     /** Mark a habit done or not done on a day. Setting the same state twice is harmless. */
+    /**
+     * Pin a picture and a note to a day. Sent as multipart so the picture can
+     * travel with the note; an entry left with neither is removed.
+     */
+    public function day(Request $request, string $day): JsonResponse
+    {
+        if ($request->has('removeImage')) {
+            $request->merge(['removeImage' => filter_var($request->input('removeImage'), FILTER_VALIDATE_BOOLEAN)]);
+        }
+        $data = $request->validate([
+            'note' => ['present', 'nullable', 'string', 'max:1000'],
+            'image' => ['sometimes', 'file', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'removeImage' => ['sometimes', 'boolean'],
+        ]);
+        $this->assertNotFuture($day);
+
+        $entry = $request->user()->dayEntries()->whereDate('day', $day)->first() ?? $request->user()->dayEntries()->make(['day' => $day]);
+        $old = $entry->image_path;
+        $entry->note = trim((string) $data['note']);
+        if ($request->file('image')) {
+            $entry->image_path = $request->file('image')->store(DayEntry::IMAGE_DIRECTORY, 'public');
+        } elseif ($data['removeImage'] ?? false) {
+            $entry->image_path = null;
+        }
+        if ($old && $old !== $entry->image_path) {
+            Storage::disk('public')->delete($old);
+        }
+        if ($entry->note === '' && $entry->image_path === null) {
+            $entry->exists && $entry->delete();
+
+            return response()->json(['entry' => null]);
+        }
+        $entry->save();
+
+        return response()->json(['entry' => $entry->toApi()]);
+    }
+
     public function check(Request $request, Habit $habit, string $day): Response
     {
         Gate::authorize('update', $habit);

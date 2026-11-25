@@ -290,7 +290,15 @@ export interface MoodEntry {
     motivation: number | null
 }
 
+/** A picture and a note the member pinned to one calendar day. */
+export interface DayEntry {
+    day: string
+    note: string
+    imageUrl: string | null
+}
+
 export interface HabitMonth {
+    days: DayEntry[]
     habits: Habit[]
     checks: { habitId: number; day: string }[]
     moods: MoodEntry[]
