@@ -350,7 +350,7 @@ export interface Preferences {
     wakeTime: string | null
 }
 
-export const STORE_KINDS = ['title', 'frame', 'theme', 'avatar'] as const
+export const STORE_KINDS = ['title', 'frame', 'theme', 'avatar', 'product'] as const
 export type StoreKind = (typeof STORE_KINDS)[number]
 /** Built-in looks an item can apply; the CSS for each lives in app.css. */
 export const FRAME_STYLES = ['bronze', 'silver', 'gold', 'royal', 'diamond'] as const
@@ -368,6 +368,24 @@ export interface StoreItem {
     isActive: boolean
     owned?: boolean
     equipped?: boolean
+    /** The section a product sits in. */
+    categoryId: number | null
+    /** A product may hand over a file and a link; the link is sent to its owner only. */
+    hasFile: boolean
+    fileName: string | null
+    link: string | null
+}
+
+/** A section of the store added by the administrators, such as "Books". */
+export interface StoreCategory {
+    id: number
+    name: string
+}
+
+/** One item's text in every language, for the admin's translation dialog. */
+export interface TranslationSheet {
+    locales: Locale[]
+    fields: { field: string; original: string; translations: Record<string, string>; stale: string[] }[]
 }
 
 export interface StoreItemInput {
@@ -379,6 +397,10 @@ export interface StoreItemInput {
     isActive: boolean
     image?: Blob | null
     removeImage?: boolean
+    categoryId?: number | null
+    link?: string
+    file?: File | null
+    removeFile?: boolean
 }
 
 export interface LeaderboardRow {
@@ -415,6 +437,7 @@ export interface Broadcast {
 export interface AdminBroadcasts {
     /** Day (YYYY-MM-DD) → message, for the requested week. */
     scheduled: Record<string, string>
+    scheduledIds: Record<string, number>
     instant: { id: number; body: string; day: string; createdAt: string }[]
 }
 

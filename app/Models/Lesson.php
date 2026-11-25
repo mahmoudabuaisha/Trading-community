@@ -2,11 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class Lesson extends Model
 {
+    use Translatable;
+
+    /** Fields members read in their own language. */
+    public const TRANSLATABLE = ['title', 'body'];
+
     public const IMAGE_DIRECTORY = 'lessons';
 
     protected $fillable = ['title', 'body', 'image_path', 'position', 'is_published', 'is_premium'];

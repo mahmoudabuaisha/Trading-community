@@ -75,7 +75,7 @@ class LeaderboardController extends Controller
     {
         $users = User::whereIn('id', $ids)->get(['id', 'display_name', 'avatar_url', 'equipped']);
         $items = StoreItem::whereIn('id', $users->flatMap(fn (User $user) => array_filter($user->equipped ?? []))->unique())->get()->keyBy('id');
-        $worn = fn (User $user, string $kind): ?string => $items->get($user->equipped[$kind] ?? null)?->value;
+        $worn = fn (User $user, string $kind): ?string => $kind === 'title' ? $items->get($user->equipped[$kind] ?? null)?->tr('value') : $items->get($user->equipped[$kind] ?? null)?->value;
 
         return $users->mapWithKeys(fn (User $user): array => [$user->id => [
             'displayName' => $user->display_name,

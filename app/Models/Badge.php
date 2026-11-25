@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Translatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -11,6 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Badge extends Model
 {
+    use Translatable;
+
+    /** Fields members read in their own language. */
+    public const TRANSLATABLE = ['title', 'description'];
+
     /** What a condition can count, within the badge's period. */
     public const METRICS = ['tasks_completed', 'perfect_days', 'streak_days', 'focus_minutes', 'goals_completed', 'habit_checks'];
 

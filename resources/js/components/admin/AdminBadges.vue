@@ -16,6 +16,7 @@ import {
 } from '../../types/domain'
 import ConfirmDialog from '../ConfirmDialog.vue'
 import EmptyState from '../EmptyState.vue'
+import TranslateButton from './TranslateButton.vue'
 
 const admin = useAdminStore()
 const ui = useUiStore()
@@ -218,6 +219,7 @@ async function confirmDelete(): Promise<void> {
                 </div>
                 <div class="row-actions">
                     <button type="button" class="pill" @click="edit(badge)">{{ t('common.edit') }}</button>
+                    <TranslateButton type="badge" :id="badge.id" />
                     <button type="button" class="pill" @click="toggle(badge)">
                         {{ t(badge.isActive ? 'admin.hide' : 'admin.publish') }}
                     </button>

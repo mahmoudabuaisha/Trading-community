@@ -12,6 +12,7 @@ use App\Models\StoreItem;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -197,11 +198,14 @@ class AdminService
     /**
      * @param  array<string, mixed>  $data
      */
-    public function saveStoreItem(User $admin, ?StoreItem $item, array $data, ?UploadedFile $image, bool $removeImage): StoreItem
+    public function saveStoreItem(User $admin, ?StoreItem $item, array $data, ?UploadedFile $image, bool $removeImage, ?UploadedFile $file = null, bool $removeFile = false): StoreItem
     {
         $path = $image?->store(StoreItem::IMAGE_DIRECTORY, 'public');
+        // The product's file goes to the private disk: only buyers may download it.
+        $filePath = $file?->store(StoreItem::FILE_DIRECTORY, 'local');
+        $oldFile = $item?->file_path;
 
-        return DB::transaction(function () use ($admin, $item, $data, $path, $removeImage): StoreItem {
+        return DB::transaction(function () use ($admin, $item, $data, $path, $removeImage, $file, $filePath, $removeFile, $oldFile): StoreItem {
             $creating = $item === null;
             $item ??= new StoreItem;
             $item->fill($data);
@@ -210,10 +214,20 @@ class AdminService
             } elseif ($removeImage) {
                 $item->image_path = null;
             }
+            if ($filePath) {
+                $item->file_path = $filePath;
+                $item->file_name = mb_substr($file->getClientOriginalName(), 0, 160);
+            } elseif ($removeFile) {
+                $item->file_path = null;
+                $item->file_name = null;
+            }
             if ($creating) {
                 $item->created_by = $admin->id;
             }
             $item->save();
+            if ($oldFile && $oldFile !== $item->file_path) {
+                Storage::disk('local')->delete($oldFile);
+            }
             $this->audit($admin, $creating ? 'store_item_created' : 'store_item_updated', null, ['name' => $item->name]);
 
             return $item;

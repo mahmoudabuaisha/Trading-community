@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Badge;
 use App\Models\BadgeAward;
 use App\Models\Broadcast;
+use App\Models\ContentTranslation;
 use App\Models\StoreItem;
 use App\Models\Task;
 use App\Models\User;
@@ -166,5 +167,62 @@ class PointsAndStoreTest extends TestCase
         $this->actingAs($admin)->putJson('/api/admin/broadcasts/schedule/2026-11-25', ['body' => ''])->assertNoContent();
         $this->deleteJson("/api/admin/broadcasts/{$id}")->assertNoContent();
         $this->assertSame(1, Broadcast::count());
+    }
+
+    public function test_members_read_admin_content_in_their_language_when_a_current_translation_exists(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $member = User::factory()->create();
+        $id = $this->actingAs($admin)->postJson('/api/admin/motivations', ['title' => 'ابدأ الآن', 'body' => 'خمس دقائق تكفي', 'category' => 'motivation'])->assertCreated()->json('motivation.id');
+
+        $this->getJson("/api/admin/translations/motivation/{$id}")->assertOk()->assertJsonCount(2, 'fields')->assertJsonPath('fields.0.original', 'ابدأ الآن');
+        $this->actingAs($member)->putJson("/api/admin/translations/motivation/{$id}", ['translations' => []])->assertForbidden();
+        $this->actingAs($admin)->getJson('/api/admin/translations/nonsense/1')->assertNotFound();
+        $this->putJson("/api/admin/translations/motivation/{$id}", ['translations' => ['title' => ['en' => 'Start now', 'fr' => 'Commencez'], 'body' => ['en' => 'Five minutes are enough']]])
+            ->assertOk()->assertJsonPath('fields.0.translations.en', 'Start now');
+
+        $title = fn (string $locale) => $this->actingAs($member)->withHeader('Accept-Language', $locale)->getJson('/api/dashboard')->json('motivations.0.title');
+        $this->assertSame('Start now', $title('en'));
+        $this->assertSame('Commencez', $title('fr'));
+        $this->assertSame('ابدأ الآن', $title('ar'));
+        // No French body was written: the original shows. Administrators always edit the original.
+        $this->assertSame('خمس دقائق تكفي', $this->actingAs($member)->withHeader('Accept-Language', 'fr')->getJson('/api/dashboard')->json('motivations.0.body'));
+        $this->assertSame('ابدأ الآن', $this->actingAs($admin)->withHeader('Accept-Language', 'en')->getJson('/api/admin/motivations')->json('motivations.0.title'));
+
+        // Rewording the original retires its translations until they are redone.
+        $this->actingAs($admin)->patchJson("/api/admin/motivations/{$id}", ['title' => 'ابدأ اليوم'])->assertOk();
+        $this->assertSame('ابدأ اليوم', $title('en'));
+        $this->actingAs($admin)->withHeader('Accept-Language', 'ar')->getJson("/api/admin/translations/motivation/{$id}")->assertJsonPath('fields.0.stale', ['en', 'fr']);
+        $this->deleteJson("/api/admin/motivations/{$id}")->assertNoContent();
+        $this->assertSame(0, ContentTranslation::count());
+    }
+
+    public function test_products_in_custom_sections_hand_their_file_and_link_to_buyers_only(): void
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$buyer, $other] = [User::factory()->create(), User::factory()->create()];
+        $this->award($buyer, 50);
+
+        $this->actingAs($buyer)->postJson('/api/admin/store-categories', ['name' => 'كتب'])->assertForbidden();
+        $category = $this->actingAs($admin)->postJson('/api/admin/store-categories', ['name' => 'كتب'])->assertCreated()->json('categories.0');
+        $this->postJson('/api/admin/store-items', ['name' => 'كتاب', 'kind' => 'product', 'price' => 30])->assertUnprocessable()->assertJsonValidationErrors('categoryId');
+        $book = $this->post('/api/admin/store-items', ['name' => 'كتاب التداول', 'kind' => 'product', 'price' => 30, 'categoryId' => $category['id'], 'link' => 'https://example.com/book', 'file' => UploadedFile::fake()->create('book.pdf', 200, 'application/pdf')])
+            ->assertCreated()->assertJsonPath('item.hasFile', true)->assertJsonPath('item.categoryId', $category['id'])->json('item');
+
+        // Before buying: listed, but no link and no download.
+        $this->actingAs($buyer)->getJson('/api/store')->assertJsonPath('categories.0.name', 'كتب')->assertJsonPath('items.0.link', null)->assertJsonPath('items.0.hasFile', true);
+        $this->get("/api/store/{$book['id']}/download")->assertNotFound();
+        $this->postJson("/api/store/{$book['id']}/buy")->assertOk()->assertJsonPath('items.0.link', 'https://example.com/book')->assertJsonPath('user.points', 20);
+        $this->get("/api/store/{$book['id']}/download")->assertOk()->assertDownload('book.pdf');
+        $this->actingAs($other)->get("/api/store/{$book['id']}/download")->assertNotFound();
+        $this->actingAs($buyer)->putJson('/api/store/equip', ['kind' => 'product', 'itemId' => $book['id']])->assertUnprocessable();
+
+        // Removing the section keeps the item; removing the item removes its file.
+        $this->actingAs($admin)->deleteJson("/api/admin/store-categories/{$category['id']}")->assertNoContent();
+        $this->getJson('/api/admin/store-items')->assertJsonPath('items.0.categoryId', null);
+        $this->deleteJson("/api/admin/store-items/{$book['id']}")->assertNoContent();
+        $this->assertSame([], Storage::disk('local')->allFiles('store-files'));
     }
 }

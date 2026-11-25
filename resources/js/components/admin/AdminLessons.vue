@@ -9,6 +9,7 @@ import { useUiStore } from '../../stores/ui'
 import type { Lesson } from '../../types/domain'
 import ConfirmDialog from '../ConfirmDialog.vue'
 import EmptyState from '../EmptyState.vue'
+import TranslateButton from './TranslateButton.vue'
 
 const admin = useAdminStore()
 const ui = useUiStore()
@@ -194,6 +195,7 @@ async function confirmDelete(): Promise<void> {
                 <div class="row-actions">
                     <button type="button" class="pill" @click="edit(lesson)">{{ t('common.edit') }}</button>
                     <button type="button" class="pill" @click="toggle(lesson)">
+                        <TranslateButton type="lesson" :id="lesson.id" />
                         {{ t(lesson.isPublished ? 'admin.hide' : 'admin.publish') }}
                     </button>
                     <button type="button" class="pill" @click="deleting = lesson">{{ t('common.delete') }}</button>

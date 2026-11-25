@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, ShoppingBag, Star } from 'lucide-vue-next'
+import { Check, Download, ExternalLink, ShoppingBag, Star } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import EmptyState from '../components/EmptyState.vue'
@@ -8,7 +8,7 @@ import { repository } from '../data/repository'
 import { t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
-import { STORE_KINDS, type StoreItem, type StoreKind, type User } from '../types/domain'
+import { STORE_KINDS, type StoreCategory, type StoreItem, type StoreKind, type User } from '../types/domain'
 
 const auth = useAuthStore()
 const ui = useUiStore()
@@ -16,19 +16,30 @@ const ui = useUiStore()
 const items = ref<StoreItem[]>([])
 const loaded = ref(false)
 const busy = ref(false)
-const filter = ref<StoreKind | 'all' | 'mine'>('all')
+const categories = ref<StoreCategory[]>([])
+/** A built-in kind, an admin-made section (by id), everything, or what the member owns. */
+const filter = ref<StoreKind | number | 'all' | 'mine'>('all')
 const buying = ref<StoreItem | null>(null)
 
 const points = computed(() => auth.user?.points ?? 0)
-const kinds = computed(() => STORE_KINDS.filter((kind) => items.value.some((item) => item.kind === kind)))
+const kinds = computed(() =>
+    STORE_KINDS.filter((kind) => kind !== 'product' && items.value.some((item) => item.kind === kind)),
+)
+const sections = computed(() =>
+    categories.value.filter((category) => items.value.some((item) => item.categoryId === category.id)),
+)
+const sectionName = (item: StoreItem) => categories.value.find((category) => category.id === item.categoryId)?.name
 const shown = computed(() =>
-    items.value.filter((item) =>
-        filter.value === 'all' ? true : filter.value === 'mine' ? item.owned : item.kind === filter.value,
-    ),
+    items.value.filter((item) => {
+        if (filter.value === 'all') return true
+        if (filter.value === 'mine') return item.owned
+        return typeof filter.value === 'number' ? item.categoryId === filter.value : item.kind === filter.value
+    }),
 )
 
-function apply(result: { items: StoreItem[]; user: User }): void {
+function apply(result: { items: StoreItem[]; categories: StoreCategory[]; user: User }): void {
     items.value = result.items
+    categories.value = result.categories
     auth.setUser(result.user)
 }
 
@@ -42,7 +53,10 @@ onMounted(async () => {
     }
 })
 
-async function run(action: () => Promise<{ items: StoreItem[]; user: User }>, successKey: string): Promise<void> {
+async function run(
+    action: () => Promise<{ items: StoreItem[]; categories: StoreCategory[]; user: User }>,
+    successKey: string,
+): Promise<void> {
     if (busy.value) return
     busy.value = true
     try {
@@ -100,6 +114,16 @@ const toggleUse = (item: StoreItem) =>
                 {{ t(`store.kinds.${kind}`) }}
             </button>
             <button
+                v-for="section in sections"
+                :key="section.id"
+                type="button"
+                :class="{ tabs__active: filter === section.id }"
+                :aria-pressed="filter === section.id"
+                @click="filter = section.id"
+            >
+                {{ section.name }}
+            </button>
+            <button
                 type="button"
                 :class="{ tabs__active: filter === 'mine' }"
                 :aria-pressed="filter === 'mine'"
@@ -119,9 +143,23 @@ const toggleUse = (item: StoreItem) =>
                 <StoreArt :item="item" />
                 <div class="store-card__body">
                     <h3>{{ item.name }}</h3>
-                    <p>{{ item.description || t(`store.kind.${item.kind}`) }}</p>
+                    <p>{{ item.description || sectionName(item) || t(`store.kind.${item.kind}`) }}</p>
                     <div class="store-card__foot">
-                        <template v-if="item.owned">
+                        <template v-if="item.owned && item.kind === 'product'">
+                            <a v-if="item.hasFile" class="btn" :href="`/api/store/${item.id}/download`" download
+                                ><Download :size="15" aria-hidden="true" /> {{ t('store.download') }}</a
+                            >
+                            <a
+                                v-if="item.link"
+                                class="btn btn--outline"
+                                :href="item.link"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                ><ExternalLink :size="15" aria-hidden="true" /> {{ t('store.open') }}</a
+                            >
+                            <span class="count-pill count-pill--ok">{{ t('store.owned') }}</span>
+                        </template>
+                        <template v-else-if="item.owned">
                             <button
                                 type="button"
                                 class="btn"

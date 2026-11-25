@@ -6,8 +6,10 @@ use App\Http\Controllers\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Admin\MotivationController as AdminMotivationController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\StoreCategoryController as AdminStoreCategoryController;
 use App\Http\Controllers\Admin\StoreItemController as AdminStoreItemController;
 use App\Http\Controllers\Admin\ThreadController as AdminThreadController;
+use App\Http\Controllers\Admin\TranslationController as AdminTranslationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -69,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('store', [StoreController::class, 'index']);
     Route::post('store/{item}/buy', [StoreController::class, 'buy'])->middleware('throttle:30,1');
     Route::put('store/equip', [StoreController::class, 'equip']);
+    Route::get('store/{item}/download', [StoreController::class, 'download']);
     Route::get('leaderboard', [LeaderboardController::class, 'show']);
 
     Route::get('insights', [JourneyController::class, 'insights']);
@@ -136,6 +139,13 @@ Route::middleware('auth:sanctum')->group(function (): void {
         // POST, not PATCH: the update carries an optional image as multipart form data.
         Route::post('store-items/{item}', [AdminStoreItemController::class, 'update'])->middleware('area:store');
         Route::delete('store-items/{item}', [AdminStoreItemController::class, 'destroy'])->middleware('area:store');
+        Route::get('store-categories', [AdminStoreCategoryController::class, 'index'])->middleware('area:store');
+        Route::post('store-categories', [AdminStoreCategoryController::class, 'store'])->middleware('area:store');
+        Route::patch('store-categories/{category}', [AdminStoreCategoryController::class, 'update'])->middleware('area:store');
+        Route::delete('store-categories/{category}', [AdminStoreCategoryController::class, 'destroy'])->middleware('area:store');
+        // Each kind of content is guarded by its own area inside the controller.
+        Route::get('translations/{type}/{id}', [AdminTranslationController::class, 'show'])->whereNumber('id');
+        Route::put('translations/{type}/{id}', [AdminTranslationController::class, 'update'])->whereNumber('id');
         Route::get('broadcasts', [AdminBroadcastController::class, 'index'])->middleware('area:growth');
         Route::post('broadcasts', [AdminBroadcastController::class, 'send'])->middleware('area:growth');
         Route::put('broadcasts/schedule/{day}', [AdminBroadcastController::class, 'schedule'])->middleware('area:growth')->where('day', '\\d{4}-\\d{2}-\\d{2}');

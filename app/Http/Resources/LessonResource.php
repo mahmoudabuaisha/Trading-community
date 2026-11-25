@@ -17,8 +17,8 @@ class LessonResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            'body' => $locked ? '' : $this->body,
+            'title' => $this->tr('title'),
+            'body' => $locked ? '' : $this->tr('body'),
             'imageUrl' => $this->image_path && ! $locked ? '/media/'.$this->image_path : null,
             'position' => $this->position,
             'isPublished' => $this->is_published,

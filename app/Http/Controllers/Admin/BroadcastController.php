@@ -18,12 +18,14 @@ class BroadcastController extends Controller
     {
         $data = $request->validate(['from' => ['required', 'date_format:Y-m-d']]);
         $from = CarbonImmutable::parse($data['from']);
-        $scheduled = Broadcast::where('kind', Broadcast::KIND_SCHEDULED)
-            ->whereDate('day', '>=', $from->toDateString())->whereDate('day', '<=', $from->addDays(6)->toDateString())->orderBy('day')->get()
-            ->mapWithKeys(fn (Broadcast $item): array => [$item->day->toDateString() => $item->body]);
+        $rows = Broadcast::where('kind', Broadcast::KIND_SCHEDULED)
+            ->whereDate('day', '>=', $from->toDateString())->whereDate('day', '<=', $from->addDays(6)->toDateString())->orderBy('day')->get();
+        $scheduled = $rows->mapWithKeys(fn (Broadcast $item): array => [$item->day->toDateString() => $item->body]);
 
         return response()->json([
             'scheduled' => (object) $scheduled->all(),
+            // Day → id, so each day's message can be translated.
+            'scheduledIds' => (object) $rows->mapWithKeys(fn (Broadcast $item): array => [$item->day->toDateString() => $item->id])->all(),
             'instant' => Broadcast::where('kind', Broadcast::KIND_INSTANT)->latest('id')->limit(10)->get()
                 ->map(fn (Broadcast $item): array => ['id' => $item->id, 'body' => $item->body, 'day' => $item->day->toDateString(), 'createdAt' => $item->created_at->toISOString()]),
         ]);

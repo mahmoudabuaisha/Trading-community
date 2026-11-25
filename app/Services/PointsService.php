@@ -78,6 +78,10 @@ class PointsService
                 throw ValidationException::withMessages(['item' => __('validation.custom.store.notOwned')]);
             }
         }
+        // A product is not worn; it is downloaded or opened.
+        if ($kind === 'product') {
+            throw ValidationException::withMessages(['item' => __('validation.custom.store.notOwned')]);
+        }
         if ($kind === 'avatar') {
             $user->forceFill(['avatar_url' => $item?->imageUrl()])->save();
 
@@ -98,7 +102,7 @@ class PointsService
         $items = $ids ? StoreItem::whereIn('id', $ids)->get()->keyBy('kind') : collect();
 
         return [
-            'title' => $items->get('title')?->value,
+            'title' => $items->get('title')?->tr('value'),
             'frame' => $items->get('frame')?->value ?? 'none',
             'theme' => $items->get('theme')?->value ?? 'gold',
         ];

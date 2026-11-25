@@ -154,6 +154,8 @@ async function switchLanguage(): Promise<void> {
     cycleLocale()
     try {
         await workspace.patchProfile({ language: locale.value })
+        // Forced: the data is already loaded, but in the previous language.
+        await workspace.load(true)
     } catch (error) {
         useUiStore().failure(error)
     }
@@ -296,7 +298,8 @@ async function signOut(): Promise<void> {
             >
                 <button type="button" class="btn" @click="workspace.load(true)">↻</button>
             </EmptyState>
-            <RouterView v-else />
+            <!-- Keyed by language: switching it reloads the page's data, so admin-written text arrives translated. -->
+            <RouterView v-else :key="locale" />
         </section>
     </main>
 </template>

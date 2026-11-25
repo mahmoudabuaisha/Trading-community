@@ -43,7 +43,7 @@ class JourneyController extends Controller
         }
         // An admin-defined badge is a milestone the first time it is earned.
         foreach (BadgeAward::where('user_id', $user->id)->with('badge')->orderBy('id')->get()->unique('badge_id') as $award) {
-            $events->push(['key' => 'badge:'.$award->badge_id, 'kind' => 'badge', 'day' => $award->day->toDateString(), 'title' => $award->badge->title]);
+            $events->push(['key' => 'badge:'.$award->badge_id, 'kind' => 'badge', 'day' => $award->day->toDateString(), 'title' => $award->badge->tr('title')]);
         }
         foreach ($user->goals()->where('status', Goal::STATUS_COMPLETED)->get() as $goal) {
             $events->push(['key' => 'goal:'.$goal->id, 'kind' => 'goal', 'day' => $local($goal->updated_at), 'title' => $goal->title]);

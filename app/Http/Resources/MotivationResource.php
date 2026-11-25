@@ -13,8 +13,8 @@ class MotivationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            'body' => $this->body,
+            'title' => $this->tr('title'),
+            'body' => $this->tr('body'),
             'category' => $this->category,
             'isActive' => $this->is_active,
             'createdAt' => $this->created_at?->toISOString(),

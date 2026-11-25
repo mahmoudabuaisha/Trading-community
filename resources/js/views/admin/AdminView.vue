@@ -21,6 +21,7 @@ import AdminContent from '../../components/admin/AdminContent.vue'
 import AdminLessons from '../../components/admin/AdminLessons.vue'
 import AdminMessages from '../../components/admin/AdminMessages.vue'
 import AdminSkills from '../../components/admin/AdminSkills.vue'
+import TranslateButton from '../../components/admin/TranslateButton.vue'
 import AdminStore from '../../components/admin/AdminStore.vue'
 import AdminBroadcasts from '../../components/admin/AdminBroadcasts.vue'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
@@ -462,6 +463,7 @@ function auditDetail(entry: AuditEntry): string {
                     </div>
                     <div class="row-actions">
                         <button type="button" class="pill" @click="editMotivation(item)">{{ t('common.edit') }}</button>
+                        <TranslateButton type="motivation" :id="item.id" />
                         <button type="button" class="pill" @click="toggleMotivation(item)">
                             {{ t(item.isActive ? 'admin.hide' : 'admin.publish') }}
                         </button>

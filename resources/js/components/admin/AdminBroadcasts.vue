@@ -7,6 +7,7 @@ import { addDays, periodRange, today } from '../../lib/dates'
 import { useAdminStore } from '../../stores/admin'
 import { useUiStore } from '../../stores/ui'
 import type { AdminBroadcasts } from '../../types/domain'
+import TranslateButton from './TranslateButton.vue'
 
 /**
  * Messages to every member: one planned per day of the week shown, and a
@@ -19,6 +20,7 @@ const weekStart = ref(periodRange('weekly', new Date()).start)
 const days = computed(() => Array.from({ length: 7 }, (_, index) => addDays(weekStart.value, index)))
 const drafts = reactive<Record<string, string>>({})
 const saved = ref<Record<string, string>>({})
+const ids = ref<Record<string, number>>({})
 const instant = ref<AdminBroadcasts['instant']>([])
 const now = ref('')
 const busy = ref(false)
@@ -31,6 +33,7 @@ async function load(): Promise<void> {
     try {
         const result = await repository.adminBroadcasts(weekStart.value)
         saved.value = result.scheduled
+        ids.value = result.scheduledIds
         instant.value = result.instant
         for (const day of days.value) drafts[day] = result.scheduled[day] ?? ''
     } catch (error) {
@@ -114,6 +117,7 @@ async function remove(id: number): Promise<void> {
                     <b>{{ item.body }}</b>
                     <small>{{ formatDate(item.createdAt, { dateStyle: 'medium', timeStyle: 'short' }) }}</small>
                 </span>
+                <TranslateButton type="broadcast" :id="item.id" />
                 <button type="button" class="pill" @click="remove(item.id)">{{ t('common.delete') }}</button>
             </li>
         </ul>
@@ -145,6 +149,11 @@ async function remove(id: number): Promise<void> {
                     rows="2"
                     maxlength="500"
                     :placeholder="t('admin.bcDayPh')"
+                />
+                <TranslateButton
+                    v-if="ids[day] && (drafts[day] ?? '').trim() === saved[day]"
+                    type="broadcast"
+                    :id="ids[day]"
                 />
             </label>
         </div>

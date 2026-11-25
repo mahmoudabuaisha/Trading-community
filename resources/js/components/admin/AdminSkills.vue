@@ -9,6 +9,7 @@ import { useUiStore } from '../../stores/ui'
 import type { QuizQuestion, SkillLevel, SkillPath } from '../../types/domain'
 import ConfirmDialog from '../ConfirmDialog.vue'
 import EmptyState from '../EmptyState.vue'
+import TranslateButton from './TranslateButton.vue'
 
 /** Skill paths: each is a ladder of levels; a level can link a lesson, set a challenge and carry a quiz. */
 const admin = useAdminStore()
@@ -159,6 +160,7 @@ async function runConfirm(): Promise<void> {
                         <button type="button" class="pill" @click="newLevel(path)">
                             <Plus :size="13" aria-hidden="true" /> {{ t('admin.skAddLevel') }}
                         </button>
+                        <TranslateButton type="skill-path" :id="path.id" />
                         <button type="button" class="pill" @click="togglePath(path)">
                             {{ t(path.isActive ? 'admin.hide' : 'admin.publish') }}
                         </button>
@@ -207,6 +209,7 @@ async function runConfirm(): Promise<void> {
                                 <ArrowDown :size="13" />
                             </button>
                             <button type="button" class="pill" @click="editLevel(path, level)">
+                                <TranslateButton type="skill-level" :id="level.id" />
                                 {{ t('common.edit') }}
                             </button>
                             <button

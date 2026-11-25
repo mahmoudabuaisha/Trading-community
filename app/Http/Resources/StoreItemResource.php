@@ -13,10 +13,16 @@ class StoreItemResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
+            'name' => $this->tr('name'),
+            'description' => $this->tr('description'),
             'kind' => $this->kind,
-            'value' => $this->value,
+            // Only a title's text is language; a frame or theme key is a machine value.
+            'value' => $this->kind === 'title' ? $this->tr('value') : $this->value,
+            'categoryId' => $this->category_id,
+            'hasFile' => $this->file_path !== null,
+            'fileName' => $this->file_name,
+            // What was bought is handed over to its owner only (and shown to administrators).
+            'link' => ! empty($this->owned) || $request->is('api/admin/*') ? $this->link : null,
             'imageUrl' => $this->imageUrl(),
             'price' => $this->price,
             'isActive' => $this->is_active,

@@ -26,7 +26,7 @@ onMounted(async () => {
     try {
         const [points, store] = await Promise.all([repository.pointsHistory(today()), repository.store()])
         history.value = points.history
-        owned.value = store.items.filter((item) => item.owned)
+        owned.value = store.items.filter((item) => item.owned && item.kind !== 'product')
         auth.setUser(store.user)
     } catch (error) {
         ui.failure(error)
@@ -73,7 +73,7 @@ async function toggleUse(item: StoreItem): Promise<void> {
     try {
         const takeOff = Boolean(item.equipped) && item.kind !== 'avatar'
         const result = await repository.equipItem(item.kind, takeOff ? null : item.id)
-        owned.value = result.items.filter((entry) => entry.owned)
+        owned.value = result.items.filter((entry) => entry.owned && entry.kind !== 'product')
         auth.setUser(result.user)
         ui.success(t(takeOff ? 'store.removed' : 'store.applied'))
     } catch (error) {

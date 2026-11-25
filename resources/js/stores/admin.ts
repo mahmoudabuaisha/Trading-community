@@ -195,6 +195,7 @@ export const useAdminStore = defineStore('admin', () => {
         saveLesson,
         deleteLesson,
         saveBadge,
+        loadStoreItems,
         saveStoreItem,
         deleteStoreItem,
         deleteBadge,

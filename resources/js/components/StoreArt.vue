@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Palette, Tag, UserRound } from 'lucide-vue-next'
+import { Package, Palette, Tag, UserRound } from 'lucide-vue-next'
 import type { StoreItem } from '../types/domain'
 import UserAvatar from './UserAvatar.vue'
 
@@ -24,6 +24,7 @@ defineProps<{ item: Pick<StoreItem, 'kind' | 'value' | 'imageUrl' | 'name'> }>()
         <span v-else-if="item.kind === 'title'" class="store-art__title"
             ><Tag :size="18" aria-hidden="true" /> {{ item.value }}</span
         >
+        <Package v-else-if="item.kind === 'product'" :size="40" aria-hidden="true" />
         <UserRound v-else :size="40" aria-hidden="true" />
     </span>
 </template>

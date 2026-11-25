@@ -152,11 +152,11 @@ class SkillController extends Controller
             $open = true;
 
             return [
-                'id' => $path->id, 'title' => $path->title, 'description' => $path->description, 'isActive' => $path->is_active,
+                'id' => $path->id, 'title' => $path->tr('title'), 'description' => $path->tr('description'), 'isActive' => $path->is_active,
                 'levels' => $path->levels->map(function (SkillLevel $level) use ($passed, $withAnswers, &$open): array {
                     $done = $passed->has($level->id);
                     $row = [
-                        'id' => $level->id, 'title' => $level->title, 'description' => $level->description, 'challenge' => $level->challenge, 'lessonId' => $level->lesson_id,
+                        'id' => $level->id, 'title' => $level->tr('title'), 'description' => $level->tr('description'), 'challenge' => $level->tr('challenge'), 'lessonId' => $level->lesson_id,
                         'quiz' => collect($level->quiz ?? [])->map(fn (array $question): array => $withAnswers ? $question : ['question' => $question['question'], 'options' => $question['options']])->all(),
                         'passed' => $done,
                         // The first level not yet passed is the one open to attempt.

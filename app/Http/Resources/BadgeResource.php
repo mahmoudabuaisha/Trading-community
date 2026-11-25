@@ -14,8 +14,8 @@ class BadgeResource extends JsonResource
         return [
             'id' => $this->id,
             'key' => $this->achievementKey(),
-            'title' => $this->title,
-            'description' => $this->description,
+            'title' => $this->tr('title'),
+            'description' => $this->tr('description'),
             'points' => $this->points,
             'period' => $this->period,
             'conditions' => $this->conditions ?? [],

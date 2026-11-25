@@ -2,11 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Translatable;
 use Illuminate\Database\Eloquent\Model;
 
 /** A message from the administrators shown to every member as a notification. */
 class Broadcast extends Model
 {
+    use Translatable;
+
+    /** Fields members read in their own language. */
+    public const TRANSLATABLE = ['body'];
+
     /** One per calendar day, written ahead of time. */
     public const KIND_SCHEDULED = 'scheduled';
 
@@ -28,6 +34,6 @@ class Broadcast extends Model
     public static function forDay(string $day): array
     {
         return self::whereDate('day', $day)->orderBy('id')->get()
-            ->map(fn (Broadcast $item): array => ['id' => $item->id, 'kind' => $item->kind, 'body' => $item->body])->all();
+            ->map(fn (Broadcast $item): array => ['id' => $item->id, 'kind' => $item->kind, 'body' => $item->tr('body')])->all();
     }
 }

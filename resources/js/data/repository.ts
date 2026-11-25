@@ -27,9 +27,11 @@ import type {
     VisionItemKind,
     VisionSize,
     PointsHistory,
+    StoreCategory,
     StoreItem,
     StoreItemInput,
     StoreKind,
+    TranslationSheet,
     Habit,
     HabitMonth,
     MoodEntry,
@@ -59,6 +61,9 @@ import type {
     ThreadUser,
     UnreadCounts,
 } from '../types/domain'
+
+/** What the store answers with: the items, the admin-made sections, and the member's fresh balance. */
+type StoreView = { items: StoreItem[]; categories: StoreCategory[]; user: User }
 
 export const repository = {
     // Auth
@@ -92,10 +97,9 @@ export const repository = {
     savePreferences: (preferences: Preferences) =>
         request<{ user: User }>('PUT', '/profile/preferences', preferences).then((r) => r.user),
     pointsHistory: (day: string) => request<PointsHistory>('GET', `/profile/points?date=${day}`),
-    store: () => request<{ items: StoreItem[]; user: User }>('GET', '/store'),
-    buyItem: (id: number) => request<{ items: StoreItem[]; user: User }>('POST', `/store/${id}/buy`),
-    equipItem: (kind: StoreKind, itemId: number | null) =>
-        request<{ items: StoreItem[]; user: User }>('PUT', '/store/equip', { kind, itemId }),
+    store: () => request<StoreView>('GET', '/store'),
+    buyItem: (id: number) => request<StoreView>('POST', `/store/${id}/buy`),
+    equipItem: (kind: StoreKind, itemId: number | null) => request<StoreView>('PUT', '/store/equip', { kind, itemId }),
     insights: (day: string) => request<Insights>('GET', `/insights?date=${day}`),
     timeline: () => request<Timeline>('GET', '/timeline'),
     saveTimelineNote: (key: string, note: string) => request<void>('PUT', `/timeline/notes/${key}`, { note }),
@@ -254,6 +258,19 @@ export const repository = {
         request<{ user: ThreadUser; messages: Message[] }>('GET', `/admin/threads/${userId}`),
     adminSendMessage: (userId: number, body: string) =>
         request<{ message: Message }>('POST', `/admin/threads/${userId}`, { body }).then((r) => r.message),
+    adminStoreCategories: () =>
+        request<{ categories: StoreCategory[] }>('GET', '/admin/store-categories').then((r) => r.categories),
+    adminSaveStoreCategory: (id: number | null, name: string) =>
+        request<{ categories: StoreCategory[] }>(
+            id === null ? 'POST' : 'PATCH',
+            id === null ? '/admin/store-categories' : `/admin/store-categories/${id}`,
+            { name },
+        ).then((r) => r.categories),
+    adminDeleteStoreCategory: (id: number) => request<void>('DELETE', `/admin/store-categories/${id}`),
+    adminTranslations: (type: string, id: number) =>
+        request<TranslationSheet>('GET', `/admin/translations/${type}/${id}`),
+    adminSaveTranslations: (type: string, id: number, translations: Record<string, Record<string, string>>) =>
+        request<TranslationSheet>('PUT', `/admin/translations/${type}/${id}`, { translations }),
     adminStoreItems: () => request<{ items: StoreItem[] }>('GET', '/admin/store-items').then((r) => r.items),
     adminSaveStoreItem: (id: number | null, input: Partial<StoreItemInput>) =>
         request<{ item: StoreItem }>(
@@ -288,6 +305,11 @@ function storeItemForm(input: Partial<StoreItemInput>): FormData {
     if (input.isActive !== undefined) form.set('isActive', input.isActive ? '1' : '0')
     if (input.removeImage) form.set('removeImage', '1')
     if (input.image) form.set('image', input.image, 'item.png')
+    if (input.categoryId !== undefined)
+        form.set('categoryId', input.categoryId === null ? '' : String(input.categoryId))
+    if (input.link !== undefined) form.set('link', input.link)
+    if (input.file) form.set('file', input.file, input.file.name)
+    if (input.removeFile) form.set('removeFile', '1')
     return form
 }
 
