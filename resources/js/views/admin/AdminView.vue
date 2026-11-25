@@ -64,6 +64,12 @@ const tabs: { id: TabId; label: string; icon: Component }[] = [
 const tab = ref<TabId>('users')
 const workspace = useWorkspaceStore()
 
+const togglePremium = (user: AdminUser) =>
+    run(
+        () => admin.updateUser(user.id, { isPremium: !user.isPremium }),
+        user.isPremium ? 'admin.premiumRevoked' : 'admin.premiumGranted',
+    )
+
 /** Jump to the inbox with this member's thread open (empty if they never wrote). */
 async function openMessages(user: AdminUser): Promise<void> {
     if (await run(() => admin.openThread(user.id))) tab.value = 'messages'
@@ -307,13 +313,30 @@ function auditDetail(entry: AuditEntry): string {
                     </div>
                     <span role="cell" class="count-pill" :class="{ 'count-pill--gold': user.role === 'admin' }">
                         <Crown v-if="user.role === 'admin'" :size="12" aria-hidden="true" />
-                        {{ t(user.role === 'admin' ? 'admin.fullAdmin' : 'admin.member') }}
+                        {{
+                            t(
+                                user.role === 'admin'
+                                    ? 'admin.fullAdmin'
+                                    : user.isPremium
+                                      ? 'role.premium'
+                                      : 'admin.member',
+                            )
+                        }}
                     </span>
                     <span role="cell" class="muted">{{ formatDate(user.createdAt, { dateStyle: 'medium' }) }}</span>
                     <div role="cell" class="row-actions">
                         <button type="button" class="pill" @click="openEdit(user)">{{ t('common.edit') }}</button>
                         <button type="button" class="pill" @click="askRole(user)">
                             {{ t(user.role === 'admin' ? 'admin.revoke' : 'admin.grant') }}
+                        </button>
+                        <button
+                            v-if="user.role !== 'admin'"
+                            type="button"
+                            class="pill"
+                            :class="{ 'pill--chosen': user.isPremium }"
+                            @click="togglePremium(user)"
+                        >
+                            {{ t(user.isPremium ? 'admin.premiumRevoke' : 'admin.premiumGrant') }}
                         </button>
                         <button type="button" class="pill" @click="openMessages(user)">
                             {{ t('admin.message') }}

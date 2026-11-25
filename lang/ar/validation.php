@@ -6,6 +6,8 @@
 */
 
 return [
+    'current_password' => 'كلمة المرور الحالية غير صحيحة.',
+    'different' => 'يجب أن تختلف :attribute عن :other.',
     'after_or_equal' => 'يجب أن يكون :attribute تاريخاً مساوياً أو لاحقاً لـ :date.',
     'boolean' => 'يجب أن تكون قيمة :attribute صح أو خطأ.',
     'date' => ':attribute ليس تاريخاً صالحاً.',
@@ -41,6 +43,11 @@ return [
     'unique' => ':attribute مستخدم من قبل.',
 
     'attributes' => [
+        'currentPassword' => 'كلمة المرور الحالية',
+        'nickname' => 'اللقب',
+        'remindAt' => 'وقت التذكير',
+        'threshold' => 'الرقم المطلوب',
+        'image' => 'الصورة',
         'displayName' => 'الاسم',
         'surname' => 'اسم العائلة',
         'email' => 'البريد الإلكتروني',

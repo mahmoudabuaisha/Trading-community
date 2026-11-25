@@ -11,6 +11,7 @@ class ProfileRequest extends ApiRequest
         return [
             'displayName' => ['required', 'string', 'max:120'],
             'surname' => ['present', 'nullable', 'string', 'max:120'],
+            'nickname' => ['sometimes', 'nullable', 'string', 'max:120'],
             'bio' => ['present', 'nullable', 'string', 'max:500'],
             'timezone' => ['required', 'string', 'timezone:all'],
             'language' => ['required', Rule::in(['ar', 'en'])],
@@ -26,6 +27,9 @@ class ProfileRequest extends ApiRequest
         $attributes = parent::attributesForModel();
         $attributes['surname'] ??= '';
         $attributes['bio'] ??= '';
+        if (array_key_exists('nickname', $attributes)) {
+            $attributes['nickname'] ??= '';
+        }
 
         return $attributes;
     }

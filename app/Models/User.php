@@ -11,10 +11,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
- * `role` is deliberately NOT fillable: it can only change through
+ * `role` and `is_premium` are deliberately NOT fillable: they can only change through
  * App\Services\AdminService, never through mass assignment at sign-up.
  */
-#[Fillable(['display_name', 'surname', 'email', 'password', 'avatar_url', 'bio', 'timezone', 'language', 'weekly_goal', 'daily_focus_minutes'])]
+#[Fillable(['display_name', 'surname', 'nickname', 'email', 'password', 'avatar_url', 'bio', 'timezone', 'language', 'weekly_goal', 'daily_focus_minutes'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -58,11 +58,18 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'is_premium' => 'boolean',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'weekly_goal' => 'integer',
             'daily_focus_minutes' => 'integer',
         ];
+    }
+
+    /** Subscriber-only lessons are open to premium members and to administrators. */
+    public function canReadPremium(): bool
+    {
+        return $this->is_premium || $this->isAdmin();
     }
 
     public function isAdmin(): bool

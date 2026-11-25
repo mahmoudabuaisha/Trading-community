@@ -41,7 +41,7 @@
     --text-on-gold: #17130b;
 
     /* Glass cards */
-    --glass: linear-gradient(155deg, rgba(26, 24, 20, 0.7), rgba(7, 7, 9, 0.8));
+    --glass: linear-gradient(155deg, rgba(22, 20, 17, 0.58), rgba(7, 7, 9, 0.7));
     --edge-light: linear-gradient(
         135deg,
         #dfe9ff 0%,

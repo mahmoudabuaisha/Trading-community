@@ -124,7 +124,10 @@ export const useAdminStore = defineStore('admin', () => {
         }
     }
 
-    async function updateUser(id: number, patch: { displayName?: string; email?: string; role?: Role }): Promise<void> {
+    async function updateUser(
+        id: number,
+        patch: { displayName?: string; email?: string; role?: Role; isPremium?: boolean },
+    ): Promise<void> {
         await repository.adminUpdateUser(id, patch)
         await Promise.all([loadUsers(), loadOverview()])
     }

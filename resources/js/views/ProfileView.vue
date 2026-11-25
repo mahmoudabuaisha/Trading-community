@@ -1,49 +1,109 @@
 <script setup lang="ts">
-import type { ChartConfiguration } from 'chart.js'
-import { Activity, Camera, CircleCheckBig, Clock3, Pencil, Target } from 'lucide-vue-next'
-import { computed, reactive, ref } from 'vue'
-import ChartCanvas from '../components/ChartCanvas.vue'
-import NotificationSettings from '../components/NotificationSettings.vue'
-import StatCard from '../components/StatCard.vue'
-import UserAvatar from '../components/UserAvatar.vue'
+import {
+    BadgeCheck,
+    BarChart3,
+    Camera,
+    ChevronLeft,
+    ChevronRight,
+    Crown,
+    House,
+    LogOut,
+    Mail,
+    Pencil,
+    Settings,
+    ShieldCheck,
+    UserRound,
+    X,
+} from 'lucide-vue-next'
+import { computed, nextTick, reactive, ref, type Component } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import ProfileSecurity from '../components/profile/ProfileSecurity.vue'
+import ProfileSettings from '../components/profile/ProfileSettings.vue'
+import ProfileStats from '../components/profile/ProfileStats.vue'
 import { ApiError } from '../data/http'
-import { formatDate, locale, t } from '../i18n'
-import { lastDays, percent, today } from '../lib/dates'
+import { isRtl, t } from '../i18n'
 import { fileToAvatar } from '../lib/image'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
-import { PERIOD_TYPES, type Locale, type ProfileInput } from '../types/domain'
 
 const auth = useAuthStore()
 const workspace = useWorkspaceStore()
 const ui = useUiStore()
+const route = useRoute()
+const router = useRouter()
 
 const user = computed(() => auth.user!)
+type Section = 'settings' | 'security' | 'stats'
+const section = computed(() => (route.params.section || null) as Section | null)
+const sections: { id: Section; icon: Component }[] = [
+    { id: 'settings', icon: Settings },
+    { id: 'security', icon: ShieldCheck },
+    { id: 'stats', icon: BarChart3 },
+]
+const panels: Record<Section, Component> = { settings: ProfileSettings, security: ProfileSecurity, stats: ProfileStats }
+
+/** "Back" points against the reading direction; rows open in the reading direction. */
+const BackIcon = computed(() => (isRtl.value ? ChevronRight : ChevronLeft))
+const OpenIcon = computed(() => (isRtl.value ? ChevronLeft : ChevronRight))
+const roleLabel = computed(() =>
+    user.value.role === 'admin' ? t('role.admin') : user.value.isPremium ? t('role.premium') : t('role.user'),
+)
+const verified = computed(() => user.value.role === 'admin' || user.value.isPremium)
+
+function goBack(): void {
+    if (section.value) void router.push({ name: 'profile' })
+    else if (window.history.length > 1) router.back()
+    else void router.push({ name: 'overview' })
+}
+
+// ── Names ────────────────────────────────────────────────────────────────
+type NameField = 'displayName' | 'nickname' | 'surname'
+const nameRows: { field: NameField; icon: Component }[] = [
+    { field: 'displayName', icon: UserRound },
+    { field: 'nickname', icon: Pencil },
+    { field: 'surname', icon: Pencil },
+]
 const editing = ref(false)
-const saving = ref(false)
-const fieldErrors = ref<Record<string, string[]>>({})
+const nameForm = reactive({ displayName: '', nickname: '', surname: '' })
+const nameErrors = ref<Record<string, string[]>>({})
+const savingNames = ref(false)
+const dialog = ref<HTMLDialogElement | null>(null)
 
-function snapshot(): ProfileInput {
-    const { displayName, surname, bio, timezone, language, weeklyGoal, dailyFocusMinutes, avatarUrl } = user.value
-    return { displayName, surname, bio, timezone, language, weeklyGoal, dailyFocusMinutes, avatarUrl }
+async function openNames(focus: NameField = 'displayName'): Promise<void> {
+    Object.assign(nameForm, {
+        displayName: user.value.displayName,
+        nickname: user.value.nickname,
+        surname: user.value.surname,
+    })
+    nameErrors.value = {}
+    editing.value = true
+    await nextTick()
+    dialog.value?.showModal()
+    dialog.value?.querySelector<HTMLInputElement>(`[name="${focus}"]`)?.focus()
 }
-const form = reactive<ProfileInput>(snapshot())
-const fullName = computed(() => `${form.displayName} ${form.surname}`.trim() || user.value.displayName)
 
-const timezones: string[] = (() => {
+async function saveNames(): Promise<void> {
+    savingNames.value = true
+    nameErrors.value = {}
     try {
-        return Intl.supportedValuesOf('timeZone')
-    } catch {
-        return [user.value.timezone]
+        await workspace.patchProfile({
+            displayName: nameForm.displayName.trim(),
+            nickname: nameForm.nickname.trim(),
+            surname: nameForm.surname.trim(),
+        })
+        editing.value = false
+        ui.success(t('profile.saved'))
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 422) nameErrors.value = error.errors
+        else ui.failure(error)
+    } finally {
+        savingNames.value = false
     }
-})()
-
-function cancel(): void {
-    Object.assign(form, snapshot())
-    fieldErrors.value = {}
-    editing.value = false
 }
+
+// ── Photo ────────────────────────────────────────────────────────────────
+const fileInput = ref<HTMLInputElement | null>(null)
 
 async function pickAvatar(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement
@@ -51,405 +111,174 @@ async function pickAvatar(event: Event): Promise<void> {
     input.value = ''
     if (!file) return
     const result = await fileToAvatar(file)
-    if (result.ok) form.avatarUrl = result.dataUrl
-    else ui.failure(new ApiError(t(`profile.avatar${result.reason[0].toUpperCase()}${result.reason.slice(1)}`), 422))
-}
-
-async function save(): Promise<void> {
-    saving.value = true
-    fieldErrors.value = {}
+    if (!result.ok) {
+        ui.failure(new ApiError(t(`profile.avatar${result.reason[0].toUpperCase()}${result.reason.slice(1)}`), 422))
+        return
+    }
     try {
-        await workspace.saveProfile({ ...form, displayName: form.displayName.trim(), surname: form.surname.trim() })
-        Object.assign(form, snapshot())
-        editing.value = false
-        ui.success(t('profile.saved'))
+        await workspace.patchProfile({ avatarUrl: result.dataUrl })
+        ui.success(t('profile.photoSaved'))
     } catch (error) {
-        if (error instanceof ApiError && error.status === 422) fieldErrors.value = error.errors
-        else ui.failure(error)
-    } finally {
-        saving.value = false
+        ui.failure(error)
     }
 }
 
-// ── Analytics ────────────────────────────────────────────────────────────
-const tasks = computed(() => workspace.tasks)
-const goals = computed(() => workspace.goals)
-const completed = computed(() => tasks.value.filter((task) => task.status === 'completed'))
-const open = computed(() => tasks.value.filter((task) => task.status !== 'completed' && task.status !== 'cancelled'))
-const overdue = computed(() => open.value.filter((task) => task.dueDate && task.dueDate < today()).length)
-const completionPct = computed(() => percent(completed.value.length, tasks.value.length))
-const week = computed(() => lastDays(tasks.value, 7))
-const activeDays = computed(() => week.value.filter((day) => day.completed > 0).length)
-const goalAvg = computed(() =>
-    goals.value.length
-        ? Math.round(
-              goals.value.reduce(
-                  (sum, goal) => sum + Math.min(100, (goal.currentValue / Math.max(1, goal.targetValue)) * 100),
-                  0,
-              ) / goals.value.length,
-          )
-        : 0,
-)
-const periodRows = computed(() =>
-    PERIOD_TYPES.map((period) => ({
-        period,
-        tasks: tasks.value.filter((task) => task.periodType === period).length,
-        completed: tasks.value.filter((task) => task.periodType === period && task.status === 'completed').length,
-        goals: goals.value.filter((goal) => goal.periodType === period).length,
-        goalsDone: goals.value.filter((goal) => goal.periodType === period && goal.status === 'completed').length,
-    })),
-)
-
-const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-const countAxis = () => ({
-    beginAtZero: true,
-    ticks: { precision: 0 },
-    title: { display: true, text: t('profile.axisCount') },
-})
-
-const weekChart = computed<ChartConfiguration>(() => ({
-    type: 'bar',
-    data: {
-        labels: week.value.map((day) => formatDate(day.date, { weekday: 'short' })),
-        datasets: [
-            {
-                label: t('profile.chart7Series'),
-                data: week.value.map((day) => day.completed),
-                backgroundColor: css('--gold-500'),
-                borderRadius: 6,
-            },
-        ],
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: countAxis() },
-    },
-}))
-
-const statusSlices = computed(() =>
-    [
-        { key: 'completed', value: completed.value.length, color: css('--green-500') },
-        {
-            key: 'in_progress',
-            value: tasks.value.filter((task) => task.status === 'in_progress').length,
-            color: css('--gold-500'),
-        },
-        {
-            key: 'pending',
-            value: tasks.value.filter((task) => task.status === 'pending').length,
-            color: css('--neutral-500'),
-        },
-        {
-            key: 'cancelled',
-            value: tasks.value.filter((task) => task.status === 'cancelled').length,
-            color: css('--red-500'),
-        },
-    ].filter((slice) => slice.value > 0),
-)
-const statusChart = computed<ChartConfiguration>(() => ({
-    type: 'doughnut',
-    data: {
-        // Counts are in the labels so the chart never relies on colour alone.
-        labels: statusSlices.value.map((slice) => `${t(`status.${slice.key}`)} (${slice.value})`),
-        datasets: [
-            {
-                data: statusSlices.value.map((slice) => slice.value),
-                backgroundColor: statusSlices.value.map((slice) => slice.color),
-                borderWidth: 0,
-            },
-        ],
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '62%',
-        plugins: { legend: { position: 'bottom' } },
-    },
-}))
-
-const periodChart = computed<ChartConfiguration>(() => {
-    const series = [
-        { label: t('profile.serAllTasks'), key: 'tasks', color: css('--gold-700') },
-        { label: t('profile.serDoneTasks'), key: 'completed', color: css('--gold-500') },
-        { label: t('profile.serGoals'), key: 'goals', color: css('--neutral-400') },
-        { label: t('profile.serGoalsDone'), key: 'goalsDone', color: css('--gold-200') },
-    ] as const
-    return {
-        type: 'bar',
-        data: {
-            labels: periodRows.value.map((row) => t(`period.${row.period}`)),
-            datasets: series.map((entry) => ({
-                label: entry.label,
-                data: periodRows.value.map((row) => row[entry.key]),
-                backgroundColor: entry.color,
-                borderRadius: 5,
-            })),
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } },
-            scales: { y: countAxis() },
-        },
-    }
-})
-// Re-read colours/labels when the language flips.
-const chartKey = computed(() => locale.value)
-const languages: Locale[] = ['ar', 'en']
+async function signOut(): Promise<void> {
+    await auth.logout()
+    workspace.reset()
+    await router.replace({ name: 'auth' })
+}
 </script>
 
 <template>
-    <section class="stack">
-        <div class="section-head">
-            <div>
-                <span class="eyebrow">SN TASKS / PERSONAL IDENTITY</span>
-                <h2>{{ t('profile.head') }}</h2>
-                <p>{{ t('profile.sub') }}</p>
-            </div>
-        </div>
+    <section class="profile">
+        <header class="profile__bar">
+            <RouterLink :to="{ name: 'overview' }" class="profile__nav" :aria-label="t('nav.overview')"
+                ><House :size="24" aria-hidden="true"
+            /></RouterLink>
+            <h2 class="profile__title">{{ section ? t(`profile.section.${section}`) : t('nav.profile') }}</h2>
+            <button type="button" class="profile__nav" :aria-label="t('profile.back')" @click="goBack">
+                <component :is="BackIcon" :size="26" aria-hidden="true" />
+            </button>
+        </header>
 
-        <form class="panel profile-form" @submit.prevent="save">
-            <div class="profile-hero">
-                <label class="profile-avatar" :title="t(editing ? 'profile.changeAvatar' : 'profile.avatar')">
-                    <UserAvatar :name="fullName" :src="form.avatarUrl" size="lg" />
-                    <template v-if="editing">
-                        <input
-                            class="sr-only"
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp,image/gif"
-                            :aria-label="t('profile.changeAvatar')"
-                            @change="pickAvatar"
+        <template v-if="!section">
+            <div class="dash-card profile-hero">
+                <div class="profile-hero__identity">
+                    <h3>
+                        <BadgeCheck
+                            v-if="verified"
+                            :size="28"
+                            class="profile-hero__verified"
+                            :aria-label="t('profile.verified')"
                         />
-                        <i class="profile-avatar__badge"><Camera :size="15" aria-hidden="true" /></i>
-                    </template>
-                </label>
-                <div class="profile-identity">
-                    <h3>{{ fullName }}</h3>
-                    <bdi>{{ user.email }}</bdi>
-                    <small class="count-pill">{{ t(`role.${user.role}`) }}</small>
-                    <small v-if="editing" class="hint">{{ t('profile.avatarHint') }}</small>
+                        {{ user.displayName }}
+                    </h3>
+                    <p>
+                        <Mail :size="20" aria-hidden="true" /> <bdi>{{ user.email }}</bdi>
+                    </p>
+                    <p class="profile-hero__role"><Crown :size="22" aria-hidden="true" /> {{ roleLabel }}</p>
                 </div>
+                <button
+                    type="button"
+                    class="profile-hero__avatar"
+                    :aria-label="t('profile.changeAvatar')"
+                    @click="fileInput?.click()"
+                >
+                    <img v-if="user.avatarUrl" :src="user.avatarUrl" alt="" />
+                    <UserRound v-else :size="84" aria-hidden="true" />
+                    <span class="profile-hero__camera"><Camera :size="18" aria-hidden="true" /></span>
+                </button>
+                <input
+                    ref="fileInput"
+                    class="sr-only"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    tabindex="-1"
+                    @change="pickAvatar"
+                />
             </div>
 
-            <div class="form-grid">
-                <label class="field">
-                    <span>{{ t('profile.firstName') }}</span>
-                    <input
-                        v-model="form.displayName"
-                        class="input"
-                        :disabled="!editing"
-                        required
-                        maxlength="80"
-                        :placeholder="t('profile.firstNamePh')"
-                    />
-                    <small v-if="fieldErrors.displayName" class="field__error">{{ fieldErrors.displayName[0] }}</small>
-                </label>
-                <label class="field">
-                    <span>{{ t('profile.surname') }}</span>
-                    <input
-                        v-model="form.surname"
-                        class="input"
-                        :disabled="!editing"
-                        maxlength="80"
-                        :placeholder="t('profile.surnamePh')"
-                    />
-                </label>
-                <label class="field">
-                    <span>{{ t('profile.email') }}</span>
-                    <input class="input" :value="user.email" disabled dir="ltr" />
-                </label>
-                <label class="field">
-                    <span>{{ t('profile.weeklyGoal') }}</span>
-                    <input
-                        v-model.number="form.weeklyGoal"
-                        class="input"
-                        :disabled="!editing"
-                        type="number"
-                        min="1"
-                        max="500"
-                        required
-                    />
-                    <small v-if="fieldErrors.weeklyGoal" class="field__error">{{ fieldErrors.weeklyGoal[0] }}</small>
-                </label>
-                <label class="field">
-                    <span>{{ t('profile.focusMinutes') }}</span>
-                    <input
-                        v-model.number="form.dailyFocusMinutes"
-                        class="input"
-                        :disabled="!editing"
-                        type="number"
-                        min="0"
-                        max="1440"
-                        required
-                    />
-                    <small v-if="fieldErrors.dailyFocusMinutes" class="field__error">{{
-                        fieldErrors.dailyFocusMinutes[0]
-                    }}</small>
-                </label>
-                <label class="field">
-                    <span>{{ t('profile.timezone') }}</span>
-                    <select v-model="form.timezone" class="input" :disabled="!editing" dir="ltr">
-                        <option v-for="zone in timezones" :key="zone" :value="zone">{{ zone }}</option>
-                    </select>
-                </label>
-                <label class="field">
-                    <span>{{ t('profile.language') }}</span>
-                    <select v-model="form.language" class="input" :disabled="!editing">
-                        <option v-for="language in languages" :key="language" :value="language">
-                            {{ language === 'ar' ? 'العربية' : 'English' }}
-                        </option>
-                    </select>
-                </label>
-                <label class="field field--wide">
-                    <span>{{ t('profile.bio') }}</span>
-                    <textarea
-                        v-model="form.bio"
-                        class="input"
-                        :disabled="!editing"
-                        rows="3"
-                        maxlength="500"
-                        :placeholder="t('profile.bioPh')"
-                    />
-                    <small class="hint">{{ t('profile.chars', { n: form.bio.length }) }}</small>
-                </label>
-            </div>
-
-            <div class="actions">
-                <template v-if="editing">
-                    <button type="button" class="btn btn--outline" :disabled="saving" @click="cancel">
-                        {{ t('common.cancel') }}
-                    </button>
-                    <button type="submit" class="btn" :disabled="saving">
-                        {{ saving ? t('common.saving') : t('profile.saveBtn') }}
-                    </button>
-                </template>
-                <button v-else type="button" class="btn" @click="editing = true">
-                    <Pencil :size="15" aria-hidden="true" /> {{ t('profile.editBtn') }}
+            <div class="dash-card profile-list">
+                <button type="button" class="profile-row" @click="openNames()">
+                    <UserRound :size="24" class="profile-row__icon" aria-hidden="true" />
+                    <span class="profile-row__label">{{ t('profile.editName') }}</span>
+                    <component :is="OpenIcon" :size="20" class="profile-row__open" aria-hidden="true" />
+                </button>
+                <button type="button" class="profile-row" @click="fileInput?.click()">
+                    <Camera :size="24" class="profile-row__icon" aria-hidden="true" />
+                    <span class="profile-row__label">{{ t('profile.changeAvatar') }}</span>
+                    <component :is="OpenIcon" :size="20" class="profile-row__open" aria-hidden="true" />
+                </button>
+                <button
+                    v-for="row in nameRows"
+                    :key="row.field"
+                    type="button"
+                    class="profile-row"
+                    @click="openNames(row.field)"
+                >
+                    <component :is="row.icon" :size="24" class="profile-row__icon" aria-hidden="true" />
+                    <span class="profile-row__label">{{ t(`profile.names.${row.field}`) }}</span>
+                    <span class="profile-row__value">{{ user[row.field] || '—' }}</span>
+                    <component :is="OpenIcon" :size="20" class="profile-row__open" aria-hidden="true" />
                 </button>
             </div>
-        </form>
 
-        <NotificationSettings />
+            <div class="dash-card profile-list">
+                <RouterLink
+                    v-for="item in sections"
+                    :key="item.id"
+                    :to="{ name: 'profile', params: { section: item.id } }"
+                    class="profile-row"
+                >
+                    <component :is="item.icon" :size="24" class="profile-row__icon" aria-hidden="true" />
+                    <span class="profile-row__label">{{ t(`profile.section.${item.id}`) }}</span>
+                    <component :is="OpenIcon" :size="20" class="profile-row__open" aria-hidden="true" />
+                </RouterLink>
+            </div>
 
-        <div class="section-head">
-            <div>
-                <span class="eyebrow">YOUR PERFORMANCE / LIVE DATA</span>
-                <h2>{{ t('profile.perfHead') }}</h2>
-                <p>{{ t('profile.perfSub') }}</p>
-            </div>
-        </div>
+            <button type="button" class="dash-card profile-logout" @click="signOut">
+                <LogOut :size="22" aria-hidden="true" /> {{ t('nav.signOut') }}
+            </button>
+        </template>
 
-        <div class="stat-grid">
-            <StatCard
-                :icon="CircleCheckBig"
-                :label="t('profile.sCompleted')"
-                :value="completed.length"
-                :note="t('profile.sCompletedNote', { pct: completionPct })"
-            />
-            <StatCard
-                :icon="Target"
-                :label="t('profile.sGoals')"
-                :value="goals.length"
-                :note="t('profile.sGoalsNote', { pct: goalAvg })"
-            />
-            <StatCard
-                :icon="Activity"
-                :label="t('profile.sActive')"
-                :value="`${activeDays}/7`"
-                :note="t('profile.sActiveNote')"
-            />
-            <StatCard
-                :icon="Clock3"
-                :label="t('profile.sOverdue')"
-                :value="overdue"
-                :note="t('profile.sOverdueNote', { n: open.length })"
-            />
-        </div>
+        <component :is="panels[section]" v-else />
 
-        <div class="two-col">
-            <div class="panel">
-                <div class="section-head">
-                    <div>
-                        <h3>{{ t('profile.chart7') }}</h3>
-                        <p>{{ t('profile.chart7Sub') }}</p>
-                    </div>
+        <dialog
+            v-if="editing"
+            ref="dialog"
+            class="dialog"
+            @cancel.prevent="editing = false"
+            @click.self="editing = false"
+        >
+            <form class="dialog__body" @submit.prevent="saveNames">
+                <div class="dialog__head">
+                    <h2>{{ t('profile.editName') }}</h2>
+                    <button type="button" class="icon-btn" :aria-label="t('common.close')" @click="editing = false">
+                        <X :size="18" />
+                    </button>
                 </div>
-                <ChartCanvas :key="`week-${chartKey}`" :config="weekChart" :label="t('profile.chart7')" />
-            </div>
-            <div class="panel">
-                <div class="section-head">
-                    <div>
-                        <h3>{{ t('profile.chartStatus') }}</h3>
-                        <p>{{ t('profile.chartStatusSub') }}</p>
-                    </div>
+                <label class="field">
+                    <span>{{ t('profile.names.displayName') }}</span>
+                    <input
+                        v-model="nameForm.displayName"
+                        name="displayName"
+                        class="input"
+                        required
+                        maxlength="120"
+                        autocomplete="given-name"
+                    />
+                    <small v-if="nameErrors.displayName" class="field__error">{{ nameErrors.displayName[0] }}</small>
+                </label>
+                <label class="field">
+                    <span>{{ t('profile.names.nickname') }}</span>
+                    <input
+                        v-model="nameForm.nickname"
+                        name="nickname"
+                        class="input"
+                        maxlength="120"
+                        autocomplete="nickname"
+                    />
+                </label>
+                <label class="field">
+                    <span>{{ t('profile.names.surname') }}</span>
+                    <input
+                        v-model="nameForm.surname"
+                        name="surname"
+                        class="input"
+                        maxlength="120"
+                        autocomplete="family-name"
+                    />
+                </label>
+                <div class="actions">
+                    <button type="button" class="btn btn--outline" @click="editing = false">
+                        {{ t('common.cancel') }}
+                    </button>
+                    <button type="submit" class="btn" :disabled="savingNames">
+                        {{ savingNames ? t('common.saving') : t('common.save') }}
+                    </button>
                 </div>
-                <ChartCanvas
-                    v-if="statusSlices.length"
-                    :key="`status-${chartKey}`"
-                    :config="statusChart"
-                    :label="t('profile.chartStatus')"
-                />
-                <p v-else class="hint-box">{{ t('profile.chartEmpty') }}</p>
-            </div>
-        </div>
-
-        <div class="panel">
-            <div class="section-head">
-                <div>
-                    <h3>{{ t('profile.chartPeriods') }}</h3>
-                    <p>{{ t('profile.chartPeriodsSub') }}</p>
-                </div>
-            </div>
-            <ChartCanvas :key="`periods-${chartKey}`" :config="periodChart" :label="t('profile.chartPeriods')" />
-            <div class="period-metrics">
-                <div v-for="row in periodRows" :key="row.period">
-                    <b>{{ t(`period.${row.period}`) }}</b>
-                    <span>{{ t('profile.tasksDone', { done: row.completed, total: row.tasks }) }}</span>
-                    <small>{{ t('profile.goalsDone', { done: row.goalsDone, total: row.goals }) }}</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="panel">
-            <div class="section-head">
-                <div>
-                    <h3>{{ t('profile.behavior') }}</h3>
-                    <p>{{ t('profile.behaviorSub') }}</p>
-                </div>
-                <Activity :size="17" class="gold" aria-hidden="true" />
-            </div>
-            <div class="behavior-grid">
-                <div>
-                    <b>{{ completionPct }}%</b>
-                    <span>{{ t('profile.bRate') }}</span>
-                    <small>{{
-                        t(
-                            completionPct >= 75
-                                ? 'profile.bRateHigh'
-                                : completionPct >= 40
-                                  ? 'profile.bRateMid'
-                                  : 'profile.bRateLow',
-                        )
-                    }}</small>
-                </div>
-                <div>
-                    <b>{{ activeDays }}/7</b>
-                    <span>{{ t('profile.bConsistency') }}</span>
-                    <small>{{ t(activeDays >= 5 ? 'profile.bConsHigh' : 'profile.bConsLow') }}</small>
-                </div>
-                <div>
-                    <b>{{ goalAvg }}%</b>
-                    <span>{{ t('profile.bGoals') }}</span>
-                    <small>{{ t(goals.length ? 'profile.bGoalsSome' : 'profile.bGoalsNone') }}</small>
-                </div>
-                <div>
-                    <b>{{ workspace.achievements.length }}</b>
-                    <span>{{ t('profile.bBadges') }}</span>
-                    <small>{{ t('profile.bBadgesNote') }}</small>
-                </div>
-            </div>
-        </div>
+            </form>
+        </dialog>
     </section>
 </template>

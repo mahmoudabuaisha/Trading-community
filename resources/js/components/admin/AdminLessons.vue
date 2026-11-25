@@ -13,7 +13,14 @@ import EmptyState from '../EmptyState.vue'
 const admin = useAdminStore()
 const ui = useUiStore()
 
-const draft = reactive({ id: null as number | null, title: '', body: '', isPublished: true, removeImage: false })
+const draft = reactive({
+    id: null as number | null,
+    title: '',
+    body: '',
+    isPublished: true,
+    isPremium: false,
+    removeImage: false,
+})
 const image = ref<Blob | null>(null)
 /** What the form shows: a freshly chosen picture, or the lesson's stored one. */
 const preview = ref<string | null>(null)
@@ -28,7 +35,7 @@ onBeforeUnmount(revokePreview)
 
 function reset(): void {
     revokePreview()
-    Object.assign(draft, { id: null, title: '', body: '', isPublished: true, removeImage: false })
+    Object.assign(draft, { id: null, title: '', body: '', isPublished: true, isPremium: false, removeImage: false })
     image.value = null
     preview.value = null
     errors.value = {}
@@ -36,7 +43,13 @@ function reset(): void {
 
 function edit(lesson: Lesson): void {
     reset()
-    Object.assign(draft, { id: lesson.id, title: lesson.title, body: lesson.body, isPublished: lesson.isPublished })
+    Object.assign(draft, {
+        id: lesson.id,
+        title: lesson.title,
+        body: lesson.body,
+        isPublished: lesson.isPublished,
+        isPremium: lesson.isPremium,
+    })
     preview.value = lesson.imageUrl
 }
 
@@ -72,6 +85,7 @@ async function save(): Promise<void> {
             title: draft.title.trim(),
             body: draft.body.trim(),
             isPublished: draft.isPublished,
+            isPremium: draft.isPremium,
             image: image.value,
             removeImage: draft.removeImage,
         })
@@ -153,6 +167,9 @@ async function confirmDelete(): Promise<void> {
                 <label class="check"
                     ><input v-model="draft.isPublished" type="checkbox" /> {{ t('admin.visible') }}</label
                 >
+                <label class="check"
+                    ><input v-model="draft.isPremium" type="checkbox" /> {{ t('admin.lPremium') }}</label
+                >
                 <button type="submit" class="btn" :disabled="saving">
                     <Plus :size="15" aria-hidden="true" />
                     {{ saving ? t('common.saving') : t(draft.id === null ? 'admin.lAdd' : 'admin.saveEdit') }}
@@ -168,7 +185,8 @@ async function confirmDelete(): Promise<void> {
                 <img v-if="lesson.imageUrl" :src="lesson.imageUrl" alt="" class="lesson-form__thumb" loading="lazy" />
                 <div>
                     <span class="count-pill" :class="{ 'count-pill--ok': lesson.isPublished }">
-                        {{ t(lesson.isPublished ? 'admin.published' : 'admin.draft') }}
+                        {{ t(lesson.isPublished ? 'admin.published' : 'admin.draft')
+                        }}{{ lesson.isPremium ? ` · ${t('admin.lPremiumTag')}` : '' }}
                     </span>
                     <h4>{{ lesson.title }}</h4>
                     <p class="clamp">{{ lesson.body }}</p>

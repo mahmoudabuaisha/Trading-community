@@ -26,7 +26,11 @@ const routes: RouteRecordRaw[] = [
             { path: 'habits', name: 'habits', component: () => import('../views/HabitsView.vue') },
             { path: 'achievements', name: 'achievements', component: () => import('../views/AchievementsView.vue') },
             { path: 'growth', name: 'growth', component: () => import('../views/GrowthView.vue') },
-            { path: 'profile', name: 'profile', component: () => import('../views/ProfileView.vue') },
+            {
+                path: 'profile/:section(settings|security|stats)?',
+                name: 'profile',
+                component: () => import('../views/ProfileView.vue'),
+            },
             { path: 'education', name: 'education', component: () => import('../views/EducationView.vue') },
             { path: 'education/:id(\\d+)', name: 'lesson', component: () => import('../views/LessonView.vue') },
             { path: 'messages', name: 'messages', component: () => import('../views/MessagesView.vue') },

@@ -708,17 +708,17 @@ select.input option {
 .backdrop__sky {
     inset: 0;
     background:
-        radial-gradient(55% 45% at 58% 12%, rgba(214, 173, 98, 0.14), transparent 70%),
+        radial-gradient(46% 42% at 56% 30%, rgba(232, 197, 125, 0.22), transparent 70%),
         radial-gradient(40% 40% at 96% 4%, rgba(143, 182, 255, 0.07), transparent 70%),
         linear-gradient(180deg, #050507 0%, #0a0a0d 60%, #040405 100%);
 }
 .backdrop__summit {
-    top: -56px;
+    top: 52px;
     left: calc(50% + var(--sidebar-width) / 2);
-    inline-size: min(1050px, 78vw);
+    inline-size: min(1500px, 112vw);
     aspect-ratio: 1600 / 932;
     translate: -53.75% 0;
-    mask: linear-gradient(#000 45%, transparent 92%);
+    mask: linear-gradient(#000 62%, transparent 100%);
 }
 .backdrop__summit > * {
     position: absolute;
@@ -727,7 +727,7 @@ select.input option {
     inset: 0;
     inline-size: 100%;
     block-size: 100%;
-    opacity: 0.9;
+    opacity: 1;
 }
 .backdrop__fog {
     left: -10%;
@@ -740,8 +740,8 @@ select.input option {
 .backdrop__veil {
     inset: 0;
     background:
-        linear-gradient(180deg, transparent 0, rgba(5, 5, 7, 0.55) 46%, rgba(5, 5, 7, 0.9) 100%),
-        radial-gradient(120% 90% at 50% 30%, transparent 55%, rgba(0, 0, 0, 0.6) 100%);
+        linear-gradient(180deg, transparent 0, rgba(5, 5, 7, 0.28) 42%, rgba(5, 5, 7, 0.82) 100%),
+        radial-gradient(130% 100% at 50% 20%, transparent 60%, rgba(0, 0, 0, 0.55) 100%);
 }
 
 /* Sidebar */
@@ -2537,8 +2537,8 @@ a.btn-metal {
 /* Lesson cards: a cropped glimpse of the picture and the opening lines; the whole card opens the lesson. */
 .lesson-grid {
     display: grid;
-    gap: var(--space-5);
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
 }
 .lesson-card {
     display: grid;
@@ -2560,7 +2560,7 @@ a.btn-metal {
     position: relative;
     display: grid;
     place-items: center;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 10;
     overflow: hidden;
     background: radial-gradient(closest-side, rgba(232, 197, 125, 0.2), transparent), var(--bg-800);
     color: var(--gold-500);
@@ -2597,12 +2597,12 @@ a.btn-metal {
 }
 .lesson-card__body {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-2);
     align-content: start;
-    padding: var(--space-4) var(--space-5) var(--space-5);
+    padding: var(--space-3) var(--space-4) var(--space-4);
 }
 .lesson-card__body h3 {
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     color: var(--gold-200);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -2611,10 +2611,10 @@ a.btn-metal {
 }
 .lesson-card__body p {
     color: var(--text-soft);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     line-height: 1.9;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -2639,7 +2639,7 @@ a.btn-metal {
 /* The lesson itself */
 .lesson-page {
     gap: var(--space-6);
-    max-inline-size: 980px;
+    max-inline-size: 860px;
     margin-inline: auto;
     padding: clamp(var(--space-5), 4vw, var(--space-10));
 }
@@ -2659,7 +2659,9 @@ a.btn-metal {
 }
 .lesson-page__image {
     position: relative;
-    display: block;
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
     padding: 0;
     overflow: hidden;
     border: 1px solid var(--line);
@@ -2669,8 +2671,12 @@ a.btn-metal {
 }
 .lesson-page__image img {
     display: block;
-    inline-size: 100%;
+    /* Large enough to read from, never taller than about half the screen; the button opens it full size. */
+    max-inline-size: 100%;
+    max-block-size: min(52vh, 460px);
+    inline-size: auto;
     block-size: auto;
+    object-fit: contain;
 }
 .lesson-page__zoom {
     position: absolute;
@@ -2687,11 +2693,49 @@ a.btn-metal {
     font-size: var(--text-xs);
 }
 .lesson-page__text {
+    display: grid;
+    gap: var(--space-4);
     color: var(--text);
     font-size: 1.05rem;
-    line-height: 2.15;
-    white-space: pre-line;
+    line-height: 2.1;
     overflow-wrap: anywhere;
+}
+.lesson-page__text p {
+    white-space: pre-line;
+    text-align: start;
+}
+.lesson-page__locked {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    padding: var(--space-8) var(--space-4);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface-sunken);
+    color: var(--gold-300);
+    text-align: center;
+}
+.lesson-page__locked p {
+    color: var(--text-soft);
+    max-inline-size: 46ch;
+}
+.lesson-card__premium {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: var(--space-3);
+    inset-inline-end: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 2px var(--space-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    background: rgba(8, 8, 10, 0.8);
+    color: var(--gold-200);
+    font-size: var(--text-xs);
+}
+.lesson-card--locked .lesson-card__media {
+    color: var(--neutral-400);
 }
 .lesson-page__nav {
     display: grid;
@@ -3296,6 +3340,210 @@ a.btn-metal {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+}
+
+/* ── Profile ──────────────────────────────────────────────────────────── */
+.profile {
+    display: grid;
+    gap: var(--space-5);
+    inline-size: 100%;
+    max-inline-size: 860px;
+    margin-inline: auto;
+}
+.profile__bar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-4);
+    align-items: center;
+}
+.profile__nav,
+.profile__title {
+    display: grid;
+    place-items: center;
+    min-block-size: 58px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    background: var(--glass);
+    box-shadow: var(--shadow-card);
+}
+.profile__nav {
+    inline-size: 86px;
+    color: var(--gold-300);
+    transition:
+        color var(--motion-fast),
+        border-color var(--motion-fast);
+}
+.profile__nav:hover {
+    color: var(--gold-200);
+    border-color: var(--gold-300);
+}
+.profile__title {
+    justify-self: center;
+    min-inline-size: min(100%, 340px);
+    padding-inline: var(--space-6);
+    font-size: var(--text-xl);
+    background-image: var(--glass);
+    color: var(--gold-200);
+}
+.profile-hero {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-8);
+}
+.profile-hero__identity {
+    display: grid;
+    gap: var(--space-3);
+    padding-inline-end: var(--space-6);
+    border-inline-end: 1px solid var(--line);
+}
+.profile-hero__identity h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--text);
+}
+.profile-hero__verified {
+    color: var(--gold-300);
+    flex: none;
+}
+.profile-hero__identity p {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-lg);
+    overflow-wrap: anywhere;
+}
+.profile-hero__identity p svg {
+    flex: none;
+    color: var(--gold-300);
+}
+.profile-hero__role {
+    padding-block-start: var(--space-3);
+    border-block-start: 1px solid var(--line-soft);
+    color: var(--gold-300);
+}
+.profile-hero__avatar {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: clamp(120px, 22vw, 190px);
+    aspect-ratio: 1;
+    padding: 0;
+    border: 3px solid var(--gold-300);
+    border-radius: 50%;
+    background: var(--bg-900);
+    color: var(--steel-300);
+    box-shadow:
+        0 0 34px rgba(214, 173, 98, 0.3),
+        inset 0 0 22px rgba(0, 0, 0, 0.8);
+}
+.profile-hero__avatar img {
+    inline-size: 100%;
+    block-size: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.profile-hero__camera {
+    position: absolute;
+    inset-block-end: 2%;
+    inset-inline-start: 2%;
+    display: grid;
+    place-items: center;
+    inline-size: 42px;
+    block-size: 42px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: var(--bg-700);
+    color: var(--gold-300);
+}
+.profile-list {
+    gap: 0;
+    padding-block: var(--space-2);
+}
+.profile-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    inline-size: 100%;
+    min-block-size: 66px;
+    padding: var(--space-3) var(--space-2);
+    border: 0;
+    border-block-end: 1px solid var(--line-soft);
+    background: none;
+    font-size: var(--text-lg);
+    text-align: start;
+    transition: background var(--motion-fast);
+}
+.profile-row:last-child {
+    border-block-end: 0;
+}
+.profile-row:hover {
+    background: rgba(214, 173, 98, 0.06);
+}
+.profile-row__icon {
+    flex: none;
+    color: var(--gold-300);
+}
+.profile-row__label {
+    flex: 1;
+}
+/* Rows with a value: label, a hairline, then the value. */
+.profile-row__value {
+    flex: 1.2;
+    padding-inline-start: var(--space-5);
+    border-inline-start: 1px solid var(--line);
+    color: var(--text-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.profile-row__label:has(+ .profile-row__value) {
+    flex: 0 0 32%;
+}
+.profile-row__open {
+    flex: none;
+    color: var(--gold-300);
+}
+.profile-logout {
+    grid-auto-flow: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-3);
+    min-block-size: 72px;
+    border: 0;
+    color: var(--gold-300);
+    font-size: var(--text-lg);
+}
+.profile-logout:hover {
+    color: var(--gold-200);
+}
+@media (max-width: 560px) {
+    .profile-hero {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: var(--space-5);
+    }
+    .profile-hero__avatar {
+        order: -1;
+    }
+    .profile-hero__identity {
+        justify-items: center;
+        padding-inline-end: 0;
+        border-inline-end: 0;
+        text-align: center;
+    }
+    .profile__nav {
+        inline-size: 60px;
+    }
+    .profile__title {
+        min-inline-size: 0;
+        font-size: var(--text-lg);
+    }
+    .profile-row {
+        font-size: var(--text-md);
+    }
 }
 
 /* ── Glass surfaces ───────────────────────────────────────────────────── */

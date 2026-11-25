@@ -29,6 +29,9 @@ export interface User {
     email: string
     displayName: string
     surname: string
+    nickname: string
+    /** Granted by an administrator; opens subscriber-only lessons. */
+    isPremium: boolean
     avatarUrl: string | null
     role: Role
     bio: string
@@ -140,6 +143,7 @@ export interface GoalInput {
 export interface ProfileInput {
     displayName: string
     surname: string
+    nickname: string
     bio: string
     timezone: string
     language: Locale
@@ -169,6 +173,7 @@ export interface AdminUser {
     displayName: string
     email: string
     role: Role
+    isPremium: boolean
     createdAt: string
 }
 
@@ -228,6 +233,9 @@ export interface Lesson {
     imageUrl: string | null
     position: number
     isPublished: boolean
+    isPremium: boolean
+    /** True when this reader may not open the lesson; its text and picture are then withheld. */
+    locked: boolean
     createdAt: string
 }
 
@@ -235,6 +243,7 @@ export interface LessonInput {
     title: string
     body: string
     isPublished: boolean
+    isPremium: boolean
     /** A new image to upload, if any. */
     image: Blob | null
     removeImage: boolean

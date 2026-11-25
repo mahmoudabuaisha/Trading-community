@@ -169,6 +169,26 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         setLocale(user.language)
     }
 
+    /** Change some profile fields, keeping the rest as they are. */
+    async function patchProfile(patch: Partial<ProfileInput>): Promise<void> {
+        const user = useAuthStore().user
+        if (!user) return
+        const { displayName, surname, nickname, bio, timezone, language, weeklyGoal, dailyFocusMinutes, avatarUrl } =
+            user
+        await saveProfile({
+            displayName,
+            surname,
+            nickname,
+            bio,
+            timezone,
+            language,
+            weeklyGoal,
+            dailyFocusMinutes,
+            avatarUrl,
+            ...patch,
+        })
+    }
+
     async function logFocusSession(minutes: number): Promise<void> {
         const result = await repository.logFocusSession(minutes, today())
         focus.value = result.focus
@@ -233,6 +253,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         setGoalProgress,
         deleteGoal,
         saveProfile,
+        patchProfile,
         logFocusSession,
         saveReview,
         loadLessons,

@@ -15,7 +15,7 @@ class LessonRequest extends ApiRequest
     protected function prepareForValidation(): void
     {
         // Multipart fields arrive as strings; normalise the booleans.
-        foreach (['isPublished', 'removeImage'] as $flag) {
+        foreach (['isPublished', 'isPremium', 'removeImage'] as $flag) {
             if ($this->has($flag)) {
                 $this->merge([$flag => filter_var($this->input($flag), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)]);
             }
@@ -31,6 +31,7 @@ class LessonRequest extends ApiRequest
             'body' => [$required, 'string', 'max:20000'],
             'position' => ['sometimes', 'integer', 'min:0', 'max:100000'],
             'isPublished' => ['sometimes', 'boolean'],
+            'isPremium' => ['sometimes', 'boolean'],
             'removeImage' => ['sometimes', 'boolean'],
             'image' => ['sometimes', 'file', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
         ];

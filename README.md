@@ -16,9 +16,9 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Reminders | A reminder time on any task; due reminders appear in the notification bell with a toast and optional chime, and as browser notifications on HTTPS |
 | Achievements | Extra badges defined by administrators (metric + threshold), plus badges awarded automatically (first task, 10/50/100 tasks, 7/30-day streaks, first goal, 10 focus hours) |
 | Growth & motivation | Library of texts published by administrators |
-| Education | Lessons (title, text, image) published by administrators |
+| Education | Lessons (title, text, image) published by administrators, shown as cards that open a lesson page; lessons can be subscriber-only and administrators grant premium access per member |
 | Messages | A private thread between each member and the administrators, with unread badges |
-| Profile | Details, avatar, weekly goal, focus target, time zone, language, and performance charts |
+| Profile | Photo and names, settings (language, time zone, goals, notifications), security (password change, sign out of other devices) and account statistics |
 | Admin center | Platform stats, user search, role changes, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log |
 
 ## Stack

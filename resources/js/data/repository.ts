@@ -63,6 +63,9 @@ export const repository = {
         request<{ goal: Goal; newAchievements: Achievement[] }>('PATCH', `/goals/${id}`, patch),
     deleteGoal: (id: number) => request<void>('DELETE', `/goals/${id}`),
     saveProfile: (input: ProfileInput) => request<{ user: User }>('PUT', '/profile', input).then((r) => r.user),
+    changePassword: (currentPassword: string, password: string) =>
+        request<void>('PUT', '/profile/password', { currentPassword, password }),
+    signOutOthers: () => request<void>('POST', '/profile/sign-out-others'),
     logFocusSession: (minutes: number, day: string) =>
         request<{ focus: FocusTotals; newAchievements: Achievement[] }>('POST', '/focus-sessions', { minutes, day }),
     saveReview: (review: Pick<DailyReview, 'date' | 'win' | 'unfinished' | 'lesson' | 'tomorrow'>) =>
@@ -89,7 +92,7 @@ export const repository = {
     adminOverview: () => request<{ stats: AdminStats; audit: AuditEntry[] }>('GET', '/admin/overview'),
     adminUsers: (search: string, page: number) =>
         request<Paginated<AdminUser>>('GET', `/admin/users?search=${encodeURIComponent(search)}&page=${page}`),
-    adminUpdateUser: (id: number, patch: { displayName?: string; email?: string; role?: Role }) =>
+    adminUpdateUser: (id: number, patch: { displayName?: string; email?: string; role?: Role; isPremium?: boolean }) =>
         request<{ user: AdminUser }>('PATCH', `/admin/users/${id}`, patch).then((r) => r.user),
     adminRevokeSessions: (id: number) => request<void>('POST', `/admin/users/${id}/revoke-sessions`),
     adminMotivations: () =>
@@ -131,6 +134,7 @@ function lessonForm(input: Partial<LessonInput>): FormData {
     if (input.title !== undefined) form.set('title', input.title)
     if (input.body !== undefined) form.set('body', input.body)
     if (input.isPublished !== undefined) form.set('isPublished', input.isPublished ? '1' : '0')
+    if (input.isPremium !== undefined) form.set('isPremium', input.isPremium ? '1' : '0')
     if (input.removeImage) form.set('removeImage', '1')
     if (input.image) form.set('image', input.image, 'lesson.jpg')
     return form

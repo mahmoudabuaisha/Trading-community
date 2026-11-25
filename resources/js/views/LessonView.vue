@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, ArrowRight, Expand, X } from 'lucide-vue-next'
+import { ArrowLeft, ArrowRight, Crown, Expand, Lock, X } from 'lucide-vue-next'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import EmptyState from '../components/EmptyState.vue'
@@ -18,6 +18,13 @@ const previous = computed(() => workspace.lessons[index.value - 1] ?? null)
 const next = computed(() => workspace.lessons[index.value + 1] ?? null)
 /** Minutes to read at roughly 180 words a minute, never less than one. */
 const readMinutes = computed(() => Math.max(1, Math.round((lesson.value?.body.trim().split(/\s+/).length ?? 0) / 180)))
+/** Paragraphs split on blank lines; each takes its own direction, so mixed Arabic and English read correctly. */
+const paragraphs = computed(() =>
+    (lesson.value?.body ?? '')
+        .split(/\n\s*\n/)
+        .map((part) => part.trim())
+        .filter(Boolean),
+)
 const BackArrow = computed(() => (isRtl.value ? ArrowRight : ArrowLeft))
 const ForwardArrow = computed(() => (isRtl.value ? ArrowLeft : ArrowRight))
 
@@ -58,6 +65,9 @@ onMounted(async () => {
                 <span class="eyebrow">{{
                     t('education.lessonNo', { n: index + 1, total: workspace.lessons.length })
                 }}</span>
+                <span v-if="lesson.isPremium" class="count-pill count-pill--gold"
+                    ><Crown :size="12" aria-hidden="true" /> {{ t('education.premium') }}</span
+                >
                 <h2>{{ lesson.title }}</h2>
                 <p class="muted">
                     {{ formatDate(lesson.createdAt, { dateStyle: 'long' }) }} ·
@@ -78,7 +88,15 @@ onMounted(async () => {
                 >
             </button>
 
-            <div class="lesson-page__text">{{ lesson.body }}</div>
+            <div v-if="lesson.locked" class="lesson-page__locked">
+                <Lock :size="34" aria-hidden="true" />
+                <h3>{{ t('education.lockedTitle') }}</h3>
+                <p>{{ t('education.lockedText') }}</p>
+                <RouterLink :to="{ name: 'messages' }" class="btn">{{ t('education.askAccess') }}</RouterLink>
+            </div>
+            <div v-else class="lesson-page__text">
+                <p v-for="(paragraph, number) in paragraphs" :key="number" dir="auto">{{ paragraph }}</p>
+            </div>
 
             <nav class="lesson-page__nav" :aria-label="t('education.head')">
                 <RouterLink

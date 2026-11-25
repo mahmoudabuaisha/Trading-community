@@ -9,13 +9,13 @@ class Lesson extends Model
 {
     public const IMAGE_DIRECTORY = 'lessons';
 
-    protected $fillable = ['title', 'body', 'image_path', 'position', 'is_published'];
+    protected $fillable = ['title', 'body', 'image_path', 'position', 'is_published', 'is_premium'];
 
     protected $attributes = ['is_published' => true, 'position' => 0];
 
     protected function casts(): array
     {
-        return ['is_published' => 'boolean', 'position' => 'integer'];
+        return ['is_published' => 'boolean', 'is_premium' => 'boolean', 'position' => 'integer'];
     }
 
     protected static function booted(): void

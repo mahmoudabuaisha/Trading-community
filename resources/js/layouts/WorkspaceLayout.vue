@@ -102,6 +102,9 @@ const pageTitle = computed(() =>
         ? t('title.tasks', { period: t(`period.${String(route.params.period)}`) })
         : t(`title.${route.name === 'lesson' ? 'education' : String(route.name)}`),
 )
+const roleLabel = computed(() =>
+    auth.isAdmin ? t('role.admin') : auth.user?.isPremium ? t('role.premium') : t('role.user'),
+)
 const fullName = computed(() => `${auth.user?.displayName ?? ''} ${auth.user?.surname ?? ''}`.trim())
 
 watch(pageTitle, (title) => (document.title = `${title} · SN Tasks`), { immediate: true })
@@ -203,7 +206,7 @@ async function signOut(): Promise<void> {
                 <div class="sidebar__badge">
                     <Crown :size="22" aria-hidden="true" />
                     <b>SN TASKS</b>
-                    <small>{{ t(`role.${auth.user?.role ?? 'user'}`) }}</small>
+                    <small>{{ roleLabel }}</small>
                 </div>
             </div>
         </aside>
@@ -227,7 +230,7 @@ async function signOut(): Promise<void> {
                                 ><Crown v-if="auth.isAdmin" :size="14" aria-hidden="true" />
                                 {{ auth.user?.displayName }}</b
                             >
-                            <small>{{ t(`role.${auth.user?.role ?? 'user'}`) }}</small>
+                            <small>{{ roleLabel }}</small>
                         </span>
                     </RouterLink>
                     <NotificationBell />
@@ -254,7 +257,7 @@ async function signOut(): Promise<void> {
                     >
                 </div>
 
-                <h1 class="topbar__title">
+                <h1 class="topbar__title" :class="{ 'sr-only': route.name === 'profile' }">
                     {{ route.name === 'overview' ? tagline : pageTitle }}
                 </h1>
             </header>

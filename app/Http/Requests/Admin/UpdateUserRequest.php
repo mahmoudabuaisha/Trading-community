@@ -19,6 +19,7 @@ class UpdateUserRequest extends ApiRequest
             'displayName' => ['sometimes', 'string', 'min:1', 'max:120'],
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
             'role' => ['sometimes', Rule::in(User::ROLES)],
+            'isPremium' => ['sometimes', 'boolean'],
         ];
     }
 }

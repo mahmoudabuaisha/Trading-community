@@ -50,6 +50,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('goals/{goal}', [GoalController::class, 'destroy']);
 
     Route::put('profile', [ProfileController::class, 'update']);
+    Route::put('profile/password', [ProfileController::class, 'password'])->middleware('throttle:6,1');
+    Route::post('profile/sign-out-others', [ProfileController::class, 'signOutOthers']);
     Route::post('focus-sessions', [FocusSessionController::class, 'store']);
     Route::put('reviews/{date}', [ReviewController::class, 'update'])->where('date', '\d{4}-\d{2}-\d{2}');
 

@@ -28,6 +28,11 @@ class AdminService
                 $this->changeRole($admin, $target, $changes['role']);
             }
 
+            if (array_key_exists('is_premium', $changes) && (bool) $changes['is_premium'] !== (bool) $target->is_premium) {
+                $target->forceFill(['is_premium' => (bool) $changes['is_premium']])->save();
+                $this->audit($admin, $target->is_premium ? 'premium_granted' : 'premium_revoked', $target, ['name' => $target->display_name]);
+            }
+
             $profile = array_intersect_key($changes, array_flip(['display_name', 'email']));
             $target->fill($profile);
             if ($target->isDirty()) {
