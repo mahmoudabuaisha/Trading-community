@@ -2531,39 +2531,236 @@ a.btn-metal {
 .form-grid--two {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
 }
-.lessons {
+/* Lesson cards: a cropped glimpse of the picture and the opening lines; the whole card opens the lesson. */
+.lesson-grid {
     display: grid;
     gap: var(--space-5);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
 }
-.lesson {
-    gap: var(--space-4);
+.lesson-card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    transition:
+        translate var(--motion-base),
+        box-shadow var(--motion-base);
 }
-.lesson__no {
+.lesson-card:hover,
+.lesson-card:focus-visible {
+    translate: 0 -4px;
+    box-shadow:
+        var(--shadow-card),
+        0 0 34px rgba(214, 173, 98, 0.22);
+}
+.lesson-card__media {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: radial-gradient(closest-side, rgba(232, 197, 125, 0.2), transparent), var(--bg-800);
     color: var(--gold-500);
+}
+.lesson-card__media img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transition: scale var(--motion-base);
+}
+.lesson-card:hover .lesson-card__media img {
+    scale: 1.05;
+}
+/* The picture fades into the card so the text below reads as one piece with it. */
+.lesson-card__media::after {
+    content: '';
+    position: absolute;
+    inset: 55% 0 0;
+    background: linear-gradient(180deg, transparent, rgba(8, 8, 10, 0.92));
+}
+.lesson-card__no {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: var(--space-3);
+    inset-inline-start: var(--space-3);
+    padding: 2px var(--space-3);
+    border-radius: var(--radius-pill);
+    background: var(--gold-gradient);
+    color: var(--text-on-gold);
     font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+}
+.lesson-card__body {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    padding: var(--space-4) var(--space-5) var(--space-5);
+}
+.lesson-card__body h3 {
     font-size: var(--text-lg);
-    letter-spacing: 0.1em;
-}
-.lesson h3 {
-    font-size: var(--text-xl);
     color: var(--gold-200);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
-.lesson p {
+.lesson-card__body p {
     color: var(--text-soft);
-    white-space: pre-line;
-    line-height: 2;
-    overflow-wrap: anywhere;
+    font-size: var(--text-sm);
+    line-height: 1.9;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
-.lesson__image {
+.lesson-card__more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--gold-300);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+.lesson-card:hover .lesson-card__more svg {
+    translate: 4px 0;
+}
+[dir='rtl'] .lesson-card:hover .lesson-card__more svg {
+    translate: -4px 0;
+}
+.lesson-card__more svg {
+    transition: translate var(--motion-fast);
+}
+
+/* The lesson itself */
+.lesson-page {
+    gap: var(--space-6);
+    max-inline-size: 980px;
+    margin-inline: auto;
+    padding: clamp(var(--space-5), 4vw, var(--space-10));
+}
+.lesson-page__head {
+    display: grid;
+    gap: var(--space-2);
+    padding-block-end: var(--space-5);
+    border-block-end: 1px solid var(--line-soft);
+}
+.lesson-page__head h2 {
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    line-height: 1.4;
+    background: var(--gold-metal);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.lesson-page__image {
+    position: relative;
     display: block;
+    padding: 0;
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
+    background: var(--bg-800);
+    cursor: zoom-in;
 }
-.lesson__image img {
+.lesson-page__image img {
     display: block;
     inline-size: 100%;
     block-size: auto;
+}
+.lesson-page__zoom {
+    position: absolute;
+    inset-block-end: var(--space-3);
+    inset-inline-end: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    background: rgba(8, 8, 10, 0.78);
+    color: var(--gold-200);
+    font-size: var(--text-xs);
+}
+.lesson-page__text {
+    color: var(--text);
+    font-size: 1.05rem;
+    line-height: 2.15;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+.lesson-page__nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    padding-block-start: var(--space-5);
+    border-block-start: 1px solid var(--line-soft);
+}
+.lesson-page__step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-inline-size: 0;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+    color: var(--gold-300);
+    transition: border-color var(--motion-fast);
+}
+.lesson-page__step:hover {
+    border-color: var(--line-strong);
+}
+.lesson-page__step--next {
+    justify-content: flex-end;
+    text-align: end;
+}
+.lesson-page__step span {
+    display: grid;
+    min-inline-size: 0;
+}
+.lesson-page__step small {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+}
+.lesson-page__step b {
+    color: var(--text);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media (max-width: 560px) {
+    .lesson-page__nav {
+        grid-template-columns: 1fr;
+    }
+}
+.image-viewer {
+    max-inline-size: 96vw;
+    max-block-size: 94vh;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    background: var(--bg-900);
+    overflow: auto;
+}
+.image-viewer::backdrop {
+    background: rgba(0, 0, 0, 0.88);
+}
+.image-viewer img {
+    display: block;
+    max-inline-size: 96vw;
+    block-size: auto;
+}
+.image-viewer__close {
+    position: sticky;
+    inset-block-start: var(--space-3);
+    inset-inline-start: var(--space-3);
+    margin: var(--space-3);
+    float: inline-start;
+    z-index: 1;
 }
 .lesson-form__preview {
     max-inline-size: min(100%, 420px);
@@ -2910,6 +3107,7 @@ a.btn-metal {
     .growth-reading,
     .task-row,
     .dash-card,
+    .lesson-card,
     .empty,
     .tile,
     .sidebar,
@@ -2928,6 +3126,7 @@ a.btn-metal {
 .growth-reading,
 .task-row,
 .dash-card,
+.lesson-card,
 .empty,
 .tile,
 .sidebar,
@@ -2947,6 +3146,7 @@ a.btn-metal {
 .growth-reading::before,
 .task-row::before,
 .dash-card::before,
+.lesson-card::before,
 .empty::before,
 .tile::before,
 .sidebar::before,

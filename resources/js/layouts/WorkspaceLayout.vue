@@ -76,7 +76,9 @@ const navItems = computed<NavItem[]>(() => {
         key,
         to: { name, params },
         icon,
-        active: route.name === name && (!params || params.period === period),
+        active:
+            (route.name === name || (name === 'education' && route.name === 'lesson')) &&
+            (!params || params.period === period),
     })
     return [
         item('overview', 'overview', House),
@@ -97,7 +99,7 @@ const navItems = computed<NavItem[]>(() => {
 const pageTitle = computed(() =>
     route.name === 'tasks'
         ? t('title.tasks', { period: t(`period.${String(route.params.period)}`) })
-        : t(`title.${String(route.name)}`),
+        : t(`title.${route.name === 'lesson' ? 'education' : String(route.name)}`),
 )
 const fullName = computed(() => `${auth.user?.displayName ?? ''} ${auth.user?.surname ?? ''}`.trim())
 
