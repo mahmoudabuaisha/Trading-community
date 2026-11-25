@@ -1,50 +1,55 @@
 <script setup lang="ts">
-import { Award, Plus } from 'lucide-vue-next'
-import { reactive, ref } from 'vue'
+import { Award, Plus, Star, Trash2 } from 'lucide-vue-next'
+import { computed, reactive, ref } from 'vue'
 import { ApiError } from '../../data/http'
 import { t } from '../../i18n'
+import { conditionsText } from '../../lib/badges'
 import { useAdminStore } from '../../stores/admin'
 import { useUiStore } from '../../stores/ui'
-import { BADGE_METRICS, type Badge, type BadgeMetric } from '../../types/domain'
+import {
+    BADGE_METRICS,
+    BADGE_PERIODS,
+    type Badge,
+    type BadgeCondition,
+    type BadgeMetric,
+    type BadgePeriod,
+} from '../../types/domain'
 import ConfirmDialog from '../ConfirmDialog.vue'
 import EmptyState from '../EmptyState.vue'
 
 const admin = useAdminStore()
 const ui = useUiStore()
 
-const draft = reactive({
+const blank = () => ({
     id: null as number | null,
     title: '',
     description: '',
-    metric: 'tasks_completed' as BadgeMetric,
-    threshold: 10,
+    period: 'daily' as BadgePeriod,
+    points: 10,
+    conditions: [{ metric: 'perfect_days', threshold: 1 }] as BadgeCondition[],
     isActive: true,
 })
+const draft = reactive(blank())
 const errors = ref<Record<string, string[]>>({})
 const saving = ref(false)
 const deleting = ref<Badge | null>(null)
 
+/** A metric can appear once per achievement, so offer only the ones not used by the other conditions. */
+const metricsFor = (index: number) =>
+    BADGE_METRICS.filter(
+        (metric) => !draft.conditions.some((condition, other) => other !== index && condition.metric === metric),
+    )
+const nextMetric = computed<BadgeMetric | undefined>(() =>
+    BADGE_METRICS.find((metric) => !draft.conditions.some((condition) => condition.metric === metric)),
+)
+
 function reset(): void {
-    Object.assign(draft, {
-        id: null,
-        title: '',
-        description: '',
-        metric: 'tasks_completed',
-        threshold: 10,
-        isActive: true,
-    })
+    Object.assign(draft, blank())
     errors.value = {}
 }
 
 function edit(badge: Badge): void {
-    Object.assign(draft, {
-        id: badge.id,
-        title: badge.title,
-        description: badge.description,
-        metric: badge.metric,
-        threshold: badge.threshold,
-        isActive: badge.isActive,
-    })
+    Object.assign(draft, { ...badge, conditions: badge.conditions.map((condition) => ({ ...condition })) })
     errors.value = {}
 }
 
@@ -58,7 +63,11 @@ async function save(): Promise<void> {
             ...input,
             title: input.title.trim(),
             description: input.description.trim(),
-            threshold: Math.round(Number(input.threshold)),
+            points: Math.max(0, Math.round(Number(input.points))),
+            conditions: input.conditions.map((condition) => ({
+                ...condition,
+                threshold: Math.round(Number(condition.threshold)),
+            })),
         })
         ui.success(t('admin.bSaved'))
         reset()
@@ -97,7 +106,7 @@ async function confirmDelete(): Promise<void> {
     <div class="panel">
         <div class="section-head">
             <div>
-                <span class="eyebrow">MILESTONES / CUSTOM BADGES</span>
+                <span class="eyebrow">ACHIEVEMENTS &amp; POINTS</span>
                 <h3>{{ t('admin.badgesHead') }}</h3>
                 <p>{{ t('admin.badgesSub') }}</p>
             </div>
@@ -127,26 +136,60 @@ async function confirmDelete(): Promise<void> {
                     />
                 </label>
                 <label class="field">
-                    <span>{{ t('admin.bMetric') }}</span>
-                    <select v-model="draft.metric" class="input">
-                        <option v-for="metric in BADGE_METRICS" :key="metric" :value="metric">
+                    <span>{{ t('admin.bPeriod') }}</span>
+                    <select v-model="draft.period" class="input">
+                        <option v-for="period in BADGE_PERIODS" :key="period" :value="period">
+                            {{ t(`admin.period.${period}`) }}
+                        </option>
+                    </select>
+                    <small class="hint">{{ t(`admin.periodHint.${draft.period}`) }}</small>
+                </label>
+                <label class="field">
+                    <span>{{ t('admin.bPoints') }}</span>
+                    <input v-model.number="draft.points" class="input" type="number" min="0" max="100000" required />
+                    <small v-if="errors.points" class="field__error">{{ errors.points[0] }}</small>
+                </label>
+            </div>
+
+            <fieldset class="perm-list condition-list">
+                <legend>{{ t('admin.bConditions') }}</legend>
+                <div v-for="(condition, index) in draft.conditions" :key="index" class="condition-row">
+                    <select v-model="condition.metric" class="input" :aria-label="t('admin.bMetric')">
+                        <option v-for="metric in metricsFor(index)" :key="metric" :value="metric">
                             {{ t(`admin.metric.${metric}`) }}
                         </option>
                     </select>
-                </label>
-                <label class="field">
-                    <span>{{ t('admin.bThreshold') }}</span>
                     <input
-                        v-model.number="draft.threshold"
+                        v-model.number="condition.threshold"
                         class="input"
                         type="number"
                         min="1"
                         max="1000000"
                         required
+                        :aria-label="t('admin.bThreshold')"
                     />
-                    <small v-if="errors.threshold" class="field__error">{{ errors.threshold[0] }}</small>
-                </label>
-            </div>
+                    <button
+                        type="button"
+                        class="icon-btn"
+                        :disabled="draft.conditions.length === 1"
+                        :aria-label="t('admin.bRemoveCondition')"
+                        :title="t('admin.bRemoveCondition')"
+                        @click="draft.conditions.splice(index, 1)"
+                    >
+                        <Trash2 :size="16" />
+                    </button>
+                </div>
+                <button
+                    v-if="nextMetric && draft.conditions.length < 5"
+                    type="button"
+                    class="pill"
+                    @click="draft.conditions.push({ metric: nextMetric, threshold: 1 })"
+                >
+                    <Plus :size="14" aria-hidden="true" /> {{ t('admin.bAddCondition') }}
+                </button>
+                <small v-if="errors.conditions" class="field__error">{{ errors.conditions[0] }}</small>
+            </fieldset>
+
             <div class="head-actions">
                 <label class="check"><input v-model="draft.isActive" type="checkbox" /> {{ t('admin.bActive') }}</label>
                 <button type="submit" class="btn" :disabled="saving">
@@ -163,11 +206,15 @@ async function confirmDelete(): Promise<void> {
             <article v-for="badge in admin.badges" :key="badge.id" class="motivation-item">
                 <div>
                     <span class="count-pill" :class="{ 'count-pill--ok': badge.isActive }">
-                        {{ t(`admin.metric.${badge.metric}`) }} ≥ {{ badge.threshold }} ·
+                        {{ t(`admin.period.${badge.period}`) }} ·
                         {{ t(badge.isActive ? 'admin.published' : 'admin.draft') }}
                     </span>
+                    <span class="count-pill count-pill--gold"
+                        ><Star :size="12" aria-hidden="true" /> {{ badge.points }}</span
+                    >
                     <h4>{{ badge.title }}</h4>
-                    <p v-if="badge.description">{{ badge.description }}</p>
+                    <p>{{ conditionsText(badge) }}</p>
+                    <p v-if="badge.description" class="muted">{{ badge.description }}</p>
                 </div>
                 <div class="row-actions">
                     <button type="button" class="pill" @click="edit(badge)">{{ t('common.edit') }}</button>

@@ -24,7 +24,7 @@ export type MotivationCategory = (typeof MOTIVATION_CATEGORIES)[number]
 export type Role = 'admin' | 'moderator' | 'user'
 
 /** Areas of the admin center a moderator can be granted. Administrators have all of them. */
-export const ADMIN_AREAS = ['users', 'content', 'growth', 'education', 'badges', 'messages', 'audit'] as const
+export const ADMIN_AREAS = ['users', 'content', 'growth', 'education', 'badges', 'store', 'messages', 'audit'] as const
 export type AdminArea = (typeof ADMIN_AREAS)[number]
 export const LOCALES = ['ar', 'en', 'fr'] as const
 export type Locale = (typeof LOCALES)[number]
@@ -39,11 +39,14 @@ export interface User {
     isPremium: boolean
     permissions: AdminArea[]
     preferences: Preferences
-    /** Commitment points: earned for every day on which all daily tasks were completed. */
+    /** Points left to spend in the store. */
     points: number
-    /** Equipped avatar frame and title (machine keys); 'none' / null when nothing is equipped. */
+    /** Every point earned so far; this is what the honour board ranks. */
+    pointsEarned: number
+    /** What the member wears, from the store items they put to use. */
+    title: string | null
     frame: string
-    titleKey: string | null
+    theme: string
     avatarUrl: string | null
     role: Role
     bio: string
@@ -91,7 +94,10 @@ export interface Goal {
 }
 
 export interface Achievement {
-    id: number
+    /** Null for an admin-defined badge announced in the response that earned it. */
+    id: number | null
+    /** For repeatable badges: how many periods it was earned in. */
+    timesEarned?: number
     key: string
     earnedAt: string
 }
@@ -132,7 +138,8 @@ export interface DashboardPayload {
     badges: Badge[]
     /** Whole days the member was away before this visit; 0 when there is nothing to mention. */
     absenceDays: number
-    rewards: RewardCatalogue
+    /** Today's messages from the administrators. */
+    broadcasts: Broadcast[]
 }
 
 export interface TaskInput {
@@ -236,6 +243,7 @@ export interface Thread {
 }
 
 export interface UnreadCounts {
+    broadcasts: Broadcast[]
     /** Messages from the administrators this member has not opened. */
     member: number
     /** Messages from members waiting on an administrator (0 for members). */
@@ -289,6 +297,7 @@ export interface HabitMonth {
 
 export const BADGE_METRICS = [
     'tasks_completed',
+    'perfect_days',
     'streak_days',
     'focus_minutes',
     'goals_completed',
@@ -296,24 +305,30 @@ export const BADGE_METRICS = [
 ] as const
 export type BadgeMetric = (typeof BADGE_METRICS)[number]
 
-/** A badge defined by an administrator; earned ones appear as achievements under `key`. */
+export const BADGE_PERIODS = ['once', 'daily', 'weekly', 'monthly', 'yearly'] as const
+export type BadgePeriod = (typeof BADGE_PERIODS)[number]
+
+export interface BadgeCondition {
+    metric: BadgeMetric
+    threshold: number
+}
+
+/**
+ * An achievement defined by an administrator. It is earned when every
+ * condition holds within its period, and awards its points each time.
+ */
 export interface Badge {
     id: number
     key: string
     title: string
     description: string
-    metric: BadgeMetric
-    threshold: number
+    points: number
+    period: BadgePeriod
+    conditions: BadgeCondition[]
     isActive: boolean
 }
 
-export interface BadgeInput {
-    title: string
-    description: string
-    metric: BadgeMetric
-    threshold: number
-    isActive: boolean
-}
+export type BadgeInput = Omit<Badge, 'id' | 'key'>
 
 /** Per-account notification choices. Times are `HH:MM` in the member's own clock, or null. */
 export interface Preferences {
@@ -325,11 +340,72 @@ export interface Preferences {
     wakeTime: string | null
 }
 
-/** What points unlock: reward key → points needed. */
-export interface RewardCatalogue {
-    pointsPerPerfectDay: number
-    frames: Record<string, number>
-    titles: Record<string, number>
+export const STORE_KINDS = ['title', 'frame', 'theme', 'avatar'] as const
+export type StoreKind = (typeof STORE_KINDS)[number]
+/** Built-in looks an item can apply; the CSS for each lives in app.css. */
+export const FRAME_STYLES = ['bronze', 'silver', 'gold', 'royal', 'diamond'] as const
+export const THEMES = ['emerald', 'sapphire', 'ruby', 'amethyst', 'silver'] as const
+
+export interface StoreItem {
+    id: number
+    name: string
+    description: string
+    kind: StoreKind
+    /** The title's text, or the key of a frame style or theme. */
+    value: string | null
+    imageUrl: string | null
+    price: number
+    isActive: boolean
+    owned?: boolean
+    equipped?: boolean
+}
+
+export interface StoreItemInput {
+    name: string
+    description: string
+    kind: StoreKind
+    value: string
+    price: number
+    isActive: boolean
+    image?: Blob | null
+    removeImage?: boolean
+}
+
+export interface LeaderboardRow {
+    userId: number
+    displayName: string
+    avatarUrl: string | null
+    title: string | null
+    frame: string
+    value: number
+    /** Today's board: every daily task of the day is done. */
+    allDone?: boolean
+}
+
+export interface Leaderboard {
+    today: LeaderboardRow[]
+    week: LeaderboardRow[]
+    points: LeaderboardRow[]
+    month: LeaderboardRow[]
+}
+
+export interface PointsHistory {
+    earned: number
+    balance: number
+    history: { day: string; points: number }[]
+}
+
+/** A message from the administrators to every member. */
+export interface Broadcast {
+    id: number
+    kind: 'scheduled' | 'instant'
+    body: string
+}
+
+export interface AdminBroadcasts {
+    /** Day (YYYY-MM-DD) → message, for the requested week. */
+    scheduled: Record<string, string>
+    instant: { id: number; body: string; day: string; createdAt: string }[]
 }
 
 export interface DeviceSession {

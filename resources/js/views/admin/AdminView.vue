@@ -9,6 +9,7 @@ import {
     Plus,
     Search,
     Shield,
+    ShoppingBag,
     Sparkles,
     Type,
     Users,
@@ -19,6 +20,8 @@ import AdminBadges from '../../components/admin/AdminBadges.vue'
 import AdminContent from '../../components/admin/AdminContent.vue'
 import AdminLessons from '../../components/admin/AdminLessons.vue'
 import AdminMessages from '../../components/admin/AdminMessages.vue'
+import AdminStore from '../../components/admin/AdminStore.vue'
+import AdminBroadcasts from '../../components/admin/AdminBroadcasts.vue'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import StatCard from '../../components/StatCard.vue'
@@ -56,13 +59,14 @@ async function run(action: () => Promise<void>, successKey?: string): Promise<bo
     }
 }
 
-type TabId = 'users' | 'content' | 'growth' | 'education' | 'badges' | 'messages' | 'audit'
+type TabId = AdminArea
 const tabs: { id: TabId; label: string; icon: Component }[] = [
     { id: 'users', label: 'tabUsers', icon: Users },
     { id: 'content', label: 'tabContent', icon: Type },
     { id: 'growth', label: 'tabGrowth', icon: Sparkles },
     { id: 'education', label: 'tabEducation', icon: GraduationCap },
     { id: 'badges', label: 'tabBadges', icon: Award },
+    { id: 'store', label: 'tabStore', icon: ShoppingBag },
     { id: 'messages', label: 'tabMessages', icon: Mail },
     { id: 'audit', label: 'tabAudit', icon: Shield },
 ]
@@ -396,6 +400,8 @@ function auditDetail(entry: AuditEntry): string {
 
         <AdminContent v-if="tab === 'content'" />
 
+        <AdminBroadcasts v-if="tab === 'growth'" />
+
         <div v-show="tab === 'growth'" class="panel">
             <div class="section-head">
                 <div>
@@ -474,6 +480,8 @@ function auditDetail(entry: AuditEntry): string {
         <AdminLessons v-if="tab === 'education'" />
 
         <AdminBadges v-if="tab === 'badges'" />
+
+        <AdminStore v-if="tab === 'store'" />
 
         <AdminMessages v-if="tab === 'messages'" />
 

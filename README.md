@@ -20,7 +20,10 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Messages | A private thread between each member and the administrators, with unread badges |
 | Profile | Photo and names, settings (language: Arabic, English or French; time zone; goals; per-account notification switches), security (password change, list of signed-in devices, sign out of other devices) and account statistics |
 | Notifications | Task reminders, a morning motivation line, a welcome back after a day or more away, and bedtime / wake-up reminders; each can be switched off. They appear while the app is open |
-| Commitment rewards | 10 points for every day on which all daily tasks were completed; points unlock avatar frames and titles (`config/rewards.php`) |
+| Points and achievements | Administrators define achievements with one or more conditions, a period (once, daily, weekly, monthly, yearly) and the points they award; points are added automatically when every condition holds. The profile shows the balance, the total earned and a 30-day chart |
+| Store | Items priced in points and managed by administrators: titles, avatar frames, colour themes for the whole app, and profile photos |
+| Honour board | Today's top finishers, the most committed members of the week, and the most points overall and this month |
+| Broadcasts | Administrators send a notification to every member on the spot, or schedule one message per day for the week |
 | Admin center | Platform stats, user search, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log. A full administrator can appoint moderators and choose which areas each one manages; the server enforces it per area |
 
 ## Stack

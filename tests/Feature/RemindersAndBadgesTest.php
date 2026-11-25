@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\Achievement;
 use App\Models\AdminAudit;
 use App\Models\Badge;
+use App\Models\BadgeAward;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -52,11 +52,11 @@ class RemindersAndBadgesTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
         $member = User::factory()->create();
 
-        $badge = $this->actingAs($admin)->postJson('/api/admin/badges', ['title' => 'ثلاث مهام', 'description' => 'أكمل 3 مهام', 'metric' => 'tasks_completed', 'threshold' => 3])
+        $badge = $this->actingAs($admin)->postJson('/api/admin/badges', ['title' => 'ثلاث مهام', 'description' => 'أكمل 3 مهام', 'conditions' => [['metric' => 'tasks_completed', 'threshold' => 3]]])
             ->assertCreated()->assertJsonPath('badge.isActive', true)->json('badge');
         $this->assertSame("badge:{$badge['id']}", $badge['key']);
-        $this->actingAs($admin)->postJson('/api/admin/badges', ['title' => 'x', 'metric' => 'nonsense', 'threshold' => 1])->assertUnprocessable()->assertJsonValidationErrors('metric');
-        $this->actingAs($member)->postJson('/api/admin/badges', ['title' => 'x', 'metric' => 'tasks_completed', 'threshold' => 1])->assertForbidden();
+        $this->actingAs($admin)->postJson('/api/admin/badges', ['title' => 'x', 'conditions' => [['metric' => 'nonsense', 'threshold' => 1]]])->assertUnprocessable()->assertJsonValidationErrors('conditions.0.metric');
+        $this->actingAs($member)->postJson('/api/admin/badges', ['title' => 'x', 'conditions' => [['metric' => 'tasks_completed', 'threshold' => 1]]])->assertForbidden();
 
         $this->actingAs($member)->getJson('/api/dashboard')->assertJsonCount(1, 'badges')->assertJsonPath('badges.0.title', 'ثلاث مهام');
 
@@ -69,16 +69,16 @@ class RemindersAndBadgesTest extends TestCase
         $this->assertContains($badge['key'], $keys($complete($tasks[2])));
         // Evaluating again never awards it twice.
         $this->actingAs($member)->patchJson("/api/tasks/{$tasks[2]->id}", ['title' => 'again'])->assertOk()->assertJsonCount(0, 'newAchievements');
-        $this->assertSame(1, Achievement::where('key', $badge['key'])->count());
+        $this->assertSame(1, BadgeAward::where('badge_id', $badge['id'])->count());
 
         // An inactive badge is hidden and not awarded; deleting a badge removes its awards.
-        $hidden = $this->actingAs($admin)->postJson('/api/admin/badges', ['title' => 'مخفية', 'metric' => 'tasks_completed', 'threshold' => 1, 'isActive' => false])->json('badge');
+        $hidden = $this->actingAs($admin)->postJson('/api/admin/badges', ['title' => 'مخفية', 'conditions' => [['metric' => 'tasks_completed', 'threshold' => 1]], 'isActive' => false])->json('badge');
         $this->actingAs($member)->patchJson("/api/tasks/{$tasks[0]->id}", ['title' => 'x'])->assertJsonCount(0, 'newAchievements');
         $this->actingAs($member)->getJson('/api/dashboard')->assertJsonCount(1, 'badges');
-        $this->assertSame(0, Achievement::where('key', $hidden['key'])->count());
+        $this->assertSame(0, BadgeAward::where('badge_id', $hidden['id'])->count());
 
         $this->actingAs($admin)->deleteJson("/api/admin/badges/{$badge['id']}")->assertNoContent();
-        $this->assertSame(0, Achievement::where('key', $badge['key'])->count());
+        $this->assertSame(0, BadgeAward::where('badge_id', $badge['id'])->count());
         $this->assertSame(['badge_created', 'badge_created', 'badge_deleted'], AdminAudit::orderBy('id')->pluck('action')->all());
         $this->assertSame(1, Badge::count());
     }
@@ -87,12 +87,12 @@ class RemindersAndBadgesTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $member = User::factory()->create();
-        $badge = Badge::create(['title' => 'عادتان', 'metric' => 'habit_checks', 'threshold' => 2]);
+        $badge = Badge::create(['title' => 'عادتان', 'conditions' => [['metric' => 'habit_checks', 'threshold' => 2]]]);
         $habit = $member->habits()->create(['name' => 'ماء']);
 
         $this->actingAs($member)->putJson("/api/habits/{$habit->id}/checks/2026-11-01", ['done' => true])->assertNoContent();
-        $this->assertSame(0, $member->achievements()->count());
+        $this->assertSame(0, BadgeAward::count());
         $this->actingAs($member)->putJson("/api/habits/{$habit->id}/checks/2026-11-02", ['done' => true])->assertNoContent();
-        $this->assertSame([$badge->achievementKey()], $member->achievements()->pluck('key')->all());
+        $this->assertSame([$badge->id], BadgeAward::where('user_id', $member->id)->pluck('badge_id')->all());
     }
 }

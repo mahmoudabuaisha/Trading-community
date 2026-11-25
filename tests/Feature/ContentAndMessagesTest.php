@@ -82,7 +82,7 @@ class ContentAndMessagesTest extends TestCase
         // The admin sees one thread with one unread message; another member sees nothing.
         $this->actingAs($admin)->getJson('/api/messages/unread')->assertJsonPath('admin', 1);
         $this->actingAs($other)->getJson('/api/messages')->assertOk()->assertJsonCount(0, 'messages');
-        $this->actingAs($other)->getJson('/api/messages/unread')->assertExactJson(['member' => 0, 'admin' => 0]);
+        $this->actingAs($other)->getJson('/api/messages/unread')->assertExactJson(['member' => 0, 'admin' => 0, 'broadcasts' => []]);
         $this->actingAs($admin)->getJson('/api/admin/threads')->assertOk()
             ->assertJsonCount(1, 'threads')->assertJsonPath('threads.0.user.id', $member->id)->assertJsonPath('threads.0.unread', 1);
 

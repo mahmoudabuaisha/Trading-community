@@ -4,7 +4,7 @@ import { repository } from '../data/repository'
 import { messages, setLocale, t } from '../i18n'
 import { completionStreak, percent, today } from '../lib/dates'
 import type {
-    RewardCatalogue,
+    Broadcast,
     Badge,
     Lesson,
     SiteContent,
@@ -37,8 +37,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     const lessons = ref<Lesson[]>([])
     const badges = ref<Badge[]>([])
     const absenceDays = ref(0)
-    const rewards = ref<RewardCatalogue>({ pointsPerPerfectDay: 10, frames: {}, titles: {} })
-    const unread = ref<UnreadCounts>({ member: 0, admin: 0 })
+    const broadcasts = ref<Broadcast[]>([])
+    const unread = ref<UnreadCounts>({ member: 0, admin: 0, broadcasts: [] })
     const loading = ref(false)
     const loaded = ref(false)
     const error = ref<unknown>(null)
@@ -69,7 +69,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
             badges.value = payload.badges
             // Mention an absence once: later refreshes in the same visit report 0.
             if (payload.absenceDays > 0) absenceDays.value = payload.absenceDays
-            rewards.value = payload.rewards
+            broadcasts.value = payload.broadcasts
             useAuthStore().setUser(payload.user)
             loaded.value = true
         } catch (e) {
@@ -88,16 +88,31 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         focus.value = { totalMinutes: 0, todayMinutes: 0 }
         review.value = null
         lessons.value = []
-        unread.value = { member: 0, admin: 0 }
+        unread.value = { member: 0, admin: 0, broadcasts: [] }
+        broadcasts.value = []
         loaded.value = false
     }
 
     function celebrate(earned: Achievement[]): void {
+        let pointsChanged = false
         for (const badge of earned) {
-            if (achievements.value.some((existing) => existing.id === badge.id)) continue
-            achievements.value.unshift(badge)
-            useUiStore().success(t('achievements.earned', { title: badgeTitle(badge.key) }))
+            const custom = badges.value.find((item) => item.key === badge.key)
+            if (!custom && achievements.value.some((existing) => existing.id === badge.id)) continue
+            // A repeatable badge replaces its entry from an earlier period.
+            achievements.value = [badge, ...achievements.value.filter((existing) => existing.key !== badge.key)]
+            if (custom?.points) {
+                pointsChanged = true
+                useUiStore().success(t('achievements.earnedPoints', { title: custom.title, n: custom.points }))
+            } else {
+                useUiStore().success(t('achievements.earned', { title: badgeTitle(badge.key) }))
+            }
         }
+        // The balance lives on the account; fetch it again rather than add it up here.
+        if (pointsChanged)
+            void repository.me().then(
+                (user) => useAuthStore().setUser(user),
+                () => undefined,
+            )
     }
 
     function replaceTask(task: Task): void {
@@ -220,6 +235,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     async function refreshUnread(): Promise<void> {
         try {
             unread.value = await repository.unreadCounts()
+            broadcasts.value = unread.value.broadcasts
         } catch {
             /* keep the previous counts */
         }
@@ -241,7 +257,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         lessons,
         badges,
         absenceDays,
-        rewards,
+        broadcasts,
         unread,
         loading,
         loaded,

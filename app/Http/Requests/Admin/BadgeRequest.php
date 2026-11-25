@@ -20,8 +20,12 @@ class BadgeRequest extends ApiRequest
         return [
             'title' => [$required, 'string', 'max:80'],
             'description' => ['sometimes', 'nullable', 'string', 'max:240'],
-            'metric' => [$required, Rule::in(Badge::METRICS)],
-            'threshold' => [$required, 'integer', 'min:1', 'max:1000000'],
+            'points' => ['sometimes', 'integer', 'min:0', 'max:100000'],
+            'period' => ['sometimes', Rule::in(Badge::PERIODS)],
+            // Every condition must hold within the period for the badge to be earned.
+            'conditions' => [$required, 'array', 'min:1', 'max:5'],
+            'conditions.*.metric' => ['required', 'distinct', Rule::in(Badge::METRICS)],
+            'conditions.*.threshold' => ['required', 'integer', 'min:1', 'max:1000000'],
             'isActive' => ['sometimes', 'boolean'],
         ];
     }
@@ -31,6 +35,12 @@ class BadgeRequest extends ApiRequest
         $attributes = parent::attributesForModel();
         if (array_key_exists('description', $attributes)) {
             $attributes['description'] ??= '';
+        }
+        if (isset($attributes['conditions'])) {
+            $attributes['conditions'] = array_map(
+                fn (array $condition): array => ['metric' => $condition['metric'], 'threshold' => (int) $condition['threshold']],
+                array_values($attributes['conditions']),
+            );
         }
 
         return $attributes;

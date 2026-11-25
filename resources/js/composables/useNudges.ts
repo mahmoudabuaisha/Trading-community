@@ -48,7 +48,9 @@ export function useNudges(): void {
         const now = new Date()
         const clock = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
 
-        if (prefs.notifyMorning && now.getHours() >= 5 && now.getHours() < 12 && firstToday('morning')) {
+        // A message planned by the administrators for today takes the place of the random morning line.
+        const planned = workspace.broadcasts.find((item) => item.kind === 'scheduled')
+        if (!planned && prefs.notifyMorning && now.getHours() >= 5 && now.getHours() < 12 && firstToday('morning')) {
             const quotes = workspace.motivations.length
                 ? workspace.motivations.map((item) => item.title)
                 : messages.value.quotes
@@ -77,6 +79,29 @@ export function useNudges(): void {
         { immediate: true },
     )
     watch(() => workspace.loaded, check)
+
+    // Messages from the administrators: each is announced once on this device, then stays in the bell for the day.
+    watch(
+        () => workspace.broadcasts,
+        (list) => {
+            for (const item of list) {
+                const key = `sn-dcc:broadcast:${auth.user?.id}:${item.id}:v1`
+                let fresh = true
+                try {
+                    fresh = localStorage.getItem(key) === null
+                    localStorage.setItem(key, today())
+                } catch {
+                    /* without storage it may be announced again on reload */
+                }
+                notices.addBroadcast(item.id, t('nudge.broadcastTitle'), item.body, fresh)
+                if (fresh) {
+                    ui.success(`${t('nudge.broadcastTitle')} — ${item.body}`)
+                    chime()
+                }
+            }
+        },
+        { immediate: true, deep: true },
+    )
 
     onMounted(() => {
         check()

@@ -181,7 +181,7 @@ return [
     */
 
     'custom' => [
-        'rewards' => ['locked' => 'You need more points to unlock this reward.'],
+        'store' => ['unavailable' => 'This item is not available right now.', 'owned' => 'You already own this item.', 'points' => 'You do not have enough points for this item.', 'notOwned' => 'Buy this item first.'],
         'habits' => [
             'limit' => 'You can track at most :max habits.',
             'future' => 'A day cannot be recorded before it happens.',

@@ -31,7 +31,7 @@ class User extends Authenticatable
     public const ROLES = [self::ROLE_ADMIN, self::ROLE_MODERATOR, self::ROLE_USER];
 
     /** Areas of the admin center. An administrator has all of them; a moderator has those granted. */
-    public const PERMISSIONS = ['users', 'content', 'growth', 'education', 'badges', 'messages', 'audit'];
+    public const PERMISSIONS = ['users', 'content', 'growth', 'education', 'badges', 'store', 'messages', 'audit'];
 
     public const DEFAULT_PREFERENCES = [
         'notifyReminders' => true,
@@ -75,6 +75,7 @@ class User extends Authenticatable
         return [
             'permissions' => 'array',
             'preferences' => 'array',
+            'equipped' => 'array',
             'last_seen_at' => 'datetime',
             'is_premium' => 'boolean',
             'email_verified_at' => 'datetime',

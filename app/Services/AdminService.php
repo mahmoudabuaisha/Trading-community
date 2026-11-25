@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Models\AdminAudit;
 use App\Models\Badge;
+use App\Models\Broadcast;
 use App\Models\Lesson;
 use App\Models\Motivation;
 use App\Models\Setting;
+use App\Models\StoreItem;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -189,6 +191,70 @@ class AdminService
         DB::transaction(function () use ($admin, $badge): void {
             $badge->delete();
             $this->audit($admin, 'badge_deleted', null, ['name' => $badge->title]);
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function saveStoreItem(User $admin, ?StoreItem $item, array $data, ?UploadedFile $image, bool $removeImage): StoreItem
+    {
+        $path = $image?->store(StoreItem::IMAGE_DIRECTORY, 'public');
+
+        return DB::transaction(function () use ($admin, $item, $data, $path, $removeImage): StoreItem {
+            $creating = $item === null;
+            $item ??= new StoreItem;
+            $item->fill($data);
+            if ($path) {
+                $item->image_path = $path;
+            } elseif ($removeImage) {
+                $item->image_path = null;
+            }
+            if ($creating) {
+                $item->created_by = $admin->id;
+            }
+            $item->save();
+            $this->audit($admin, $creating ? 'store_item_created' : 'store_item_updated', null, ['name' => $item->name]);
+
+            return $item;
+        });
+    }
+
+    /** Deleting an item removes it from everyone who bought it; their points come back, since spending is the sum of purchases. */
+    public function deleteStoreItem(User $admin, StoreItem $item): void
+    {
+        DB::transaction(function () use ($admin, $item): void {
+            $item->delete();
+            $this->audit($admin, 'store_item_deleted', null, ['name' => $item->name]);
+        });
+    }
+
+    public function scheduleBroadcast(User $admin, string $day, string $body): void
+    {
+        DB::transaction(function () use ($admin, $day, $body): void {
+            Broadcast::where('kind', Broadcast::KIND_SCHEDULED)->whereDate('day', $day)->delete();
+            if ($body !== '') {
+                Broadcast::create(['kind' => Broadcast::KIND_SCHEDULED, 'day' => $day, 'body' => $body, 'created_by' => $admin->id]);
+            }
+            $this->audit($admin, 'broadcast_scheduled', null, ['name' => $day]);
+        });
+    }
+
+    public function sendBroadcast(User $admin, string $day, string $body): Broadcast
+    {
+        return DB::transaction(function () use ($admin, $day, $body): Broadcast {
+            $broadcast = Broadcast::create(['kind' => Broadcast::KIND_INSTANT, 'day' => $day, 'body' => $body, 'created_by' => $admin->id]);
+            $this->audit($admin, 'broadcast_sent', null, ['name' => mb_strimwidth($body, 0, 60, '…')]);
+
+            return $broadcast;
+        });
+    }
+
+    public function deleteBroadcast(User $admin, Broadcast $broadcast): void
+    {
+        DB::transaction(function () use ($admin, $broadcast): void {
+            $broadcast->delete();
+            $this->audit($admin, 'broadcast_deleted', null, ['name' => mb_strimwidth($broadcast->body, 0, 60, '…')]);
         });
     }
 

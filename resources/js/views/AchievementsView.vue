@@ -2,6 +2,7 @@
 import { Award, Lock } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { formatDate, messages, t } from '../i18n'
+import { conditionsText } from '../lib/badges'
 import { useWorkspaceStore } from '../stores/workspace'
 
 const workspace = useWorkspaceStore()
@@ -13,11 +14,15 @@ const badges = computed(() => {
         key,
         title: copy.title,
         text: copy.text,
+        points: 0,
+        period: 'once',
     }))
     const custom = workspace.badges.map((badge) => ({
         key: badge.key,
         title: badge.title,
-        text: badge.description || `${t(`admin.metric.${badge.metric}`)} ≥ ${badge.threshold}`,
+        text: badge.description || conditionsText(badge),
+        points: badge.points,
+        period: badge.period,
     }))
     return [...builtIn, ...custom]
         .map((badge) => ({ ...badge, earned: workspace.achievements.find((earned) => earned.key === badge.key) }))
@@ -49,6 +54,9 @@ const badges = computed(() => {
                 <div>
                     <h3>{{ badge.title }}</h3>
                     <p>{{ badge.text }}</p>
+                    <span v-if="badge.points" class="count-pill count-pill--gold">
+                        {{ t('rewards.count', { n: badge.points }) }} · {{ t(`admin.period.${badge.period}`) }}
+                    </span>
                     <small>{{
                         badge.earned
                             ? formatDate(badge.earned.earnedAt, { dateStyle: 'medium' })

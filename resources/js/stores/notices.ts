@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type NoticeKind = 'morning' | 'absence' | 'sleep' | 'wake'
+export type NoticeKind = 'morning' | 'absence' | 'sleep' | 'wake' | 'broadcast'
 
 export interface Notice {
     id: number
     kind: NoticeKind
+    /** For a message from the administrators: its id, so it is listed once. */
+    broadcastId?: number
     title: string
     text: string
 }
@@ -20,9 +22,20 @@ export const useNoticesStore = defineStore('notices', () => {
         items.value = [{ id: nextId++, kind, title, text }, ...items.value.filter((notice) => notice.kind !== kind)]
     }
 
-    function dismiss(id: number): void {
-        items.value = items.value.filter((notice) => notice.id !== id)
+    const dismissed = new Set<number>()
+
+    /** List a message from the administrators (once per id); a dismissed one stays dismissed for this visit. */
+    function addBroadcast(broadcastId: number, title: string, text: string, toFront: boolean): void {
+        if (dismissed.has(broadcastId) || items.value.some((notice) => notice.broadcastId === broadcastId)) return
+        const notice: Notice = { id: nextId++, kind: 'broadcast', broadcastId, title, text }
+        items.value = toFront ? [notice, ...items.value] : [...items.value, notice]
     }
 
-    return { items, add, dismiss }
+    function dismiss(id: number): void {
+        const notice = items.value.find((item) => item.id === id)
+        if (notice?.broadcastId) dismissed.add(notice.broadcastId)
+        items.value = items.value.filter((item) => item.id !== id)
+    }
+
+    return { items, add, addBroadcast, dismiss }
 })

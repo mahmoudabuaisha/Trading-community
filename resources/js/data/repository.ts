@@ -9,8 +9,14 @@ import type {
     AdminArea,
     DeviceSession,
     Preferences,
+    AdminBroadcasts,
     Badge,
     BadgeInput,
+    Leaderboard,
+    PointsHistory,
+    StoreItem,
+    StoreItemInput,
+    StoreKind,
     Habit,
     HabitMonth,
     MoodEntry,
@@ -72,8 +78,12 @@ export const repository = {
     sessions: () => request<{ sessions: DeviceSession[] }>('GET', '/profile/sessions').then((r) => r.sessions),
     savePreferences: (preferences: Preferences) =>
         request<{ user: User }>('PUT', '/profile/preferences', preferences).then((r) => r.user),
-    equipRewards: (frame: string, titleKey: string | null) =>
-        request<{ user: User }>('PUT', '/profile/rewards', { frame, titleKey }).then((r) => r.user),
+    pointsHistory: (day: string) => request<PointsHistory>('GET', `/profile/points?date=${day}`),
+    store: () => request<{ items: StoreItem[]; user: User }>('GET', '/store'),
+    buyItem: (id: number) => request<{ items: StoreItem[]; user: User }>('POST', `/store/${id}/buy`),
+    equipItem: (kind: StoreKind, itemId: number | null) =>
+        request<{ items: StoreItem[]; user: User }>('PUT', '/store/equip', { kind, itemId }),
+    leaderboard: (day: string) => request<Leaderboard>('GET', `/leaderboard?date=${day}`),
     logFocusSession: (minutes: number, day: string) =>
         request<{ focus: FocusTotals; newAchievements: Achievement[] }>('POST', '/focus-sessions', { minutes, day }),
     saveReview: (review: Pick<DailyReview, 'date' | 'win' | 'unfinished' | 'lesson' | 'tomorrow'>) =>
@@ -128,6 +138,20 @@ export const repository = {
         request<{ user: ThreadUser; messages: Message[] }>('GET', `/admin/threads/${userId}`),
     adminSendMessage: (userId: number, body: string) =>
         request<{ message: Message }>('POST', `/admin/threads/${userId}`, { body }).then((r) => r.message),
+    adminStoreItems: () => request<{ items: StoreItem[] }>('GET', '/admin/store-items').then((r) => r.items),
+    adminSaveStoreItem: (id: number | null, input: Partial<StoreItemInput>) =>
+        request<{ item: StoreItem }>(
+            'POST',
+            id === null ? '/admin/store-items' : `/admin/store-items/${id}`,
+            storeItemForm(input),
+        ).then((r) => r.item),
+    adminDeleteStoreItem: (id: number) => request<void>('DELETE', `/admin/store-items/${id}`),
+    adminBroadcasts: (from: string) => request<AdminBroadcasts>('GET', `/admin/broadcasts?from=${from}`),
+    adminScheduleBroadcast: (day: string, body: string) =>
+        request<void>('PUT', `/admin/broadcasts/schedule/${day}`, { body }),
+    adminSendBroadcast: (body: string, day: string) =>
+        request<{ id: number }>('POST', '/admin/broadcasts', { body, day }),
+    adminDeleteBroadcast: (id: number) => request<void>('DELETE', `/admin/broadcasts/${id}`),
     adminLessons: () => request<{ lessons: Lesson[] }>('GET', '/admin/lessons').then((r) => r.lessons),
     adminSaveLesson: (id: number | null, input: Partial<LessonInput>) =>
         request<{ lesson: Lesson }>(
@@ -136,6 +160,19 @@ export const repository = {
             lessonForm(input),
         ).then((r) => r.lesson),
     adminDeleteLesson: (id: number) => request<void>('DELETE', `/admin/lessons/${id}`),
+}
+
+/** Store items travel as multipart form data so the picture can go with the details. */
+function storeItemForm(input: Partial<StoreItemInput>): FormData {
+    const form = new FormData()
+    for (const key of ['name', 'description', 'kind', 'value'] as const) {
+        if (input[key] !== undefined) form.set(key, input[key])
+    }
+    if (input.price !== undefined) form.set('price', String(input.price))
+    if (input.isActive !== undefined) form.set('isActive', input.isActive ? '1' : '0')
+    if (input.removeImage) form.set('removeImage', '1')
+    if (input.image) form.set('image', input.image, 'item.png')
+    return form
 }
 
 /** Lessons travel as multipart form data so the image can go with the text. */

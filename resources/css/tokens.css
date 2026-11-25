@@ -12,6 +12,9 @@
     --surface-sunken: rgba(8, 8, 9, 0.6);
 
     /* Brand gold */
+    /* The accent as bare channels, for translucent uses: rgb(var(--accent-rgb) / 0.2). */
+    --accent-rgb: 214 173 98;
+    --accent-light-rgb: 232 197 125;
     --gold-200: #f0d9a7;
     --gold-300: #e8c57d;
     --gold-500: #d6ad62;
@@ -29,8 +32,10 @@
     --frame-royal: linear-gradient(135deg, #fbeec4, #b06bff 35%, #5b2bd0 60%, #f3dca6);
     --frame-glow-bronze: rgba(208, 139, 84, 0.45);
     --frame-glow-silver: rgba(223, 225, 231, 0.4);
-    --frame-glow-gold: rgba(232, 197, 125, 0.6);
+    --frame-glow-gold: rgb(var(--accent-light-rgb) / 0.6);
     --frame-glow-royal: rgba(176, 107, 255, 0.6);
+    --frame-diamond: linear-gradient(135deg, #ffffff, #9fe8ff 30%, #5aa7e8 55%, #e6fbff 80%, #ffffff);
+    --frame-glow-diamond: rgba(159, 232, 255, 0.65);
     --steel-100: #f4f5f8;
     --steel-300: #b9bcc6;
     --steel-600: #5b5e68;
@@ -55,18 +60,18 @@
         135deg,
         #dfe9ff 0%,
         #f3dca6 5%,
-        rgba(214, 173, 98, 0.55) 16%,
-        rgba(214, 173, 98, 0.16) 42%,
-        rgba(214, 173, 98, 0.14) 60%,
-        rgba(214, 173, 98, 0.55) 84%,
+        rgb(var(--accent-rgb) / 0.55) 16%,
+        rgb(var(--accent-rgb) / 0.16) 42%,
+        rgb(var(--accent-rgb) / 0.14) 60%,
+        rgb(var(--accent-rgb) / 0.55) 84%,
         #f3dca6 95%,
         #dfe9ff 100%
     );
 
     /* Lines */
-    --line: rgba(214, 173, 98, 0.22);
-    --line-soft: rgba(214, 173, 98, 0.1);
-    --line-strong: rgba(214, 173, 98, 0.5);
+    --line: rgb(var(--accent-rgb) / 0.22);
+    --line-soft: rgb(var(--accent-rgb) / 0.1);
+    --line-strong: rgb(var(--accent-rgb) / 0.5);
 
     /* Semantic */
     --green-500: #79cda4;
@@ -95,7 +100,7 @@
 
     /* Elevation */
     --shadow-card: 0 18px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 236, 190, 0.05);
-    --shadow-glow: 0 0 34px rgba(214, 173, 98, 0.22);
+    --shadow-glow: 0 0 34px rgb(var(--accent-rgb) / 0.22);
 
     /* Type */
     --font-display: 'Cinzel', 'Times New Roman', serif;
@@ -118,4 +123,64 @@
     /* Layout */
     --page-max: 1340px;
     --sidebar-width: 290px;
+}
+
+/*
+ * Themes bought in the store. Each one swaps the accent ramp; everything that
+ * reads the gold tokens follows. The logo and the mountain stay as they are.
+ */
+:root[data-theme='emerald'] {
+    --gold-200: #b8f0d2;
+    --gold-300: #7fe0b0;
+    --gold-500: #3fc48a;
+    --gold-700: #1f7a55;
+    --gold-900: #0f3324;
+    --accent-rgb: 63 196 138;
+    --accent-light-rgb: 127 224 176;
+    --gold-gradient: linear-gradient(100deg, #b8f0d2 0%, #3fc48a 45%, #1f7a55 100%);
+    --gold-metal: linear-gradient(180deg, #ffffff 0%, #b8f0d2 22%, #3fc48a 52%, #1f7a55 70%, #7fe0b0 100%);
+}
+:root[data-theme='sapphire'] {
+    --gold-200: #bcd8ff;
+    --gold-300: #8fbcff;
+    --gold-500: #5a94f0;
+    --gold-700: #2f5aa8;
+    --gold-900: #14264a;
+    --accent-rgb: 90 148 240;
+    --accent-light-rgb: 143 188 255;
+    --gold-gradient: linear-gradient(100deg, #bcd8ff 0%, #5a94f0 45%, #2f5aa8 100%);
+    --gold-metal: linear-gradient(180deg, #ffffff 0%, #bcd8ff 22%, #5a94f0 52%, #2f5aa8 70%, #8fbcff 100%);
+}
+:root[data-theme='ruby'] {
+    --gold-200: #ffc2cc;
+    --gold-300: #ff8fa3;
+    --gold-500: #e8566f;
+    --gold-700: #9c2b40;
+    --gold-900: #3d121b;
+    --accent-rgb: 232 86 111;
+    --accent-light-rgb: 255 143 163;
+    --gold-gradient: linear-gradient(100deg, #ffc2cc 0%, #e8566f 45%, #9c2b40 100%);
+    --gold-metal: linear-gradient(180deg, #ffffff 0%, #ffc2cc 22%, #e8566f 52%, #9c2b40 70%, #ff8fa3 100%);
+}
+:root[data-theme='amethyst'] {
+    --gold-200: #dcc8ff;
+    --gold-300: #c19bff;
+    --gold-500: #9a6bf0;
+    --gold-700: #5f3aa8;
+    --gold-900: #26174a;
+    --accent-rgb: 154 107 240;
+    --accent-light-rgb: 193 155 255;
+    --gold-gradient: linear-gradient(100deg, #dcc8ff 0%, #9a6bf0 45%, #5f3aa8 100%);
+    --gold-metal: linear-gradient(180deg, #ffffff 0%, #dcc8ff 22%, #9a6bf0 52%, #5f3aa8 70%, #c19bff 100%);
+}
+:root[data-theme='silver'] {
+    --gold-200: #eef0f5;
+    --gold-300: #d5d8e0;
+    --gold-500: #a9aebb;
+    --gold-700: #666b78;
+    --gold-900: #2a2c33;
+    --accent-rgb: 169 174 187;
+    --accent-light-rgb: 213 216 224;
+    --gold-gradient: linear-gradient(100deg, #eef0f5 0%, #a9aebb 45%, #666b78 100%);
+    --gold-metal: linear-gradient(180deg, #ffffff 0%, #eef0f5 22%, #a9aebb 52%, #666b78 70%, #d5d8e0 100%);
 }

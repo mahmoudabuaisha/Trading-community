@@ -18,6 +18,8 @@ import type {
     ThreadUser,
     Badge,
     BadgeInput,
+    StoreItem,
+    StoreItemInput,
 } from '../types/domain'
 
 export const useAdminStore = defineStore('admin', () => {
@@ -29,6 +31,7 @@ export const useAdminStore = defineStore('admin', () => {
     const content = ref<SiteContent>({ taglineAr: null, taglineEn: null, welcomeSubAr: null, welcomeSubEn: null })
     const lessons = ref<Lesson[]>([])
     const badges = ref<Badge[]>([])
+    const storeItems = ref<StoreItem[]>([])
     const threads = ref<Thread[]>([])
     const activeThread = ref<{ user: ThreadUser; messages: Message[] } | null>(null)
     const search = ref('')
@@ -88,6 +91,20 @@ export const useAdminStore = defineStore('admin', () => {
         await Promise.all([loadBadges(), loadOverview()])
     }
 
+    async function loadStoreItems(): Promise<void> {
+        storeItems.value = await repository.adminStoreItems()
+    }
+
+    async function saveStoreItem(id: number | null, input: Partial<StoreItemInput>): Promise<void> {
+        await repository.adminSaveStoreItem(id, input)
+        await Promise.all([loadStoreItems(), loadOverview()])
+    }
+
+    async function deleteStoreItem(id: number): Promise<void> {
+        await repository.adminDeleteStoreItem(id)
+        await Promise.all([loadStoreItems(), loadOverview()])
+    }
+
     async function loadThreads(): Promise<void> {
         threads.value = await repository.adminThreads()
     }
@@ -118,6 +135,7 @@ export const useAdminStore = defineStore('admin', () => {
                 auth.can('education') ? loadLessons() : null,
                 auth.can('messages') ? loadThreads() : null,
                 auth.can('badges') ? loadBadges() : null,
+                auth.can('store') ? loadStoreItems() : null,
             ])
         } catch (e) {
             error.value = e
@@ -160,6 +178,8 @@ export const useAdminStore = defineStore('admin', () => {
         content,
         lessons,
         badges,
+        storeItems,
+        loadOverview,
         threads,
         activeThread,
         search,
@@ -175,6 +195,8 @@ export const useAdminStore = defineStore('admin', () => {
         saveLesson,
         deleteLesson,
         saveBadge,
+        saveStoreItem,
+        deleteStoreItem,
         deleteBadge,
         loadThreads,
         openThread,

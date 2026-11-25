@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\BadgeController as AdminBadgeController;
+use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
 use App\Http\Controllers\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Admin\MotivationController as AdminMotivationController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\StoreItemController as AdminStoreItemController;
 use App\Http\Controllers\Admin\ThreadController as AdminThreadController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthController;
@@ -12,10 +14,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FocusSessionController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\HabitController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,7 +58,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('profile/sign-out-others', [ProfileController::class, 'signOutOthers']);
     Route::get('profile/sessions', [ProfileController::class, 'sessions']);
     Route::put('profile/preferences', [ProfileController::class, 'preferences']);
-    Route::put('profile/rewards', [ProfileController::class, 'rewards']);
+    Route::get('profile/points', [ProfileController::class, 'points']);
+    Route::get('store', [StoreController::class, 'index']);
+    Route::post('store/{item}/buy', [StoreController::class, 'buy'])->middleware('throttle:30,1');
+    Route::put('store/equip', [StoreController::class, 'equip']);
+    Route::get('leaderboard', [LeaderboardController::class, 'show']);
     Route::post('focus-sessions', [FocusSessionController::class, 'store']);
     Route::put('reviews/{date}', [ReviewController::class, 'update'])->where('date', '\d{4}-\d{2}-\d{2}');
 
@@ -84,6 +92,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('badges', [AdminBadgeController::class, 'store'])->middleware('area:badges');
         Route::patch('badges/{badge}', [AdminBadgeController::class, 'update'])->middleware('area:badges');
         Route::delete('badges/{badge}', [AdminBadgeController::class, 'destroy'])->middleware('area:badges');
+        Route::get('store-items', [AdminStoreItemController::class, 'index'])->middleware('area:store');
+        Route::post('store-items', [AdminStoreItemController::class, 'store'])->middleware('area:store');
+        // POST, not PATCH: the update carries an optional image as multipart form data.
+        Route::post('store-items/{item}', [AdminStoreItemController::class, 'update'])->middleware('area:store');
+        Route::delete('store-items/{item}', [AdminStoreItemController::class, 'destroy'])->middleware('area:store');
+        Route::get('broadcasts', [AdminBroadcastController::class, 'index'])->middleware('area:growth');
+        Route::post('broadcasts', [AdminBroadcastController::class, 'send'])->middleware('area:growth');
+        Route::put('broadcasts/schedule/{day}', [AdminBroadcastController::class, 'schedule'])->middleware('area:growth')->where('day', '\\d{4}-\\d{2}-\\d{2}');
+        Route::delete('broadcasts/{broadcast}', [AdminBroadcastController::class, 'destroy'])->middleware('area:growth');
         Route::get('settings', [AdminSettingsController::class, 'show'])->middleware('area:content');
         Route::put('settings', [AdminSettingsController::class, 'update'])->middleware('area:content');
         Route::get('threads', [AdminThreadController::class, 'index'])->middleware('area:messages');

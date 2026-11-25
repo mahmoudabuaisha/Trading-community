@@ -3,30 +3,37 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * An achievement defined by the administrators: when all its conditions hold
+ * within its period, the member earns it and its points.
+ */
 class Badge extends Model
 {
-    /** What a badge can count. Each is a running total for the member. */
-    public const METRICS = ['tasks_completed', 'streak_days', 'focus_minutes', 'goals_completed', 'habit_checks'];
+    /** What a condition can count, within the badge's period. */
+    public const METRICS = ['tasks_completed', 'perfect_days', 'streak_days', 'focus_minutes', 'goals_completed', 'habit_checks'];
 
-    protected $fillable = ['title', 'description', 'metric', 'threshold', 'is_active'];
+    /** "once" is earned a single time over all history; the others can be earned again every period. */
+    public const PERIODS = ['once', 'daily', 'weekly', 'monthly', 'yearly'];
 
-    protected $attributes = ['description' => '', 'is_active' => true];
+    protected $fillable = ['title', 'description', 'points', 'period', 'conditions', 'is_active'];
+
+    protected $attributes = ['description' => '', 'is_active' => true, 'points' => 0, 'period' => 'once'];
 
     protected function casts(): array
     {
-        return ['threshold' => 'integer', 'is_active' => 'boolean'];
+        return ['points' => 'integer', 'conditions' => 'array', 'is_active' => 'boolean'];
     }
 
-    /** The achievement key under which this badge is recorded once earned. */
+    public function awards(): HasMany
+    {
+        return $this->hasMany(BadgeAward::class);
+    }
+
+    /** The key under which this badge appears among a member's achievements. */
     public function achievementKey(): string
     {
         return 'badge:'.$this->id;
-    }
-
-    protected static function booted(): void
-    {
-        // A deleted badge takes its awards with it, so nobody keeps a badge that no longer exists.
-        static::deleted(fn (Badge $badge) => Achievement::where('key', $badge->achievementKey())->delete());
     }
 }

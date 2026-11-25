@@ -105,3 +105,10 @@ export function fromLocalInput(value: string): string | null {
     const d = new Date(value)
     return Number.isNaN(d.getTime()) ? null : d.toISOString()
 }
+
+/** The day `count` days after (or, negative, before) a YYYY-MM-DD day. */
+export function addDays(day: string, count: number): string {
+    const date = parseDay(day)
+    date.setDate(date.getDate() + count)
+    return ymd(date)
+}

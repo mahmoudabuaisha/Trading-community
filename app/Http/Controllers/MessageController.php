@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\MessageRequest;
 use App\Http\Resources\MessageResource;
+use App\Models\Broadcast;
 use App\Models\Message;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,6 +37,8 @@ class MessageController extends Controller
         $user = $request->user();
 
         return response()->json([
+            // Today's messages from the administrators ride along, so an open tab receives one sent just now.
+            'broadcasts' => Broadcast::forDay(now($user->timezone)->toDateString()),
             'member' => $user->messages()->unreadFor(admin: false)->count(),
             'admin' => $user->isAdmin() ? Message::unreadFor(admin: true)->count() : 0,
         ]);

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\AdminAudit;
-use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -67,32 +66,6 @@ class StaffAndRewardsTest extends TestCase
         $this->actingAs($admin)->patchJson("/api/admin/users/{$member->id}", ['role' => 'user'])->assertOk();
         $this->actingAs($member->refresh())->getJson('/api/admin/overview')->assertForbidden();
         $this->assertContains('permissions_changed', AdminAudit::pluck('action')->all());
-    }
-
-    public function test_points_come_from_fully_completed_days_and_unlock_rewards(): void
-    {
-        $user = User::factory()->create();
-        $task = fn (string $day, string $status, string $period = 'daily') => Task::factory()->for($user)->create(['period_type' => $period, 'period_start' => $day, 'period_end' => $day, 'status' => $status]);
-
-        $task('2026-11-01', 'completed');
-        $task('2026-11-01', 'completed');             // perfect day
-        $task('2026-11-02', 'completed');
-        $task('2026-11-02', 'pending');               // not perfect
-        $task('2026-11-03', 'completed');
-        $task('2026-11-03', 'cancelled');             // cancelled does not count against the day
-        $task('2026-11-04', 'completed', 'weekly');   // not a daily task
-        $this->actingAs($user)->getJson('/api/auth/me')->assertJsonPath('user.points', 20)->assertJsonPath('user.frame', 'none')->assertJsonPath('user.titleKey', null);
-
-        $this->putJson('/api/profile/rewards', ['frame' => 'bronze', 'titleKey' => null])->assertUnprocessable()->assertJsonValidationErrors('frame');
-        $this->putJson('/api/profile/rewards', ['frame' => 'made-up', 'titleKey' => null])->assertUnprocessable();
-        $task('2026-11-05', 'completed');             // 30 points
-        $this->putJson('/api/profile/rewards', ['frame' => 'bronze', 'titleKey' => null])->assertOk()->assertJsonPath('user.frame', 'bronze');
-        $this->putJson('/api/profile/rewards', ['frame' => 'bronze', 'titleKey' => 'committed'])->assertUnprocessable()->assertJsonValidationErrors('titleKey');
-
-        // Points can fall; the frame then stops showing but is not forgotten.
-        Task::whereDate('period_start', '2026-11-05')->update(['status' => 'pending']);
-        $this->getJson('/api/auth/me')->assertJsonPath('user.points', 20)->assertJsonPath('user.frame', 'none');
-        $this->assertSame('bronze', $user->refresh()->frame);
     }
 
     public function test_preferences_sessions_and_absence(): void

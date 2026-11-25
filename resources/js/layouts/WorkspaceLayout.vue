@@ -4,24 +4,26 @@ import {
     BarChart3,
     CalendarDays,
     Clock3,
+    Crown,
     Flag,
     GraduationCap,
-    Crown,
     House,
     ListChecks,
     LogOut,
     Mail,
+    Menu,
     PanelLeftClose,
     PanelLeftOpen,
-    Menu,
     Shield,
+    ShoppingBag,
     Sparkles,
     Target,
     TrendingUp,
+    Trophy,
     UserRound,
     X,
 } from 'lucide-vue-next'
-import { computed, onBeforeUnmount, onMounted, ref, watch, type Component } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch, type Component, watchEffect } from 'vue'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import BrandLogo from '../components/BrandLogo.vue'
 import EmptyState from '../components/EmptyState.vue'
@@ -43,6 +45,7 @@ const router = useRouter()
 
 const { tagline } = useSiteCopy()
 const navOpen = ref(false)
+let stopTheme: () => void = () => undefined
 
 // Desktop: the sidebar can be tucked away to give the page its full width. The choice is remembered.
 const SIDEBAR_KEY = 'sn-dcc:sidebar-collapsed:v1'
@@ -92,6 +95,8 @@ const navItems = computed<NavItem[]>(() => {
         item('goals', 'goals', TrendingUp),
         item('habits', 'habits', ListChecks),
         item('achievements', 'achievements', Award),
+        item('leaderboard', 'leaderboard', Trophy),
+        item('store', 'store', ShoppingBag),
         item('growth', 'growth', Sparkles),
         item('education', 'education', GraduationCap),
         item('messages', 'messages', Mail),
@@ -119,6 +124,10 @@ function onKeydown(event: KeyboardEvent): void {
 
 onMounted(() => {
     if (auth.user) setLocale(auth.user.language)
+    stopTheme = watchEffect(() => {
+        // The member's bought theme recolours the whole app; signed out, it goes back to gold.
+        document.documentElement.dataset.theme = auth.user?.theme ?? 'gold'
+    })
     void workspace.load()
     clock = window.setInterval(() => (now.value = new Date()), 1000)
     void workspace.refreshUnread()
@@ -126,6 +135,8 @@ onMounted(() => {
     window.addEventListener('keydown', onKeydown)
 })
 onBeforeUnmount(() => {
+    stopTheme()
+    delete document.documentElement.dataset.theme
     window.clearInterval(clock)
     window.clearInterval(unreadPoll)
     window.removeEventListener('keydown', onKeydown)

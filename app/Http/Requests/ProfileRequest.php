@@ -18,7 +18,7 @@ class ProfileRequest extends ApiRequest
             'weeklyGoal' => ['required', 'integer', 'min:1', 'max:500'],
             'dailyFocusMinutes' => ['required', 'integer', 'min:0', 'max:1440'],
             // Only an inline image data URL is accepted — never a remote URL or script.
-            'avatarUrl' => ['present', 'nullable', 'string', 'max:520000', 'regex:/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/'],
+            'avatarUrl' => ['present', 'nullable', 'string', 'max:520000', 'regex:/^(data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+|\/media\/store\/[A-Za-z0-9_-]+\.(jpg|jpeg|png|webp))$/'],
         ];
     }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Bell, BellRing, Check, Mail, Moon, Sparkles, Sun, X } from 'lucide-vue-next'
+import { Bell, BellRing, Check, Mail, Megaphone, Moon, Sparkles, Sun, X } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useNudges } from '../composables/useNudges'
 import { useReminders } from '../composables/useReminders'
@@ -17,7 +17,13 @@ const notices = useNoticesStore()
 const { due } = useReminders()
 useNudges()
 
-const noticeIcons: Record<NoticeKind, typeof Sun> = { morning: Sun, absence: Sparkles, sleep: Moon, wake: Sun }
+const noticeIcons: Record<NoticeKind, typeof Sun> = {
+    morning: Sun,
+    absence: Sparkles,
+    sleep: Moon,
+    wake: Sun,
+    broadcast: Megaphone,
+}
 
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)

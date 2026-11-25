@@ -4,15 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileRequest;
 use App\Http\Resources\UserResource;
-use App\Services\RewardService;
+use App\Services\PointsService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
@@ -80,23 +78,17 @@ class ProfileController extends Controller
         return response()->json(['user' => new UserResource($user)]);
     }
 
-    /** Equip a frame and a title the member has enough points for. */
-    public function rewards(Request $request, RewardService $rewards): JsonResponse
+    /** Points earned per day over the last 30 days, for the profile chart. */
+    public function points(Request $request, PointsService $points): JsonResponse
     {
-        $data = $request->validate([
-            'frame' => ['required', 'string', Rule::in(array_keys(config('rewards.frames')))],
-            'titleKey' => ['present', 'nullable', 'string', Rule::in(array_keys(config('rewards.titles')))],
-        ]);
+        $request->validate(['date' => ['sometimes', 'date_format:Y-m-d']]);
         $user = $request->user();
-        if (! $rewards->canEquipFrame($user, $data['frame'])) {
-            throw ValidationException::withMessages(['frame' => __('validation.custom.rewards.locked')]);
-        }
-        if (! $rewards->canEquipTitle($user, $data['titleKey'])) {
-            throw ValidationException::withMessages(['titleKey' => __('validation.custom.rewards.locked')]);
-        }
-        $user->forceFill(['frame' => $data['frame'], 'title_key' => $data['titleKey']])->save();
 
-        return response()->json(['user' => new UserResource($user)]);
+        return response()->json([
+            'earned' => $points->earned($user),
+            'balance' => $points->balance($user),
+            'history' => $points->history($user, $request->query('date', now($user->timezone)->toDateString())),
+        ]);
     }
 
     /** "Chrome on Windows" from a user-agent string; good enough to recognise your own devices. */
