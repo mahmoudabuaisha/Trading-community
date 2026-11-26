@@ -450,6 +450,125 @@ export const en: Messages = {
         emptyText:
             'Create a path, add the skills you want to learn with your notes, and mark what you master. It is drawn with the design you picked.',
     },
+    help: {
+        label: 'Help: {name}',
+        overview: {
+            title: 'Home',
+            text: 'Your daily dashboard: today\'s progress, top tasks and points.\n• Use the tools below (Today, Focus, Review…) to run your day.\n• "Add task" adds a task for today.',
+        },
+        tasks: {
+            title: 'Tasks',
+            text: 'Plan your day, week, month or year.\n• Tap "Add task" and set the title, priority, area, due date and reminder.\n• Tick the circle to complete a task; finishing tasks raises your score and earns achievements and points.\n• Edit or delete from the task\'s buttons.',
+        },
+        goals: {
+            title: 'Goals',
+            text: 'Measurable goals with a current and target value.\n• Add a goal with the number you aim for and a date.\n• Update progress as you go.\n• Open "Map" to split the goal into stages and steps drawn as a map.',
+        },
+        roadmap: {
+            title: 'Goal map',
+            text: 'Split your goal into stages, and each stage into steps.\n• Add stages in order, then the steps inside each.\n• Tick a step done; it lights up on the map and your next step shows.\n• Change the look from "Choose design".',
+        },
+        habits: {
+            title: 'Habit tracker',
+            text: "A monthly grid of your habits.\n• Add a habit, then tick each day you kept it.\n• Tap a date to add a picture (the day's background) and a note.\n• Log mood and motivation to see your pattern over the month.",
+        },
+        achievements: {
+            title: 'Achievements',
+            text: 'What you have earned and what lies ahead.\n• Each achievement has a condition (like finishing every task of a day) and points.\n• Some give you a store item (badge, frame, title).',
+        },
+        growth: {
+            title: 'Growth & motivation',
+            text: 'Messages from the team to build your mindset and keep going.\n• Read one each day.\n• Spin "Tip of the day" once a day.',
+        },
+        profile: {
+            title: 'Profile',
+            text: 'Your details and settings.\n• Edit your name and photo at the top.\n• Settings: preferences, notifications (including the focus tone), privacy (what others see) and security.\n• "My record" holds your statistics and points.',
+        },
+        education: {
+            title: 'Education',
+            text: 'Lessons from the team.\n• Open any lesson to read it.\n• Locked lessons open when your subscription includes them.',
+        },
+        journey: {
+            title: 'Growth journey',
+            text: 'One place to see your progress: performance DNA, timeline, vision board, skill tree and portfolio.\n• Pick a card to open it.',
+        },
+        insights: {
+            title: 'Performance DNA',
+            text: 'A reading of how you get things done, from your tasks.\n• Your strongest days and times, on-time rate and a 30-day comparison.\n• Tips based on your data; the more you log, the sharper they get.',
+        },
+        timeline: {
+            title: 'Timeline',
+            text: 'The milestones of your journey, added automatically for big achievements.\n• Add your own milestone with a note.',
+        },
+        vision: {
+            title: 'Vision board',
+            text: 'Pictures, quotes and dreams that remind you why you work.\n• Create a board, add pictures and quotes, and link them to goals.',
+        },
+        skills: {
+            title: 'Skill tree',
+            text: 'Your skill paths.\n• "Platform paths": paths from the team, climbed level by level (quiz or challenge).\n• "My skills": build your own path, add skills with notes and mark what you master.\n• "Choose design" changes the tree\'s look.',
+        },
+        portfolio: {
+            title: 'Portfolio',
+            text: 'Record your projects and work.\n• Add a project with pictures, a description and a date.\n• Choose who sees it and share its link.',
+        },
+        world: {
+            title: 'My summit',
+            text: 'Your 3D mountain grows with what you achieve.\n• Drag to turn it.\n• Save a story picture or a 10-second reel video and share it.',
+        },
+        books: {
+            title: 'Books',
+            text: 'The paid library.\n• A book opens when the team adds it to your subscription.\n• Ask for a subscription in Messages.',
+        },
+        store: {
+            title: 'Store',
+            text: 'Spend your points.\n• Titles, frames, badges and themes: buy, then tap "Use".\n• Products (books, files…) open or download after purchase.\n• Exclusive items are for subscribers.',
+        },
+        leaderboard: {
+            title: 'Top members',
+            text: 'Member rankings.\n• Star of the day: most daily tasks done today.\n• Top-ten tables for points, commitment, the week and the month.\n• Control whether you appear in Profile → Privacy.',
+        },
+        messages: {
+            title: 'Messages',
+            text: 'Your private conversation with the team.\n• Only you and the team see it.\n• Write here to ask for a subscription or support.',
+        },
+        admin: {
+            title: 'Admin center',
+            text: 'Tools for running the platform, by your permissions.\n• Users: search, details, subscriptions, services and membership name.\n• Content: lessons, messages, tips, achievements, store, designs.\n• What you write is translated automatically when translation is on.',
+        },
+        center_daily: {
+            title: 'Today',
+            text: 'A summary of your day: top 3 tasks, your timeline and focus time.\n• Start with the highest priority.',
+        },
+        center_focus: {
+            title: 'Focus session',
+            text: 'A timer for deep work.\n• Pick 10, 25, 30 or 60 minutes, or type your own.\n• It keeps running while you move around and rings at the end.\n• Change the tone in Profile → Notifications.',
+        },
+        center_review: {
+            title: 'Daily review',
+            text: "Four questions to end your day: a win, what is left, a lesson, and tomorrow's plan.\n• Save it each evening.",
+        },
+        center_areas: {
+            title: 'Life areas',
+            text: 'How your tasks spread across your life.\n• Add your own areas (like Sport) with a colour and pick one when adding a task.',
+        },
+        center_calendar: {
+            title: 'Calendar',
+            text: 'Your tasks on the days of the month.\n• Tap a day to see its tasks and add one.',
+        },
+        center_week: {
+            title: 'Weekly review',
+            text: 'A look at your week: completed days, tasks done and your busiest areas.',
+        },
+        center_universe: {
+            title: 'My universe',
+            text: 'A visual map of your tasks, goals, achievements and focus time.',
+        },
+        center_assistant: {
+            title: 'Assistant',
+            text: 'Instant suggestions from your data.\n• For questions, use the floating assistant button at the bottom.',
+        },
+    },
     privacy: {
         showEmblem: 'Show my badge',
         showEmblemHint: 'The badge next to your name.',

@@ -28,6 +28,7 @@ import { repository } from '../data/repository'
 import { formatDate, messages, t } from '../i18n'
 import { dailyScore, lastDays, percent, today, ymd } from '../lib/dates'
 import { useAuthStore } from '../stores/auth'
+import HelpTip from './HelpTip.vue'
 import { PRESETS, MAX_MINUTES, useFocusStore } from '../stores/focus'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
@@ -290,6 +291,9 @@ const growthLabel = (category: keyof typeof messages.value.growth.cat) => messag
             </div>
         </div>
 
+        <div class="center-help">
+            <HelpTip :topic="`center_${activeTab}`" />
+        </div>
         <nav class="tabs" :aria-label="t('center.tools')">
             <button
                 v-for="tab in tabs"

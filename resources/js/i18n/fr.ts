@@ -454,6 +454,125 @@ export const fr: Messages = {
         emptyText:
             'Créez un parcours, ajoutez les compétences à apprendre avec vos notes, et cochez celles maîtrisées. Il est dessiné avec le design choisi.',
     },
+    help: {
+        label: 'Aide : {name}',
+        overview: {
+            title: 'Accueil',
+            text: "Votre tableau du jour : progression, tâches clés et points.\n• Utilisez les outils (Aujourd'hui, Concentration, Bilan…) pour gérer la journée.\n• « Ajouter une tâche » l'ajoute pour aujourd'hui.",
+        },
+        tasks: {
+            title: 'Tâches',
+            text: 'Planifiez jour, semaine, mois ou année.\n• « Ajouter une tâche » : titre, priorité, domaine, échéance et rappel.\n• Cochez le cercle pour terminer ; chaque tâche faite augmente votre score et rapporte succès et points.\n• Modifiez ou supprimez via les boutons de la tâche.',
+        },
+        goals: {
+            title: 'Objectifs',
+            text: 'Des objectifs mesurables avec valeur actuelle et cible.\n• Ajoutez un objectif avec le chiffre visé et une date.\n• Mettez à jour la progression.\n• Ouvrez « Carte » pour le découper en phases et étapes.',
+        },
+        roadmap: {
+            title: "Carte de l'objectif",
+            text: "Découpez l'objectif en phases, et chaque phase en étapes.\n• Ajoutez les phases dans l'ordre, puis les étapes.\n• Cochez une étape : elle s'illumine et la suivante s'affiche.\n• Changez l'apparence via « Choisir un design ».",
+        },
+        habits: {
+            title: "Suivi d'habitudes",
+            text: 'Une grille mensuelle de vos habitudes.\n• Ajoutez une habitude et cochez chaque jour tenu.\n• Touchez une date pour ajouter une image (fond du jour) et une note.\n• Notez humeur et motivation pour voir votre rythme.',
+        },
+        achievements: {
+            title: 'Succès',
+            text: 'Vos succès et ceux à venir.\n• Chaque succès a une condition (ex. finir toutes les tâches du jour) et des points.\n• Certains offrent un article de la boutique (badge, cadre, titre).',
+        },
+        growth: {
+            title: 'Croissance & motivation',
+            text: "Des messages de l'équipe pour renforcer votre état d'esprit.\n• Lisez-en un chaque jour.\n• Tournez « Conseil du jour » une fois par jour.",
+        },
+        profile: {
+            title: 'Profil',
+            text: 'Vos informations et paramètres.\n• Modifiez nom et photo en haut.\n• Paramètres : préférences, notifications (dont la sonnerie), confidentialité et sécurité.\n• « Mon parcours » : statistiques et points.',
+        },
+        education: {
+            title: 'Formation',
+            text: "Des leçons de l'équipe.\n• Ouvrez une leçon pour la lire.\n• Les leçons verrouillées s'ouvrent avec votre abonnement.",
+        },
+        journey: {
+            title: 'Parcours de croissance',
+            text: "Un lieu pour voir vos progrès : ADN de performance, chronologie, tableau de vision, arbre de compétences et portfolio.\n• Choisissez une carte pour l'ouvrir.",
+        },
+        insights: {
+            title: 'ADN de performance',
+            text: "Une lecture de votre façon d'avancer, à partir de vos tâches.\n• Meilleurs jours et moments, ponctualité et comparaison sur 30 jours.\n• Des conseils fondés sur vos données, plus précis avec le temps.",
+        },
+        timeline: {
+            title: 'Chronologie',
+            text: 'Les étapes de votre parcours, ajoutées automatiquement.\n• Ajoutez votre propre étape avec une note.',
+        },
+        vision: {
+            title: 'Tableau de vision',
+            text: 'Images, citations et rêves qui rappellent pourquoi vous travaillez.\n• Créez un tableau, ajoutez images et citations, liez-les à vos objectifs.',
+        },
+        skills: {
+            title: 'Arbre de compétences',
+            text: "Vos parcours de compétences.\n• « Parcours de la plateforme » : niveau après niveau (quiz ou défi).\n• « Mes compétences » : votre propre parcours, avec notes, cochez ce que vous maîtrisez.\n• « Choisir un design » change l'arbre.",
+        },
+        portfolio: {
+            title: 'Portfolio',
+            text: 'Documentez vos projets.\n• Ajoutez un projet avec images, description et date.\n• Choisissez qui le voit et partagez le lien.',
+        },
+        world: {
+            title: 'Mon sommet',
+            text: 'Votre montagne 3D grandit avec vos réussites.\n• Faites-la tourner.\n• Enregistrez une image pour la story ou une vidéo de 10 s.',
+        },
+        books: {
+            title: 'Livres',
+            text: "La bibliothèque payante.\n• Un livre s'ouvre quand l'équipe l'ajoute à votre abonnement.\n• Demandez un abonnement dans Messages.",
+        },
+        store: {
+            title: 'Boutique',
+            text: "Dépensez vos points.\n• Titres, cadres, badges, thèmes : achetez puis « Utiliser ».\n• Les produits s'ouvrent ou se téléchargent après achat.\n• Les articles exclusifs sont réservés aux abonnés.",
+        },
+        leaderboard: {
+            title: 'Meilleurs membres',
+            text: "Les classements.\n• Étoile du jour : le plus de tâches du jour terminées.\n• Top 10 des points, de l'engagement, de la semaine et du mois.\n• Gérez votre visibilité dans Profil → Confidentialité.",
+        },
+        messages: {
+            title: 'Messages',
+            text: "Votre conversation privée avec l'équipe.\n• Seuls vous et l'équipe la voyez.\n• Écrivez ici pour un abonnement ou de l'aide.",
+        },
+        admin: {
+            title: "Centre d'administration",
+            text: "Les outils selon vos permissions.\n• Utilisateurs : recherche, détails, abonnements, services et nom d'adhésion.\n• Contenu : leçons, messages, conseils, succès, boutique, designs.\n• Ce que vous écrivez est traduit automatiquement si la traduction est activée.",
+        },
+        center_daily: {
+            title: "Aujourd'hui",
+            text: 'Résumé du jour : 3 tâches clés, chronologie et concentration.\n• Commencez par la plus prioritaire.',
+        },
+        center_focus: {
+            title: 'Concentration',
+            text: 'Un minuteur pour le travail profond.\n• 10, 25, 30 ou 60 minutes, ou votre durée.\n• Il continue pendant la navigation et sonne à la fin.\n• Changez la sonnerie dans Profil → Notifications.',
+        },
+        center_review: {
+            title: 'Bilan du jour',
+            text: 'Quatre questions : une victoire, ce qui reste, une leçon, le plan de demain.\n• Enregistrez chaque soir.',
+        },
+        center_areas: {
+            title: 'Domaines de vie',
+            text: 'La répartition de vos tâches.\n• Ajoutez vos domaines (ex. Sport) avec une couleur.',
+        },
+        center_calendar: {
+            title: 'Calendrier',
+            text: 'Vos tâches sur le mois.\n• Touchez un jour pour voir ses tâches et en ajouter.',
+        },
+        center_week: {
+            title: 'Bilan hebdomadaire',
+            text: 'Votre semaine : jours complets, tâches faites et domaines les plus actifs.',
+        },
+        center_universe: {
+            title: 'Mon univers',
+            text: 'Une carte visuelle de vos tâches, objectifs, succès et concentration.',
+        },
+        center_assistant: {
+            title: 'Assistant',
+            text: "Des suggestions instantanées tirées de vos données.\n• Pour vos questions, utilisez le bouton d'assistant flottant.",
+        },
+    },
     privacy: {
         showEmblem: 'Afficher mon badge',
         showEmblemHint: 'Le badge à côté de votre nom.',

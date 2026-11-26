@@ -32,6 +32,7 @@ import BrandLogo from '../components/BrandLogo.vue'
 import EmptyState from '../components/EmptyState.vue'
 import AssistantWidget from '../components/AssistantWidget.vue'
 import FocusDock from '../components/FocusDock.vue'
+import HelpTip from '../components/HelpTip.vue'
 import NameEmblem from '../components/NameEmblem.vue'
 import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import NotificationBell from '../components/NotificationBell.vue'
@@ -125,6 +126,8 @@ const pageTitle = computed(() =>
         ? t('title.tasks', { period: t(`period.${String(route.params.period)}`) })
         : t(`title.${route.name === 'lesson' ? 'education' : String(route.name)}`),
 )
+/** The help entry for the page: lessons share Education's, every task period shares Tasks'. */
+const helpTopic = computed(() => (route.name === 'lesson' ? 'education' : String(route.name ?? '')))
 const roleLabel = computed(() => roleName(auth.user))
 const fullName = computed(() => `${auth.user?.displayName ?? ''} ${auth.user?.surname ?? ''}`.trim())
 
@@ -292,9 +295,12 @@ async function signOut(): Promise<void> {
                     >
                 </div>
 
-                <h1 class="topbar__title" :class="{ 'sr-only': route.name === 'profile' }">
-                    {{ route.name === 'overview' ? tagline : pageTitle }}
-                </h1>
+                <div class="topbar__heading">
+                    <h1 class="topbar__title" :class="{ 'sr-only': route.name === 'profile' }">
+                        {{ route.name === 'overview' ? tagline : pageTitle }}
+                    </h1>
+                    <HelpTip :topic="helpTopic" />
+                </div>
             </header>
 
             <div v-if="workspace.loading" class="loading-panel">
