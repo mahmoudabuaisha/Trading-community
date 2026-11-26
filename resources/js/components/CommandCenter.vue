@@ -8,6 +8,9 @@ import {
     Compass,
     Layers,
     Pause,
+    Pencil,
+    Plus,
+    Trash2,
     Play,
     RotateCcw,
     ScanLine,
@@ -17,12 +20,16 @@ import {
     Award,
 } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, reactive, ref, watch, type Component } from 'vue'
+import DayEntryDialog from './DayEntryDialog.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
+import { ApiError } from '../data/http'
+import { repository } from '../data/repository'
 import { formatDate, messages, t } from '../i18n'
 import { dailyScore, lastDays, percent, today, ymd } from '../lib/dates'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
-import type { Task, TaskPriority } from '../types/domain'
+import type { DayEntry, Task, TaskPriority } from '../types/domain'
 
 const emit = defineEmits<{ add: [] }>()
 
@@ -69,7 +76,7 @@ function timelineNote(task: Task): string {
 
 // ── Focus timer ──────────────────────────────────────────────────────────
 // The end instant is stored, not a countdown, so a throttled background tab cannot drift.
-const DURATIONS = [15, 25, 50, 90]
+const DURATIONS = [10, 25, 30, 60]
 const duration = ref(25)
 const remaining = ref(25 * 60)
 const endsAt = ref<number | null>(null)
@@ -165,6 +172,47 @@ const areas = computed(() =>
     }),
 )
 
+// Adding, renaming and removing areas; a new one counts like the starter ones.
+const AREA_COLORS = ['#70d6ad', '#a89bf5', '#f2c879', '#83d8f5', '#e58a7b', '#e79ac0', '#8fb6ff', '#d6ad62']
+const areaForm = reactive({ id: null as number | null, name: '', color: AREA_COLORS[4] })
+const areaErrors = ref<Record<string, string[]>>({})
+const deletingArea = ref<{ id: number; name: string } | null>(null)
+
+function editArea(area: { id: number; name: string; color: string }): void {
+    Object.assign(areaForm, { id: area.id, name: area.name, color: area.color })
+    areaErrors.value = {}
+}
+function resetArea(): void {
+    Object.assign(areaForm, {
+        id: null,
+        name: '',
+        color: AREA_COLORS[(workspace.categories.length + 4) % AREA_COLORS.length],
+    })
+    areaErrors.value = {}
+}
+async function saveArea(): Promise<void> {
+    if (!areaForm.name.trim()) return
+    try {
+        await workspace.saveCategory(areaForm.id, { name: areaForm.name.trim(), color: areaForm.color })
+        ui.success(t(areaForm.id === null ? 'center.areaAdded' : 'center.areaSaved'))
+        resetArea()
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 422) areaErrors.value = error.errors
+        else ui.failure(error)
+    }
+}
+async function confirmDeleteArea(): Promise<void> {
+    const area = deletingArea.value
+    deletingArea.value = null
+    if (!area) return
+    try {
+        await workspace.deleteCategory(area.id)
+        if (areaForm.id === area.id) resetArea()
+    } catch (error) {
+        ui.failure(error)
+    }
+}
+
 // ── Calendar (weeks start on Monday) ─────────────────────────────────────
 const calendarMonth = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
 const todayKey = today()
@@ -181,12 +229,43 @@ const calendarCells = computed(() => {
         blanks,
         days: Array.from({ length: days }, (_, i) => {
             const key = ymd(new Date(year, month, i + 1))
-            return { n: i + 1, key, due: workspace.tasks.filter((task) => task.dueDate === key).length }
+            return {
+                n: i + 1,
+                key,
+                due: workspace.tasks.filter((task) => task.dueDate === key).length,
+                entry: dayEntries.value.get(key) ?? null,
+            }
         }),
     }
 })
 const shiftMonth = (step: number) =>
     (calendarMonth.value = new Date(calendarMonth.value.getFullYear(), calendarMonth.value.getMonth() + step, 1))
+
+// A picture and a note per day, the same entries the habit tracker shows.
+const dayEntries = ref(new Map<string, DayEntry>())
+const openDay = ref<string | null>(null)
+const monthKey = computed(() => ymd(calendarMonth.value).slice(0, 7))
+async function loadDayEntries(): Promise<void> {
+    const month = monthKey.value
+    try {
+        const days = await repository.dayEntries(month)
+        if (month === monthKey.value) dayEntries.value = new Map(days.map((entry) => [entry.day, entry]))
+    } catch (error) {
+        ui.failure(error)
+    }
+}
+watch(
+    () => [activeTab.value, monthKey.value],
+    () => {
+        if (activeTab.value === 'calendar') void loadDayEntries()
+    },
+)
+function setDayEntry(day: string, entry: DayEntry | null): void {
+    const next = new Map(dayEntries.value)
+    if (entry) next.set(day, entry)
+    else next.delete(day)
+    dayEntries.value = next
+}
 
 // ── Weekly rhythm ────────────────────────────────────────────────────────
 const week = computed(() => lastDays(workspace.tasks, 7))
@@ -411,7 +490,27 @@ const growthLabel = (category: keyof typeof messages.value.growth.cat) => messag
             </div>
             <div class="area-grid">
                 <div v-for="area in areas" :key="area.id">
-                    <span class="area-grid__bar" :style="{ background: area.color }" />
+                    <span class="area-grid__top">
+                        <span class="area-grid__bar" :style="{ background: area.color }" />
+                        <span class="area-grid__tools">
+                            <button
+                                type="button"
+                                class="icon-btn icon-btn--sm"
+                                :aria-label="t('center.areaEdit', { name: area.name })"
+                                @click="editArea(area)"
+                            >
+                                <Pencil :size="13" />
+                            </button>
+                            <button
+                                type="button"
+                                class="icon-btn icon-btn--sm"
+                                :aria-label="t('center.areaDelete', { name: area.name })"
+                                @click="deletingArea = area"
+                            >
+                                <Trash2 :size="13" />
+                            </button>
+                        </span>
+                    </span>
                     <b>{{ area.name }}</b>
                     <strong>{{ area.done }}/{{ area.total }}</strong>
                     <small>{{ t('center.pctAchieved', { pct: area.pct }) }}</small>
@@ -420,6 +519,45 @@ const growthLabel = (category: keyof typeof messages.value.growth.cat) => messag
                     </div>
                 </div>
             </div>
+            <form class="area-form" @submit.prevent="saveArea">
+                <span class="area-form__swatches" role="radiogroup" :aria-label="t('center.areaColor')">
+                    <button
+                        v-for="color in AREA_COLORS"
+                        :key="color"
+                        type="button"
+                        role="radio"
+                        class="area-form__swatch"
+                        :class="{ 'area-form__swatch--on': areaForm.color === color }"
+                        :style="{ background: color }"
+                        :aria-checked="areaForm.color === color"
+                        :aria-label="color"
+                        @click="areaForm.color = color"
+                    />
+                </span>
+                <input
+                    v-model="areaForm.name"
+                    class="input"
+                    required
+                    maxlength="40"
+                    :placeholder="t('center.areaPh')"
+                    :aria-label="t('center.areaPh')"
+                />
+                <button type="submit" class="btn">
+                    <Plus :size="15" aria-hidden="true" />
+                    {{ t(areaForm.id === null ? 'center.areaAdd' : 'common.save') }}
+                </button>
+                <button v-if="areaForm.id !== null" type="button" class="btn btn--outline" @click="resetArea">
+                    {{ t('common.cancel') }}
+                </button>
+                <small v-if="areaErrors.name" class="field__error">{{ areaErrors.name[0] }}</small>
+            </form>
+            <ConfirmDialog
+                v-if="deletingArea"
+                :message="t('center.areaConfirmDelete', { name: deletingArea.name })"
+                :confirm-label="t('common.delete')"
+                @confirm="confirmDeleteArea"
+                @cancel="deletingArea = null"
+            />
         </div>
 
         <div v-else-if="activeTab === 'calendar'" class="suite__content">
@@ -433,15 +571,34 @@ const growthLabel = (category: keyof typeof messages.value.growth.cat) => messag
             <div class="calendar-grid">
                 <b v-for="label in weekdayLabels" :key="label">{{ label }}</b>
                 <span v-for="blank in calendarCells.blanks" :key="`blank-${blank}`" class="calendar-grid__blank" />
-                <span
+                <button
                     v-for="cell in calendarCells.days"
                     :key="cell.key"
-                    :class="{ 'calendar-grid__today': cell.key === todayKey }"
+                    type="button"
+                    class="calendar-grid__day"
+                    :class="{
+                        'calendar-grid__today': cell.key === todayKey,
+                        'calendar-grid__day--image': cell.entry?.imageUrl,
+                        'calendar-grid__day--note': cell.entry?.note,
+                    }"
+                    :style="cell.entry?.imageUrl ? { backgroundImage: `url(${cell.entry.imageUrl})` } : undefined"
+                    :title="cell.entry?.note || t('center.calendarOpen')"
+                    :aria-label="
+                        t('habits.dayOpen', { day: formatDate(`${cell.key}T00:00`, { day: 'numeric', month: 'long' }) })
+                    "
+                    @click="openDay = cell.key"
                 >
-                    {{ cell.n }}<i v-if="cell.due">{{ cell.due }}</i>
-                </span>
+                    <span>{{ cell.n }}</span><i v-if="cell.due">{{ cell.due }}</i>
+                </button>
             </div>
-            <small class="hint">{{ t('center.calendarHint') }}</small>
+            <small class="hint">{{ t('center.calendarHint') }} {{ t('center.calendarOpen') }}</small>
+            <DayEntryDialog
+                v-if="openDay"
+                :day="openDay"
+                :entry="dayEntries.get(openDay) ?? null"
+                @saved="(entry) => setDayEntry(openDay!, entry)"
+                @close="openDay = null"
+            />
         </div>
 
         <div v-else-if="activeTab === 'week'" class="suite__content">

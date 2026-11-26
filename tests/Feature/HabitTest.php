@@ -116,7 +116,12 @@ class HabitTest extends TestCase
         $this->getJson("/api/habits?month={$month}")->assertJsonCount(1, 'days')->assertJsonPath('days.0.day', $day);
         // Nobody else sees it, and tomorrow cannot be written yet.
         $this->actingAs(User::factory()->create())->getJson("/api/habits?month={$month}")->assertJsonCount(0, 'days');
-        $this->actingAs($user)->postJson('/api/habit-days/'.now()->addDays(2)->toDateString(), ['note' => 'x'])->assertUnprocessable();
+        // A day ahead can hold a note (the calendar plans ahead); an impossible date cannot.
+        $this->actingAs($user)->postJson('/api/habit-days/'.now()->addDays(2)->toDateString(), ['note' => 'خطة'])->assertOk();
+        $this->postJson('/api/habit-days/2026-02-30', ['note' => 'x'])->assertUnprocessable();
+        $this->getJson('/api/habit-days?month='.now()->addDays(2)->format('Y-m'))->assertOk()->assertJsonFragment(['note' => 'خطة']);
+        $this->actingAs(User::factory()->create())->getJson('/api/habit-days?month='.$month)->assertJsonCount(0, 'days');
+        $this->actingAs($user)->postJson('/api/habit-days/'.now()->addDays(2)->toDateString(), ['note' => ''])->assertOk();
 
         // Changing the note keeps the picture; removing both removes the entry and its file.
         $this->postJson("/api/habit-days/{$day}", ['note' => 'معدّلة'])->assertOk()->assertJsonPath('entry.imageUrl', $entry['imageUrl']);

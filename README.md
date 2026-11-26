@@ -9,7 +9,7 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | --- | --- |
 | Sign in / sign up | Email + password, remember me, password strength meter, password reset by email |
 | Overview | Greeting, daily score, today's tasks, quick links, weekly goal progress |
-| Command center | Today's top priorities and timeline, focus timer (15/25/50/90 min), daily review, life areas, calendar, 7-day rhythm, "universe" map, rule-based assistant |
+| Command center | Today's top priorities and timeline, focus timer (10/25/30/60 min), daily review, life areas (members add their own), a calendar whose days hold a picture and a note, 7-day rhythm, "universe" map, rule-based assistant |
 | Plans | Daily, weekly, monthly and yearly task lists with period navigation, filters, priorities, categories, due dates, undoable delete |
 | Goals | Measurable goals per period with progress steps |
 | Habit tracker | Monthly grid of habits by week with daily totals, per-habit goals and analysis, a consistency chart, daily mood and motivation ratings with weekly averages, and monthly notes |
@@ -22,6 +22,7 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Notifications | Task reminders, a morning motivation line, a welcome back after a day or more away, and bedtime / wake-up reminders; each can be switched off. They appear while the app is open |
 | Points and achievements | Administrators define achievements with one or more conditions, a period (once, daily, weekly, monthly, yearly) and the points they award; points are added automatically when every condition holds. The profile shows the balance, the total earned and a 30-day chart |
 | Store | Items priced in points and managed by administrators: titles, avatar frames, colour themes for the whole app, profile photos, and products in admin-made sections (e.g. books) that hand a private file or a link to buyers |
+| Tip of the day | A free daily draw on the home page: lines roll past and stop on one; one draw per member per day. Administrators add lines in bulk, edit, hide and translate them |
 | Translations | Text written by administrators (motivation, lessons, achievements, store, skill paths, broadcasts) can be given per language; members read the version for their language and fall back to the original. A translation is retired when its original is reworded |
 | Honour board | Today's top finishers, the most committed members of the week, and the most points overall and this month |
 | Broadcasts | Administrators send a notification to every member on the spot, or schedule one message per day for the week |

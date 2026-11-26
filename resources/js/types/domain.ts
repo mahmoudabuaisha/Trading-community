@@ -492,6 +492,18 @@ export interface UserDetails {
     purchases: { name: string; kind: StoreKind; price: number; boughtAt: string }[]
 }
 
+export interface DailyTipItem {
+    id: number
+    body: string
+    isActive: boolean
+}
+
+export interface DailyTipState {
+    tip: string | null
+    available: boolean
+    day: string
+}
+
 export interface AdminBroadcasts {
     /** Day (YYYY-MM-DD) → message, for the requested week. */
     scheduled: Record<string, string>

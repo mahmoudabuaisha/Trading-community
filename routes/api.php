@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BadgeController as AdminBadgeController;
 use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
 use App\Http\Controllers\Admin\BroadcastScheduleController as AdminBroadcastScheduleController;
+use App\Http\Controllers\Admin\DailyTipController as AdminDailyTipController;
 use App\Http\Controllers\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Admin\MotivationController as AdminMotivationController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Admin\ThreadController as AdminThreadController;
 use App\Http\Controllers\Admin\TranslationController as AdminTranslationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DailyTipController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FocusSessionController;
 use App\Http\Controllers\GoalController;
@@ -75,6 +78,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('store/{item}/download', [StoreController::class, 'download']);
     Route::get('leaderboard', [LeaderboardController::class, 'show']);
 
+    Route::post('categories', [CategoryController::class, 'store']);
+    Route::patch('categories/{category}', [CategoryController::class, 'update']);
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
+    Route::get('daily-tip', [DailyTipController::class, 'show']);
+    Route::post('daily-tip', [DailyTipController::class, 'draw'])->middleware('throttle:20,1');
+
     Route::get('insights', [JourneyController::class, 'insights']);
     Route::get('timeline', [JourneyController::class, 'timeline']);
     Route::put('timeline/notes/{key}', [JourneyController::class, 'note'])->where('key', '[a-z]+(:[A-Za-z0-9_]+)?');
@@ -113,6 +122,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('habits/{habit}', [HabitController::class, 'destroy']);
     Route::put('habits/{habit}/checks/{day}', [HabitController::class, 'check'])->where('day', '\d{4}-\d{2}-\d{2}');
     // POST, not PUT: the day's picture travels as multipart form data.
+    Route::get('habit-days', [HabitController::class, 'days']);
     Route::post('habit-days/{day}', [HabitController::class, 'day'])->where('day', '\\d{4}-\\d{2}-\\d{2}');
     Route::put('moods/{day}', [HabitController::class, 'mood'])->where('day', '\d{4}-\d{2}-\d{2}');
     Route::put('habit-notes/{month}', [HabitController::class, 'note'])->where('month', '\d{4}-(0[1-9]|1[0-2])');
@@ -151,6 +161,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('broadcasts', [AdminBroadcastController::class, 'index'])->middleware('area:growth');
         Route::post('broadcasts', [AdminBroadcastController::class, 'send'])->middleware('area:growth');
         Route::put('broadcasts/schedule/{day}', [AdminBroadcastController::class, 'schedule'])->middleware('area:growth')->where('day', '\\d{4}-\\d{2}-\\d{2}');
+        Route::get('daily-tips', [AdminDailyTipController::class, 'index'])->middleware('area:growth');
+        Route::post('daily-tips', [AdminDailyTipController::class, 'store'])->middleware('area:growth');
+        Route::patch('daily-tips/{tip}', [AdminDailyTipController::class, 'update'])->middleware('area:growth');
+        Route::delete('daily-tips/{tip}', [AdminDailyTipController::class, 'destroy'])->middleware('area:growth');
         Route::get('broadcast-schedules', [AdminBroadcastScheduleController::class, 'index'])->middleware('area:growth');
         Route::post('broadcast-schedules', [AdminBroadcastScheduleController::class, 'store'])->middleware('area:growth');
         Route::patch('broadcast-schedules/{schedule}', [AdminBroadcastScheduleController::class, 'update'])->middleware('area:growth');

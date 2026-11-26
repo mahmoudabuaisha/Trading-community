@@ -49,11 +49,8 @@ export const useHabitsStore = defineStore('habits', () => {
         return load()
     }
 
-    async function saveDay(
-        day: string,
-        input: { note: string; image?: Blob | null; removeImage?: boolean },
-    ): Promise<void> {
-        const entry = await repository.saveDayEntry(day, input)
+    /** Record what the day dialog saved (null when the day was emptied). */
+    function setDay(day: string, entry: DayEntry | null): void {
         const next = new Map(dayEntries.value)
         if (entry) next.set(day, entry)
         else next.delete(day)
@@ -122,7 +119,7 @@ export const useHabitsStore = defineStore('habits', () => {
 
     return {
         dayEntries,
-        saveDay,
+        setDay,
         anchor,
         habits,
         checks,

@@ -19,6 +19,7 @@ import {
 } from 'lucide-vue-next'
 import { computed, ref, type Component } from 'vue'
 import CommandCenter from '../components/CommandCenter.vue'
+import DailyTip from '../components/DailyTip.vue'
 import TaskModal from '../components/TaskModal.vue'
 import { formatDate, isRtl, messages, t } from '../i18n'
 import { useSiteCopy } from '../lib/content'
@@ -265,6 +266,8 @@ const chart = computed(() => {
                 </div>
             </div>
         </div>
+
+        <DailyTip />
 
         <CommandCenter @add="adding = true" />
 

@@ -8,6 +8,7 @@ use App\Models\Badge;
 use App\Models\Broadcast;
 use App\Models\BroadcastSchedule;
 use App\Models\ContentTranslation;
+use App\Models\DailyTip;
 use App\Models\Lesson;
 use App\Models\Motivation;
 use App\Models\SkillLevel;
@@ -31,6 +32,7 @@ class TranslationController extends Controller
         'motivation' => [Motivation::class, 'growth'],
         'broadcast' => [Broadcast::class, 'growth'],
         'broadcast-schedule' => [BroadcastSchedule::class, 'growth'],
+        'daily-tip' => [DailyTip::class, 'growth'],
         'lesson' => [Lesson::class, 'education'],
         'skill-path' => [SkillPath::class, 'education'],
         'skill-level' => [SkillLevel::class, 'education'],

@@ -82,7 +82,8 @@ class HabitController extends Controller
             'image' => ['sometimes', 'file', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'removeImage' => ['sometimes', 'boolean'],
         ]);
-        $this->assertNotFuture($day);
+        // A day of the calendar can carry a note ahead of time; only real dates are accepted.
+        abort_unless(checkdate((int) substr($day, 5, 2), (int) substr($day, 8, 2), (int) substr($day, 0, 4)), 422);
 
         $entry = $request->user()->dayEntries()->whereDate('day', $day)->first() ?? $request->user()->dayEntries()->make(['day' => $day]);
         $old = $entry->image_path;
@@ -103,6 +104,15 @@ class HabitController extends Controller
         $entry->save();
 
         return response()->json(['entry' => $entry->toApi()]);
+    }
+
+    /** The pictures and notes pinned to the days of one month (for the calendar). */
+    public function days(Request $request): JsonResponse
+    {
+        $request->validate(['month' => ['required', 'date_format:Y-m']]);
+        $start = CarbonImmutable::createFromFormat('!Y-m', $request->query('month'));
+
+        return response()->json(['days' => $request->user()->dayEntries()->whereBetween('day', [$start->toDateString(), $start->endOfMonth()->toDateString()])->orderBy('day')->get()->map(fn (DayEntry $entry): array => $entry->toApi())]);
     }
 
     public function check(Request $request, Habit $habit, string $day): Response

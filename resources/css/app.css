@@ -5585,3 +5585,196 @@ a.btn-metal {
     max-block-size: 260px;
     overflow-y: auto;
 }
+
+/* ── Tip of the day ─────────────────────────────────────────────────────── */
+.daily-tip {
+    position: relative;
+    overflow: hidden;
+    justify-items: center;
+    text-align: center;
+}
+.daily-tip::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(60% 80% at 50% 0%, rgb(var(--accent-rgb) / 0.16), transparent 70%);
+    pointer-events: none;
+}
+.daily-tip__head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: start;
+}
+.daily-tip__head h3 {
+    color: var(--gold-200);
+    font-size: var(--text-lg);
+}
+.daily-tip__head p {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+.daily-tip__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 48px;
+    block-size: 48px;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: var(--surface-sunken);
+    color: var(--gold-300);
+}
+.daily-tip__window {
+    position: relative;
+    display: grid;
+    place-items: center;
+    inline-size: min(100%, 720px);
+    min-block-size: 92px;
+    padding: var(--space-4);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface-sunken);
+}
+.daily-tip__line {
+    color: var(--gold-200);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: 1.6;
+}
+/* Each line slides in from below, like a reel turning. */
+.daily-tip__line--rolling {
+    animation: tip-roll 120ms ease-out;
+    filter: blur(0.4px);
+    opacity: 0.85;
+}
+.daily-tip__line--final {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    animation: tip-land 520ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.daily-tip__line--final svg {
+    flex: none;
+    color: var(--gold-300);
+}
+.daily-tip--done .daily-tip__window {
+    border-color: var(--gold-300);
+    box-shadow: 0 0 28px rgb(var(--accent-rgb) / 0.22);
+}
+.daily-tip__button {
+    font-size: var(--text-lg);
+    padding-inline: var(--space-6);
+}
+@keyframes tip-roll {
+    from {
+        transform: translateY(60%);
+        opacity: 0;
+    }
+}
+@keyframes tip-land {
+    from {
+        transform: scale(0.92);
+        opacity: 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .daily-tip__line--rolling,
+    .daily-tip__line--final {
+        animation: none;
+    }
+}
+.daily-tips-list {
+    max-block-size: 420px;
+    overflow-y: auto;
+}
+.device-row--muted {
+    opacity: 0.55;
+}
+
+/* ── Life areas: add, rename, remove ────────────────────────────────────── */
+.area-grid__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.area-grid__tools {
+    display: inline-flex;
+    gap: 4px;
+    opacity: 0.6;
+}
+.area-grid > div:hover .area-grid__tools,
+.area-grid__tools:focus-within {
+    opacity: 1;
+}
+.area-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-block-start: var(--space-3);
+}
+.area-form .input {
+    flex: 1;
+    min-inline-size: 200px;
+}
+.area-form__swatches {
+    display: inline-flex;
+    gap: 6px;
+}
+.area-form__swatch {
+    inline-size: 22px;
+    block-size: 22px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+}
+.area-form__swatch--on {
+    border-color: var(--text);
+    box-shadow: 0 0 0 2px var(--bg-900) inset;
+}
+
+/* ── Calendar days hold a picture and a note ────────────────────────────── */
+.calendar-grid__day {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-block-size: 46px;
+    padding: 0;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-sm);
+    background: transparent center / cover no-repeat;
+    color: var(--text);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+.calendar-grid__day:hover {
+    border-color: var(--line-strong);
+}
+.calendar-grid__day--image > span {
+    padding-inline: 4px;
+    border-radius: var(--radius-sm);
+    background: rgb(0 0 0 / 0.6);
+    color: var(--steel-100);
+    font-weight: 700;
+}
+.calendar-grid__day--note::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 4px;
+    inset-inline-start: 50%;
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 50%;
+    background: var(--gold-300);
+    transform: translateX(-50%);
+}
+/* The number inside a calendar day is plain text, not another cell. */
+.calendar-grid .calendar-grid__day > span {
+    display: inline;
+    min-block-size: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+}

@@ -10,6 +10,9 @@ import type {
     DeviceSession,
     Preferences,
     AdminBroadcasts,
+    Category,
+    DailyTipItem,
+    DailyTipState,
     BroadcastSchedule,
     UserDetails,
     DayEntry,
@@ -102,6 +105,21 @@ export const repository = {
     store: () => request<StoreView>('GET', '/store'),
     buyItem: (id: number) => request<StoreView>('POST', `/store/${id}/buy`),
     equipItem: (kind: StoreKind, itemId: number | null) => request<StoreView>('PUT', '/store/equip', { kind, itemId }),
+    dailyTip: (day: string) => request<DailyTipState>('GET', `/daily-tip?date=${day}`),
+    drawDailyTip: (day: string) => request<DailyTipState & { reel: string[] }>('POST', '/daily-tip', { date: day }),
+    dayEntries: (month: string) =>
+        request<{ days: DayEntry[] }>('GET', `/habit-days?month=${month}`).then((r) => r.days),
+    createCategory: (input: { name: string; color: string }) =>
+        request<{ category: Category }>('POST', '/categories', input).then((r) => r.category),
+    updateCategory: (id: number, input: { name: string; color: string }) =>
+        request<{ category: Category }>('PATCH', `/categories/${id}`, input).then((r) => r.category),
+    deleteCategory: (id: number) => request<void>('DELETE', `/categories/${id}`),
+    adminDailyTips: () => request<{ tips: DailyTipItem[] }>('GET', '/admin/daily-tips').then((r) => r.tips),
+    adminAddDailyTips: (bodies: string[]) =>
+        request<{ tips: DailyTipItem[] }>('POST', '/admin/daily-tips', { bodies }).then((r) => r.tips),
+    adminSaveDailyTip: (id: number, patch: { body?: string; isActive?: boolean }) =>
+        request<{ tips: DailyTipItem[] }>('PATCH', `/admin/daily-tips/${id}`, patch).then((r) => r.tips),
+    adminDeleteDailyTip: (id: number) => request<void>('DELETE', `/admin/daily-tips/${id}`),
     insights: (day: string) => request<Insights>('GET', `/insights?date=${day}`),
     timeline: () => request<Timeline>('GET', '/timeline'),
     saveTimelineNote: (key: string, note: string) => request<void>('PUT', `/timeline/notes/${key}`, { note }),

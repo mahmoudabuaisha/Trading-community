@@ -216,6 +216,20 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         celebrate(result.newAchievements)
     }
 
+    /** Add, rename or remove a life area; the statistics read `categories`, so they follow. */
+    async function saveCategory(id: number | null, input: { name: string; color: string }): Promise<void> {
+        const saved = id === null ? await repository.createCategory(input) : await repository.updateCategory(id, input)
+        categories.value =
+            id === null ? [...categories.value, saved] : categories.value.map((item) => (item.id === id ? saved : item))
+    }
+
+    async function deleteCategory(id: number): Promise<void> {
+        await repository.deleteCategory(id)
+        categories.value = categories.value.filter((item) => item.id !== id)
+        // Its tasks stay, without an area.
+        tasks.value = tasks.value.map((task) => (task.categoryId === id ? { ...task, categoryId: null } : task))
+    }
+
     /** Title of a badge by achievement key: admin-defined ones carry their own, built-in ones are translated. */
     function badgeTitle(key: string): string {
         const custom = badges.value.find((badge) => badge.key === key)
@@ -282,6 +296,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         saveReview,
         loadLessons,
         badgeTitle,
+        saveCategory,
+        deleteCategory,
         dismissReminder,
         refreshUnread,
     }

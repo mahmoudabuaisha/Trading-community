@@ -142,6 +142,11 @@ class User extends Authenticatable
         'merchant', 'freelancer', 'employee', 'business_owner', 'content_creator', 'other',
     ];
 
+    public function dailyTipDraws(): HasMany
+    {
+        return $this->hasMany(DailyTipDraw::class);
+    }
+
     public function dayEntries(): HasMany
     {
         return $this->hasMany(DayEntry::class);

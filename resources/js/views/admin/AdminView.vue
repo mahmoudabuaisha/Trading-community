@@ -23,6 +23,7 @@ import AdminMessages from '../../components/admin/AdminMessages.vue'
 import AdminSkills from '../../components/admin/AdminSkills.vue'
 import TranslateButton from '../../components/admin/TranslateButton.vue'
 import UserDetailsDialog from '../../components/admin/UserDetailsDialog.vue'
+import AdminDailyTips from '../../components/admin/AdminDailyTips.vue'
 import AdminStore from '../../components/admin/AdminStore.vue'
 import AdminBroadcasts from '../../components/admin/AdminBroadcasts.vue'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
@@ -380,6 +381,8 @@ function auditDetail(entry: AuditEntry): string {
         <AdminContent v-if="tab === 'content'" />
 
         <AdminBroadcasts v-if="tab === 'growth'" />
+
+        <AdminDailyTips v-if="tab === 'growth'" />
 
         <div v-show="tab === 'growth'" class="panel">
             <div class="section-head">
