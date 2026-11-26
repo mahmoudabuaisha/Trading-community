@@ -99,7 +99,7 @@ class PointsService
      * What the member currently shows, resolved from the items they have in use.
      * An item that was deleted simply stops showing.
      *
-     * @return array{title: string|null, frame: string, theme: array<string, mixed>|null, ownedThemes: list<array<string, mixed>>}
+     * @return array{title: string|null, frame: string, emblem: string|null, theme: array<string, mixed>|null, ownedThemes: list<array<string, mixed>>}
      */
     public function appearance(User $user): array
     {
@@ -108,7 +108,9 @@ class PointsService
 
         return [
             'title' => $items->get('title')?->tr('value'),
-            'frame' => $items->get('frame')?->value ?? 'none',
+            'frame' => $items->get('frame')?->look() ?? 'none',
+            // A small badge (emoji or picture) shown next to the name.
+            'emblem' => $items->get('emblem')?->look(),
             // The theme in use, or null for the platform's own gold.
             'theme' => $items->get('theme')?->themeData(),
             // Bought themes, for the switcher in the top bar.

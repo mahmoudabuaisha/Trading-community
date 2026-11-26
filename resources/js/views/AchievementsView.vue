@@ -16,6 +16,7 @@ const badges = computed(() => {
         text: copy.text,
         points: 0,
         period: 'once',
+        reward: null as string | null,
     }))
     const custom = workspace.badges.map((badge) => ({
         key: badge.key,
@@ -23,6 +24,7 @@ const badges = computed(() => {
         text: badge.description || conditionsText(badge),
         points: badge.points,
         period: badge.period,
+        reward: badge.reward?.name ?? null,
     }))
     return [...builtIn, ...custom]
         .map((badge) => ({ ...badge, earned: workspace.achievements.find((earned) => earned.key === badge.key) }))
@@ -54,6 +56,7 @@ const badges = computed(() => {
                 <div>
                     <h3>{{ badge.title }}</h3>
                     <p>{{ badge.text }}</p>
+                    <p v-if="badge.reward" class="hint">{{ t('achievements.reward', { name: badge.reward }) }}</p>
                     <span v-if="badge.points" class="count-pill count-pill--gold">
                         {{ t('rewards.count', { n: badge.points }) }} · {{ t(`admin.period.${badge.period}`) }}
                     </span>

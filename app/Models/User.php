@@ -51,6 +51,7 @@ class User extends Authenticatable
         'showAvatar' => true,
         'showTitle' => true,
         'showFrame' => true,
+        'showEmblem' => true,
         'showOnLeaderboard' => true,
     ];
 

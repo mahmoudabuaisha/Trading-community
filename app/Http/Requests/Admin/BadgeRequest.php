@@ -27,6 +27,8 @@ class BadgeRequest extends ApiRequest
             'conditions.*.metric' => ['required', 'distinct', Rule::in(Badge::METRICS)],
             'conditions.*.threshold' => ['required', 'integer', 'min:1', 'max:1000000'],
             'isActive' => ['sometimes', 'boolean'],
+            // A store item handed over free with the achievement.
+            'rewardItemId' => ['sometimes', 'nullable', 'integer', 'exists:store_items,id'],
         ];
     }
 

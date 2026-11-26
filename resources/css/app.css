@@ -6615,3 +6615,122 @@ a.btn-metal {
         justify-content: center;
     }
 }
+
+/* ── Focus timer: custom length, floating dock, tones ───────────────── */
+.focus-custom {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+}
+.focus-custom .input {
+    inline-size: 170px;
+    text-align: center;
+}
+.focus-dock {
+    position: fixed;
+    inset-block-end: var(--space-5);
+    inset-inline-start: calc(var(--space-5) + 68px);
+    z-index: 55;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid rgb(var(--accent-rgb) / 0.6);
+    border-radius: var(--radius-pill);
+    background: var(--bg-700);
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+    animation: rise var(--motion-base);
+}
+.focus-dock__time {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--gold-200);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+}
+.focus-dock--ringing {
+    color: var(--gold-200);
+    animation: focus-ring 1s ease-in-out infinite;
+}
+@keyframes focus-ring {
+    50% {
+        box-shadow:
+            0 0 0 6px rgb(var(--accent-rgb) / 0.25),
+            var(--shadow-card);
+    }
+}
+.tone-list .setting-row {
+    gap: var(--space-3);
+}
+@media (max-width: 640px) {
+    .focus-dock {
+        inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
+        inset-inline-start: calc(var(--space-3) + 66px);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .focus-dock--ringing {
+        animation: none;
+    }
+}
+.btn--sm {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+}
+
+/* ── Emblems and picture frames ─────────────────────────────────────── */
+.emblem {
+    display: inline-grid;
+    place-items: center;
+    vertical-align: middle;
+    font-size: 0.95em;
+    line-height: 1;
+}
+.emblem img {
+    inline-size: 1.1em;
+    block-size: 1.1em;
+    object-fit: contain;
+}
+.avatar {
+    position: relative;
+}
+.avatar--frame-picture {
+    overflow: visible;
+}
+.avatar__frame-picture {
+    position: absolute;
+    inset: -18%;
+    inline-size: 136%;
+    block-size: 136%;
+    max-inline-size: none;
+    object-fit: contain;
+    border-radius: 0;
+    pointer-events: none;
+}
+.profile-hero__avatar--picture {
+    overflow: visible;
+}
+.profile-hero__frame-picture {
+    position: absolute;
+    inset: -16%;
+    inline-size: 132%;
+    block-size: 132%;
+    max-inline-size: none;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 1;
+}
+.profile-hero__title {
+    color: var(--gold-300);
+    font-weight: 600;
+}
+.store-art__emblem {
+    font-size: 3rem;
+    line-height: 1;
+}
+.avatar--frame-picture,
+.avatar--frame-picture .avatar__photo {
+    border-radius: 50%;
+}

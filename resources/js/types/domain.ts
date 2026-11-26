@@ -51,6 +51,8 @@ export interface User {
     /** What the member wears, from the store items they put to use. */
     title: string | null
     frame: string
+    /** An emoji or picture worn next to the name. */
+    emblem: string | null
     /** The theme in use, or null for the platform's own gold. */
     theme: ThemeData | null
     /** Themes the member bought, for the switcher in the top bar. */
@@ -345,9 +347,12 @@ export interface Badge {
     period: BadgePeriod
     conditions: BadgeCondition[]
     isActive: boolean
+    /** A store item handed over free with the achievement. */
+    rewardItemId: number | null
+    reward: { name: string; kind: StoreKind } | null
 }
 
-export type BadgeInput = Omit<Badge, 'id' | 'key'>
+export type BadgeInput = Omit<Badge, 'id' | 'key' | 'reward'>
 
 /** Per-account notification choices. Times are `HH:MM` in the member's own clock, or null. */
 /** What other members see of an account. */
@@ -356,6 +361,7 @@ export interface Privacy {
     showAvatar: boolean
     showTitle: boolean
     showFrame: boolean
+    showEmblem: boolean
     showOnLeaderboard: boolean
 }
 
@@ -368,7 +374,7 @@ export interface Preferences {
     wakeTime: string | null
 }
 
-export const STORE_KINDS = ['title', 'frame', 'theme', 'avatar', 'product'] as const
+export const STORE_KINDS = ['title', 'frame', 'emblem', 'theme', 'avatar', 'product'] as const
 export type StoreKind = (typeof STORE_KINDS)[number]
 /** Built-in looks an item can apply; the CSS for each lives in app.css. */
 export const FRAME_STYLES = ['bronze', 'silver', 'gold', 'royal', 'diamond'] as const
@@ -440,6 +446,7 @@ export interface LeaderboardRow {
     avatarUrl: string | null
     title: string | null
     frame: string
+    emblem?: string | null
     value: number
     /** Today's board: every daily task of the day is done. */
     allDone?: boolean

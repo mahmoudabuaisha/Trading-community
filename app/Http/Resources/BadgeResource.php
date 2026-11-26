@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Badge;
+use App\Models\StoreItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,6 +21,10 @@ class BadgeResource extends JsonResource
             'period' => $this->period,
             'conditions' => $this->conditions ?? [],
             'isActive' => $this->is_active,
+            'rewardItemId' => $this->reward_item_id,
+            'reward' => $this->reward_item_id && ($item = StoreItem::find($this->reward_item_id))
+                ? ['name' => $item->tr('name'), 'kind' => $item->kind]
+                : null,
         ];
     }
 }

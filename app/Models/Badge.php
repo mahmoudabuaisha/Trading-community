@@ -23,7 +23,7 @@ class Badge extends Model
     /** "once" is earned a single time over all history; the others can be earned again every period. */
     public const PERIODS = ['once', 'daily', 'weekly', 'monthly', 'yearly'];
 
-    protected $fillable = ['title', 'description', 'points', 'period', 'conditions', 'is_active'];
+    protected $fillable = ['title', 'description', 'points', 'period', 'conditions', 'is_active', 'reward_item_id'];
 
     protected $attributes = ['description' => '', 'is_active' => true, 'points' => 0, 'period' => 'once'];
 

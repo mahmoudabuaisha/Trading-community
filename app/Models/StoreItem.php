@@ -15,8 +15,8 @@ class StoreItem extends Model
 
     public const IMAGE_DIRECTORY = 'store';
 
-    /** title: text under the name · product: anything else, in a section the administrators made · frame: ring around the photo · theme: colours of the app · avatar: the item's image as profile photo. */
-    public const KINDS = ['title', 'frame', 'theme', 'avatar', 'product'];
+    /** title: text under the name · product: anything else, in a section the administrators made · frame: ring around the photo · theme: colours of the app · avatar: the item's image as profile photo · emblem: a small badge next to the name. */
+    public const KINDS = ['title', 'frame', 'theme', 'avatar', 'product', 'emblem'];
 
     /** Files a product hands over live on the private disk and are served only to their buyers. */
     public const FILE_DIRECTORY = 'store-files';
@@ -50,6 +50,19 @@ class StoreItem extends Model
             'background' => $this->theme_background,
             'imageUrl' => $this->theme_image_path ? '/media/'.$this->theme_image_path : null,
         ];
+    }
+
+    /**
+     * What a worn frame or emblem draws: a built-in frame style or the uploaded
+     * picture for a frame; the uploaded icon or an emoji for an emblem.
+     */
+    public function look(): ?string
+    {
+        return match ($this->kind) {
+            'frame' => $this->value === 'image' ? $this->imageUrl() : $this->value,
+            'emblem' => $this->imageUrl() ?? ($this->value ?: null),
+            default => $this->value,
+        };
     }
 
     public function imageUrl(): ?string

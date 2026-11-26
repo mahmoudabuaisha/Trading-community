@@ -31,13 +31,22 @@ class StoreItemRequest extends ApiRequest
         // What `value` means depends on the kind of item.
         $value = match ($kind) {
             'title' => ['required', 'string', 'max:40'],
-            'frame' => ['required', Rule::in(StoreItem::FRAMES)],
+            // A built-in style, or `image` to use the uploaded picture as the frame.
+            'frame' => ['required', Rule::in([...StoreItem::FRAMES, 'image'])],
+            // An emoji; without one the uploaded icon is the emblem.
+            'emblem' => ['nullable', 'string', 'max:16'],
             'theme' => ['nullable'],
             default => ['nullable'],
         };
         $valueNeeded = ! $item || $this->has('kind') || $this->has('value');
         // An avatar item is its picture, so it cannot exist without one.
-        $imageNeeded = $kind === 'avatar' && (! $item?->image_path || $this->boolean('removeImage'));
+        $noImage = ! $item?->image_path || $this->boolean('removeImage');
+        $imageNeeded = $noImage && ! $this->hasFile('image') && match ($kind) {
+            'avatar' => true,
+            'frame' => $this->input('value', $item?->value) === 'image',
+            'emblem' => trim((string) $this->input('value', $item?->value)) === '',
+            default => false,
+        };
 
         return [
             'name' => [$required, 'string', 'max:80'],

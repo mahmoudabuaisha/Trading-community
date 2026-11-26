@@ -82,9 +82,10 @@ class ProfileController extends Controller
     /** What other members see of this account. */
     public function privacy(Request $request): JsonResponse
     {
-        $data = $request->validate(array_fill_keys(array_keys(User::DEFAULT_PRIVACY), ['required', 'boolean']));
+        // Any subset may be sent; the rest keep their current value.
+        $data = $request->validate(array_fill_keys(array_keys(User::DEFAULT_PRIVACY), ['sometimes', 'boolean']));
         $user = $request->user();
-        $user->forceFill(['privacy' => array_map('boolval', $data)])->save();
+        $user->forceFill(['privacy' => array_map('boolval', [...$user->privacyValues(), ...$data])])->save();
 
         return response()->json(['user' => new UserResource($user)]);
     }

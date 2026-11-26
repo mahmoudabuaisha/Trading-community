@@ -31,6 +31,8 @@ import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import BrandLogo from '../components/BrandLogo.vue'
 import EmptyState from '../components/EmptyState.vue'
 import AssistantWidget from '../components/AssistantWidget.vue'
+import FocusDock from '../components/FocusDock.vue'
+import NameEmblem from '../components/NameEmblem.vue'
 import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import NotificationBell from '../components/NotificationBell.vue'
 import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
@@ -265,8 +267,8 @@ async function signOut(): Promise<void> {
                         <span>
                             <b
                                 ><Crown v-if="auth.isAdmin" :size="14" aria-hidden="true" />
-                                {{ auth.user?.displayName }}</b
-                            >
+                                {{ auth.user?.displayName }} <NameEmblem :emblem="auth.user?.emblem"
+                            /></b>
                             <small>{{ roleLabel }}</small>
                         </span>
                     </RouterLink>
@@ -309,6 +311,7 @@ async function signOut(): Promise<void> {
             <!-- Keyed by language: switching it reloads the page's data, so admin-written text arrives translated. -->
             <RouterView v-else :key="`${locale}:${route.path}`" />
             <AssistantWidget />
+            <FocusDock />
         </section>
     </main>
 </template>

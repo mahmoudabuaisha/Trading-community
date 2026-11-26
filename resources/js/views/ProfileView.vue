@@ -20,6 +20,7 @@ import {
 } from 'lucide-vue-next'
 import { computed, nextTick, reactive, ref, type Component } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import NameEmblem from '../components/NameEmblem.vue'
 import ProfileNotifications from '../components/profile/ProfileNotifications.vue'
 import ProfilePrivacy from '../components/profile/ProfilePrivacy.vue'
 import ProfileRewards from '../components/profile/ProfileRewards.vue'
@@ -84,14 +85,14 @@ function goBack(): void {
 }
 
 // ── Names ────────────────────────────────────────────────────────────────
-type NameField = 'displayName' | 'nickname' | 'surname'
+// Titles are bought in the store; members only set their own names here.
+type NameField = 'displayName' | 'surname'
 const nameRows: { field: NameField; icon: Component }[] = [
     { field: 'displayName', icon: UserRound },
-    { field: 'nickname', icon: Pencil },
     { field: 'surname', icon: Pencil },
 ]
 const editing = ref(false)
-const nameForm = reactive({ displayName: '', nickname: '', surname: '' })
+const nameForm = reactive({ displayName: '', surname: '' })
 const nameErrors = ref<Record<string, string[]>>({})
 const savingNames = ref(false)
 const dialog = ref<HTMLDialogElement | null>(null)
@@ -99,7 +100,6 @@ const dialog = ref<HTMLDialogElement | null>(null)
 async function openNames(focus: NameField = 'displayName'): Promise<void> {
     Object.assign(nameForm, {
         displayName: user.value.displayName,
-        nickname: user.value.nickname,
         surname: user.value.surname,
     })
     nameErrors.value = {}
@@ -115,7 +115,6 @@ async function saveNames(): Promise<void> {
     try {
         await workspace.patchProfile({
             displayName: nameForm.displayName.trim(),
-            nickname: nameForm.nickname.trim(),
             surname: nameForm.surname.trim(),
         })
         editing.value = false
@@ -179,7 +178,9 @@ async function signOut(): Promise<void> {
                             :aria-label="t('profile.verified')"
                         />
                         {{ user.displayName }}
+                        <NameEmblem :emblem="user.emblem" />
                     </h3>
+                    <p v-if="user.title" class="profile-hero__title">{{ user.title }}</p>
                     <p>
                         <Mail :size="20" aria-hidden="true" /> <bdi>{{ user.email }}</bdi>
                     </p>
@@ -199,12 +200,24 @@ async function signOut(): Promise<void> {
                 <button
                     type="button"
                     class="profile-hero__avatar"
-                    :class="user.frame !== 'none' ? `profile-hero__avatar--${user.frame}` : ''"
+                    :class="
+                        user.frame.startsWith('/')
+                            ? 'profile-hero__avatar--picture'
+                            : user.frame !== 'none'
+                              ? `profile-hero__avatar--${user.frame}`
+                              : ''
+                    "
                     :aria-label="t('profile.changeAvatar')"
                     @click="fileInput?.click()"
                 >
                     <img v-if="user.avatarUrl" :src="user.avatarUrl" alt="" />
                     <UserRound v-else :size="84" aria-hidden="true" />
+                    <img
+                        v-if="user.frame.startsWith('/')"
+                        :src="user.frame"
+                        alt=""
+                        class="profile-hero__frame-picture"
+                    />
                     <span class="profile-hero__camera"><Camera :size="18" aria-hidden="true" /></span>
                 </button>
                 <input
@@ -294,16 +307,6 @@ async function signOut(): Promise<void> {
                         autocomplete="given-name"
                     />
                     <small v-if="nameErrors.displayName" class="field__error">{{ nameErrors.displayName[0] }}</small>
-                </label>
-                <label class="field">
-                    <span>{{ t('profile.names.nickname') }}</span>
-                    <input
-                        v-model="nameForm.nickname"
-                        name="nickname"
-                        class="input"
-                        maxlength="120"
-                        autocomplete="nickname"
-                    />
                 </label>
                 <label class="field">
                     <span>{{ t('profile.names.surname') }}</span>

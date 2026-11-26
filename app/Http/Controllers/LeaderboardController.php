@@ -82,7 +82,7 @@ class LeaderboardController extends Controller
     {
         $users = User::whereIn('id', $ids)->get(['id', 'display_name', 'avatar_url', 'equipped', 'privacy']);
         $items = StoreItem::whereIn('id', $users->flatMap(fn (User $user) => array_filter($user->equipped ?? []))->unique())->get()->keyBy('id');
-        $worn = fn (User $user, string $kind): ?string => $kind === 'title' ? $items->get($user->equipped[$kind] ?? null)?->tr('value') : $items->get($user->equipped[$kind] ?? null)?->value;
+        $worn = fn (User $user, string $kind): ?string => $kind === 'title' ? $items->get($user->equipped[$kind] ?? null)?->tr('value') : $items->get($user->equipped[$kind] ?? null)?->look();
 
         return $users->mapWithKeys(function (User $user) use ($worn): array {
             $privacy = $user->privacyValues();
@@ -91,6 +91,7 @@ class LeaderboardController extends Controller
                 ...$user->publicIdentity(),
                 'title' => $privacy['showTitle'] ? $worn($user, 'title') : null,
                 'frame' => $privacy['showFrame'] ? ($worn($user, 'frame') ?? 'none') : 'none',
+                'emblem' => $privacy['showEmblem'] ? $worn($user, 'emblem') : null,
             ]];
         });
     }

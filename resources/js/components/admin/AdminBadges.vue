@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Award, Plus, Star, Trash2 } from 'lucide-vue-next'
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ApiError } from '../../data/http'
 import { t } from '../../i18n'
 import { conditionsText } from '../../lib/badges'
@@ -29,8 +29,14 @@ const blank = () => ({
     points: 10,
     conditions: [{ metric: 'perfect_days', threshold: 1 }] as BadgeCondition[],
     isActive: true,
+    rewardItemId: null as number | null,
 })
 const draft = reactive(blank())
+/** Items an achievement can hand over (anything worn or shown; products are bought). */
+const rewardItems = computed(() => admin.storeItems.filter((item) => item.kind !== 'product'))
+onMounted(() => {
+    if (!admin.storeItems.length) void admin.loadStoreItems().catch(() => undefined)
+})
 const errors = ref<Record<string, string[]>>({})
 const saving = ref(false)
 const deleting = ref<Badge | null>(null)
@@ -50,7 +56,9 @@ function reset(): void {
 }
 
 function edit(badge: Badge): void {
-    Object.assign(draft, { ...badge, conditions: badge.conditions.map((condition) => ({ ...condition })) })
+    const { reward: _reward, ...rest } = badge
+    void _reward
+    Object.assign(draft, { ...rest, conditions: badge.conditions.map((condition) => ({ ...condition })) })
     errors.value = {}
 }
 
@@ -191,6 +199,17 @@ async function confirmDelete(): Promise<void> {
                 <small v-if="errors.conditions" class="field__error">{{ errors.conditions[0] }}</small>
             </fieldset>
 
+            <label class="field">
+                <span>{{ t('admin.bReward') }}</span>
+                <select v-model="draft.rewardItemId" class="input">
+                    <option :value="null">{{ t('admin.bRewardNone') }}</option>
+                    <option v-for="item in rewardItems" :key="item.id" :value="item.id">
+                        {{ t(`store.kind.${item.kind}`) }} · {{ item.name }}
+                    </option>
+                </select>
+                <small class="hint">{{ t('admin.bRewardHint') }}</small>
+            </label>
+
             <div class="head-actions">
                 <label class="check"><input v-model="draft.isActive" type="checkbox" /> {{ t('admin.bActive') }}</label>
                 <button type="submit" class="btn" :disabled="saving">
@@ -215,6 +234,9 @@ async function confirmDelete(): Promise<void> {
                     >
                     <h4>{{ badge.title }}</h4>
                     <p>{{ conditionsText(badge) }}</p>
+                    <p v-if="badge.reward" class="hint">
+                        🎁 {{ t('admin.bRewardShown', { name: badge.reward.name }) }}
+                    </p>
                     <p v-if="badge.description" class="muted">{{ badge.description }}</p>
                 </div>
                 <div class="row-actions">

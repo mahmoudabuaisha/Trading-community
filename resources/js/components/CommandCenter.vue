@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
 import {
     Activity,
     Brain,
@@ -19,7 +20,7 @@ import {
     TrendingUp,
     Award,
 } from 'lucide-vue-next'
-import { computed, onBeforeUnmount, reactive, ref, watch, type Component } from 'vue'
+import { computed, reactive, ref, watch, type Component } from 'vue'
 import DayEntryDialog from './DayEntryDialog.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { ApiError } from '../data/http'
@@ -27,6 +28,7 @@ import { repository } from '../data/repository'
 import { formatDate, messages, t } from '../i18n'
 import { dailyScore, lastDays, percent, today, ymd } from '../lib/dates'
 import { useAuthStore } from '../stores/auth'
+import { PRESETS, MAX_MINUTES, useFocusStore } from '../stores/focus'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
 import type { DayEntry, Task, TaskPriority } from '../types/domain'
@@ -48,7 +50,14 @@ const tabs: { id: TabId; label: string; icon: Component }[] = [
     { id: 'universe', label: 'tabUniverse', icon: Compass },
     { id: 'assistant', label: 'tabAssistant', icon: Brain },
 ]
-const activeTab = ref<TabId>('daily')
+const route = useRoute()
+const activeTab = ref<TabId>(route.query.tab === 'focus' ? 'focus' : 'daily')
+watch(
+    () => route.query.tab,
+    (tab) => {
+        if (tab === 'focus') activeTab.value = 'focus'
+    },
+)
 
 // ── Today ────────────────────────────────────────────────────────────────
 const PRIORITY_ORDER: Record<TaskPriority, number> = { urgent: 0, high: 1, medium: 2, low: 3 }
@@ -75,65 +84,12 @@ function timelineNote(task: Task): string {
 }
 
 // ── Focus timer ──────────────────────────────────────────────────────────
-// The end instant is stored, not a countdown, so a throttled background tab cannot drift.
-const DURATIONS = [10, 25, 30, 60]
-const duration = ref(25)
-const remaining = ref(25 * 60)
-const endsAt = ref<number | null>(null)
-let ticker = 0
-
-const running = computed(() => endsAt.value !== null)
-const dialPct = computed(() =>
-    Math.max(0, Math.min(100, ((duration.value * 60 - remaining.value) / (duration.value * 60)) * 100)),
-)
-const clockText = computed(
-    () =>
-        `${String(Math.floor(remaining.value / 60)).padStart(2, '0')}:${String(remaining.value % 60).padStart(2, '0')}`,
-)
-
-function chooseDuration(minutes: number): void {
-    duration.value = minutes
-    remaining.value = minutes * 60
+// The timer lives in a store so it keeps running across pages and visits.
+const focus = useFocusStore()
+const customMinutes = ref<number | null>(null)
+function chooseCustom(): void {
+    if (customMinutes.value && customMinutes.value > 0) focus.choose(customMinutes.value)
 }
-
-function startTimer(): void {
-    endsAt.value = Date.now() + remaining.value * 1000
-    ticker = window.setInterval(tick, 300)
-}
-
-function tick(): void {
-    if (endsAt.value === null) return
-    remaining.value = Math.max(0, Math.ceil((endsAt.value - Date.now()) / 1000))
-    if (remaining.value === 0) void finishSession()
-}
-
-function pauseTimer(): void {
-    tick()
-    stopTicker()
-}
-
-function resetTimer(): void {
-    stopTicker()
-    remaining.value = duration.value * 60
-}
-
-function stopTicker(): void {
-    window.clearInterval(ticker)
-    endsAt.value = null
-}
-
-async function finishSession(): Promise<void> {
-    const minutes = duration.value
-    resetTimer()
-    try {
-        await workspace.logFocusSession(minutes)
-        ui.success(t('center.focusSaved', { n: minutes }))
-    } catch (error) {
-        ui.failure(error)
-    }
-}
-
-onBeforeUnmount(() => window.clearInterval(ticker))
 
 // ── Daily review ─────────────────────────────────────────────────────────
 const reviewFields = ['win', 'unfinished', 'lesson', 'tomorrow'] as const
@@ -419,34 +375,52 @@ const growthLabel = (category: keyof typeof messages.value.growth.cat) => messag
         <div v-else-if="activeTab === 'focus'" class="suite__content">
             <div class="focus-panel">
                 <span class="eyebrow"><ScanLine :size="13" aria-hidden="true" /> DEEP WORK SESSION</span>
-                <div class="timer-dial" :style="{ '--pct': `${dialPct}%` }">
-                    <div class="timer-dial__time" role="timer" aria-live="off">{{ clockText }}</div>
+                <div class="timer-dial" :style="{ '--pct': `${focus.pct}%` }">
+                    <div class="timer-dial__time" role="timer" aria-live="off">{{ focus.clock }}</div>
                 </div>
-                <p>{{ t(running ? 'center.focusRunning' : 'center.focusIdle') }}</p>
+                <p>{{ t(focus.running ? 'center.focusRunning' : 'center.focusIdle') }}</p>
                 <div class="pill-row">
                     <button
-                        v-for="minutes in DURATIONS"
+                        v-for="minutes in PRESETS"
                         :key="minutes"
                         type="button"
                         class="pill"
-                        :class="{ 'pill--chosen': duration === minutes }"
-                        :disabled="running"
-                        @click="chooseDuration(minutes)"
+                        :class="{ 'pill--chosen': focus.duration === minutes }"
+                        :disabled="focus.running"
+                        @click="focus.choose(minutes)"
                     >
                         {{ t('center.minutesOption', { n: minutes }) }}
                     </button>
                 </div>
+                <form class="focus-custom" @submit.prevent="chooseCustom">
+                    <label class="sr-only" for="focus-custom">{{ t('focus.custom') }}</label>
+                    <input
+                        id="focus-custom"
+                        v-model.number="customMinutes"
+                        class="input"
+                        type="number"
+                        min="1"
+                        :max="MAX_MINUTES"
+                        inputmode="numeric"
+                        :placeholder="t('focus.custom')"
+                        :disabled="focus.running"
+                    />
+                    <button type="submit" class="pill" :disabled="focus.running || !customMinutes">
+                        {{ t('focus.set') }}
+                    </button>
+                </form>
                 <div class="actions actions--center">
-                    <button v-if="running" type="button" class="btn" @click="pauseTimer">
+                    <button v-if="focus.running" type="button" class="btn" @click="focus.pause()">
                         <Pause :size="16" /> {{ t('center.pause') }}
                     </button>
-                    <button v-else type="button" class="btn" @click="startTimer">
-                        <Play :size="16" /> {{ t(remaining === duration * 60 ? 'center.start' : 'center.resume') }}
+                    <button v-else type="button" class="btn" @click="focus.start()">
+                        <Play :size="16" /> {{ t(focus.active ? 'center.resume' : 'center.start') }}
                     </button>
-                    <button type="button" class="btn btn--outline" @click="resetTimer">
+                    <button type="button" class="btn btn--outline" @click="focus.reset()">
                         <RotateCcw :size="15" /> {{ t('center.reset') }}
                     </button>
                 </div>
+                <p class="hint">{{ t('focus.keepsRunning') }}</p>
                 <small>{{
                     t('center.focusTotal', { today: workspace.focus.todayMinutes, total: workspace.focus.totalMinutes })
                 }}</small>

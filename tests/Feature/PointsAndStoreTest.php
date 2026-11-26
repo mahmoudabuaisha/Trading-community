@@ -7,8 +7,10 @@ use App\Models\BadgeAward;
 use App\Models\Broadcast;
 use App\Models\ContentTranslation;
 use App\Models\StoreItem;
+use App\Models\StorePurchase;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\AchievementService;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -162,6 +164,20 @@ class PointsAndStoreTest extends TestCase
         $this->assertNull($points[0]['displayName']);
         $this->assertNull($points[0]['avatarUrl']);
         $this->assertSame(80, $points[0]['value']);
+    }
+
+    public function test_achievements_can_hand_over_an_emblem_that_shows_next_to_the_name(): void
+    {
+        $member = User::factory()->create(['timezone' => 'UTC']);
+        $emblem = StoreItem::create(['name' => 'نجمة', 'kind' => 'emblem', 'value' => '⭐', 'price' => 500]);
+        $badge = Badge::create(['title' => 'أول مهمة', 'points' => 5, 'period' => 'once', 'conditions' => [['metric' => 'tasks_completed', 'threshold' => 1]], 'reward_item_id' => $emblem->id]);
+        $this->dailyTask($member, now()->toDateString(), 'completed');
+        app(AchievementService::class)->evaluate($member);
+
+        $this->assertTrue(StorePurchase::where('user_id', $member->id)->where('store_item_id', $emblem->id)->where('price', 0)->exists());
+        $this->actingAs($member)->putJson('/api/store/equip', ['kind' => 'emblem', 'itemId' => $emblem->id])->assertOk();
+        $this->actingAs($member)->getJson('/api/auth/me')->assertJsonPath('user.emblem', '⭐');
+        $this->assertSame($badge->id, $badge->fresh()->id);
     }
 
     public function test_admins_schedule_and_send_messages_that_members_receive_on_the_day(): void

@@ -7,6 +7,7 @@ use App\Models\Badge;
 use App\Models\BadgeAward;
 use App\Models\Goal;
 use App\Models\HabitCheck;
+use App\Models\StorePurchase;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -105,6 +106,10 @@ class AchievementService
             }
             try {
                 BadgeAward::create(['user_id' => $user->id, 'badge_id' => $badge->id, 'period_key' => $periodKey, 'points' => $badge->points, 'day' => $now->toDateString()]);
+                if ($badge->reward_item_id) {
+                    // The item that comes with it is the member's, free.
+                    StorePurchase::firstOrCreate(['user_id' => $user->id, 'store_item_id' => $badge->reward_item_id], ['price' => 0]);
+                }
                 $new[] = new Achievement(['key' => $badge->achievementKey(), 'earned_at' => now()]);
             } catch (UniqueConstraintViolationException) {
                 // A concurrent request awarded it first.

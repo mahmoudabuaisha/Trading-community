@@ -23,8 +23,14 @@ defineProps<{
                 : undefined
         "
     >
+        <UserAvatar
+            v-if="item.kind === 'frame' && item.value === 'image' && item.imageUrl"
+            name="SN"
+            :frame="item.imageUrl"
+            size="lg"
+        />
         <img
-            v-if="item.imageUrl ?? (item.kind === 'theme' ? item.themeImageUrl : null)"
+            v-else-if="item.imageUrl ?? (item.kind === 'theme' ? item.themeImageUrl : null)"
             :src="(item.imageUrl ?? item.themeImageUrl)!"
             alt=""
             loading="lazy"
@@ -33,6 +39,7 @@ defineProps<{
         <span v-else-if="item.kind === 'theme'" class="store-art__swatch"
             ><Palette :size="30" aria-hidden="true"
         /></span>
+        <span v-else-if="item.kind === 'emblem'" class="store-art__emblem">{{ item.value || '✦' }}</span>
         <span v-else-if="item.kind === 'title'" class="store-art__title"
             ><Tag :size="18" aria-hidden="true" /> {{ item.value }}</span
         >

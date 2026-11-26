@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Eye, Lock } from 'lucide-vue-next'
 import { computed, reactive, ref } from 'vue'
+import NameEmblem from '../NameEmblem.vue'
 import UserAvatar from '../UserAvatar.vue'
 import { repository } from '../../data/repository'
 import { t } from '../../i18n'
@@ -14,13 +15,14 @@ const ui = useUiStore()
 const user = computed(() => auth.user!)
 const form = reactive<Privacy>({ ...auth.user!.privacy })
 const saving = ref(false)
-const toggles = ['showOnLeaderboard', 'showName', 'showAvatar', 'showTitle', 'showFrame'] as const
+const toggles = ['showOnLeaderboard', 'showName', 'showAvatar', 'showTitle', 'showFrame', 'showEmblem'] as const
 
 const preview = computed(() => ({
     name: form.showName ? user.value.displayName : t('privacy.anonymous'),
     avatar: form.showAvatar ? user.value.avatarUrl : null,
     title: form.showTitle ? user.value.title : null,
     frame: form.showFrame ? user.value.frame : 'none',
+    emblem: form.showEmblem ? user.value.emblem : null,
 }))
 
 /** Every switch saves straight away; a refused save puts it back. */
@@ -74,7 +76,7 @@ async function save(): Promise<void> {
                 <span class="leader-row__rank">1</span>
                 <UserAvatar :name="preview.name" :src="preview.avatar" :frame="preview.frame" size="sm" />
                 <span class="leader-row__name">
-                    <b>{{ preview.name }}</b>
+                    <b>{{ preview.name }} <NameEmblem :emblem="preview.emblem" /></b>
                     <small v-if="preview.title">{{ preview.title }}</small>
                 </span>
                 <span class="leader-row__value">{{ t('leaders.unitPoints', { n: user.points }) }}</span>

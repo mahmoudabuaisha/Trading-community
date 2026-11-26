@@ -324,7 +324,18 @@ async function confirmDelete(): Promise<void> {
                         <option v-for="style in FRAME_STYLES" :key="style" :value="style">
                             {{ t(`store.frames.${style}`) }}
                         </option>
+                        <option value="image">{{ t('store.frames.image') }}</option>
                     </select>
+                    <small class="hint">{{
+                        t(draft.value === 'image' ? 'admin.stFrameImageHint' : 'admin.stFrameStyleHint')
+                    }}</small>
+                    <small v-if="errors.image" class="field__error">{{ errors.image[0] }}</small>
+                </label>
+                <label v-else-if="draft.kind === 'emblem'" class="field">
+                    <span>{{ t('admin.stEmblemValue') }}</span>
+                    <input v-model="draft.value" class="input" maxlength="16" :placeholder="t('admin.stEmblemPh')" />
+                    <small class="hint">{{ t('admin.stEmblemHint') }}</small>
+                    <small v-if="errors.image" class="field__error">{{ errors.image[0] }}</small>
                 </label>
                 <template v-else-if="draft.kind === 'theme'">
                     <label class="field">

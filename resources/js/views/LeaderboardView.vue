@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { CalendarCheck, CircleCheckBig, Crown, Flame, Star, Trophy, Zap } from 'lucide-vue-next'
 import { computed, onMounted, ref, type Component } from 'vue'
+import NameEmblem from '../components/NameEmblem.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { repository } from '../data/repository'
 import { t } from '../i18n'
@@ -57,7 +58,7 @@ onMounted(async () => {
                     <UserAvatar :name="nameOf(featured)" :src="featured.avatarUrl" :frame="featured.frame" size="lg" />
                     <div class="leader-star__text">
                         <span class="eyebrow">{{ t('leaders.featured') }}</span>
-                        <h3>{{ nameOf(featured) }}</h3>
+                        <h3>{{ nameOf(featured) }} <NameEmblem :emblem="featured.emblem" /></h3>
                         <small v-if="featured.title">{{ featured.title }}</small>
                         <p>
                             <CircleCheckBig :size="16" aria-hidden="true" />
@@ -116,7 +117,7 @@ onMounted(async () => {
                                             size="sm"
                                         />
                                         <span class="leader-row__name">
-                                            <b>{{ nameOf(row) }}</b>
+                                            <b>{{ nameOf(row) }} <NameEmblem :emblem="row.emblem" /></b>
                                             <small v-if="row.title">{{ row.title }}</small>
                                         </span>
                                     </span>
