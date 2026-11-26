@@ -23,7 +23,7 @@ import ProfileSecurity from '../components/profile/ProfileSecurity.vue'
 import ProfileSettings from '../components/profile/ProfileSettings.vue'
 import ProfileStats from '../components/profile/ProfileStats.vue'
 import { ApiError } from '../data/http'
-import { isRtl, t } from '../i18n'
+import { formatDate, isRtl, t } from '../i18n'
 import { fileToAvatar } from '../lib/image'
 import { roleName } from '../lib/roles'
 import { useAuthStore } from '../stores/auth'
@@ -165,6 +165,9 @@ async function signOut(): Promise<void> {
                         <Mail :size="20" aria-hidden="true" /> <bdi>{{ user.email }}</bdi>
                     </p>
                     <p class="profile-hero__role"><Crown :size="22" aria-hidden="true" /> {{ roleLabel }}</p>
+                    <p v-if="user.isPremium && user.premiumUntil" class="profile-hero__until">
+                        {{ t('profile.premiumUntil', { date: formatDate(user.premiumUntil, { dateStyle: 'long' }) }) }}
+                    </p>
                     <p v-if="user.specialties.length" class="profile-hero__tags">
                         <span v-for="key in user.specialties" :key="key" class="count-pill count-pill--gold">{{
                             t(`specialty.${key}`)

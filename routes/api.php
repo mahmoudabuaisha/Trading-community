@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BadgeController as AdminBadgeController;
+use App\Http\Controllers\Admin\BookController as AdminBookController;
 use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
 use App\Http\Controllers\Admin\BroadcastScheduleController as AdminBroadcastScheduleController;
 use App\Http\Controllers\Admin\DailyTipController as AdminDailyTipController;
@@ -10,10 +11,12 @@ use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\StoreCategoryController as AdminStoreCategoryController;
 use App\Http\Controllers\Admin\StoreItemController as AdminStoreItemController;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\ThreadController as AdminThreadController;
 use App\Http\Controllers\Admin\TranslationController as AdminTranslationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DailyTipController;
 use App\Http\Controllers\DashboardController;
@@ -128,6 +131,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::put('habit-notes/{month}', [HabitController::class, 'note'])->where('month', '\d{4}-(0[1-9]|1[0-2])');
 
     Route::get('lessons', [LessonController::class, 'index']);
+    Route::get('books', [BookController::class, 'index']);
+    Route::get('books/{book}/read', [BookController::class, 'read']);
     Route::get('messages', [MessageController::class, 'index']);
     Route::get('messages/unread', [MessageController::class, 'unread']);
     Route::post('messages', [MessageController::class, 'store'])->middleware('throttle:20,1');
@@ -136,6 +141,15 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('overview', [AdminOverviewController::class, 'show']);
         Route::get('users', [AdminUserController::class, 'index'])->middleware('area:users');
         Route::get('users/{user}', [AdminUserController::class, 'show'])->middleware('area:users');
+        Route::get('users/{user}/subscription', [AdminSubscriptionController::class, 'show'])->middleware('area:users');
+        Route::put('users/{user}/subscription', [AdminSubscriptionController::class, 'update'])->middleware('area:users');
+        Route::get('subscription-notice', [AdminSubscriptionController::class, 'notice'])->middleware('area:messages');
+        Route::put('subscription-notice', [AdminSubscriptionController::class, 'saveNotice'])->middleware('area:messages');
+        Route::get('books', [AdminBookController::class, 'index'])->middleware('area:education');
+        Route::post('books', [AdminBookController::class, 'store'])->middleware('area:education');
+        // POST, not PATCH: the update may carry a cover or a file as multipart form data.
+        Route::post('books/{book}', [AdminBookController::class, 'update'])->middleware('area:education');
+        Route::delete('books/{book}', [AdminBookController::class, 'destroy'])->middleware('area:education');
         Route::patch('users/{user}', [AdminUserController::class, 'update'])->middleware('area:users');
         Route::post('users/{user}/revoke-sessions', [AdminUserController::class, 'revokeSessions'])->middleware('area:users');
         Route::get('motivations', [AdminMotivationController::class, 'index'])->middleware('area:growth');

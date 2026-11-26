@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, Download, ExternalLink, ShoppingBag, Star } from 'lucide-vue-next'
+import { Check, Crown, Download, ExternalLink, ShoppingBag, Star } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import EmptyState from '../components/EmptyState.vue'
@@ -142,7 +142,15 @@ const toggleUse = (item: StoreItem) =>
             >
                 <StoreArt :item="item" />
                 <div class="store-card__body">
-                    <h3>{{ item.name }}</h3>
+                    <h3>
+                        {{ item.name }}
+                        <Crown
+                            v-if="item.isExclusive"
+                            :size="15"
+                            class="gold"
+                            :aria-label="t('store.subscribersOnly')"
+                        />
+                    </h3>
                     <p>{{ item.description || sectionName(item) || t(`store.kind.${item.kind}`) }}</p>
                     <div class="store-card__foot">
                         <template v-if="item.owned && item.kind === 'product'">
@@ -180,6 +188,14 @@ const toggleUse = (item: StoreItem) =>
                             </button>
                             <span class="count-pill count-pill--ok">{{ t('store.owned') }}</span>
                         </template>
+                        <template v-else-if="item.allowed === false">
+                            <span class="store-card__price"
+                                ><Crown :size="16" aria-hidden="true" /> {{ t('store.subscribersOnly') }}</span
+                            >
+                            <RouterLink :to="{ name: 'messages' }" class="btn btn--outline">{{
+                                t('books.subscribe')
+                            }}</RouterLink>
+                        </template>
                         <template v-else>
                             <span class="store-card__price"
                                 ><Star :size="16" aria-hidden="true" /> {{ item.price }}</span
@@ -194,7 +210,7 @@ const toggleUse = (item: StoreItem) =>
                             </button>
                         </template>
                     </div>
-                    <small v-if="!item.owned && points < item.price" class="hint">{{
+                    <small v-if="!item.owned && item.allowed !== false && points < item.price" class="hint">{{
                         t('store.missing', { n: item.price - points })
                     }}</small>
                 </div>

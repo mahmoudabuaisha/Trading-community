@@ -18,7 +18,9 @@ class UserResource extends JsonResource
             'displayName' => $this->display_name,
             'surname' => $this->surname,
             'nickname' => $this->nickname,
-            'isPremium' => (bool) $this->is_premium,
+            // The subscription as it stands now: an ended one reads as off.
+            'isPremium' => $this->hasActiveSubscription(),
+            'premiumUntil' => $this->premium_until?->toISOString(),
             'permissions' => $this->effectivePermissions(),
             'preferences' => $this->preferenceValues(),
             // Points left to spend, and everything earned so far.

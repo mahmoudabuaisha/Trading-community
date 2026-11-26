@@ -37,8 +37,10 @@ export interface User {
     displayName: string
     surname: string
     nickname: string
-    /** Granted by an administrator; opens subscriber-only lessons. */
+    /** A subscription switched on by an administrator and not past its end. */
     isPremium: boolean
+    /** Its end, if it has one. */
+    premiumUntil: string | null
     permissions: AdminArea[]
     preferences: Preferences
     /** Points left to spend in the store. */
@@ -200,6 +202,7 @@ export interface AdminUser {
     email: string
     role: Role
     isPremium: boolean
+    premiumUntil: string | null
     permissions: AdminArea[]
     createdAt: string
 }
@@ -370,6 +373,10 @@ export interface StoreItem {
     isActive: boolean
     owned?: boolean
     equipped?: boolean
+    /** Reserved to the subscribers it was opened for. */
+    isExclusive: boolean
+    /** On the member's store: whether this member may buy it. */
+    allowed?: boolean
     /** The section a product sits in. */
     categoryId: number | null
     /** A product may hand over a file and a link; the link is sent to its owner only. */
@@ -400,6 +407,7 @@ export interface StoreItemInput {
     image?: Blob | null
     removeImage?: boolean
     categoryId?: number | null
+    isExclusive?: boolean
     link?: string
     file?: File | null
     removeFile?: boolean
@@ -687,4 +695,32 @@ export interface Portfolio {
 export interface PublicPortfolio {
     owner: { displayName: string; avatarUrl: string | null; bio: string; specialties: Specialty[] }
     projects: PortfolioProject[]
+}
+
+// ── Paid subscriptions and books ────────────────────────────────────────
+
+/** What a subscription can open for a member. */
+export type GrantType = 'lesson' | 'book' | 'store_item'
+
+export interface SubscriptionSheet {
+    isPremium: boolean
+    active: boolean
+    /** Last day (YYYY-MM-DD) in the platform's timezone; null means no end. */
+    premiumUntil: string | null
+    grants: Record<GrantType, number[]>
+    options: Record<GrantType, { id: number; title: string }[]>
+}
+
+export interface Book {
+    id: number
+    title: string
+    author: string
+    description: string
+    coverUrl: string | null
+    hasFile: boolean
+    fileName: string | null
+    position: number
+    isPublished: boolean
+    /** Opened for this member (always for staff). */
+    unlocked: boolean
 }

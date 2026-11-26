@@ -2,6 +2,7 @@
 import {
     Award,
     BarChart3,
+    BookOpen,
     CalendarDays,
     Clock3,
     Crown,
@@ -106,6 +107,7 @@ const navItems = computed<NavItem[]>(() => {
         item('store', 'store', ShoppingBag),
         item('growth', 'growth', Sparkles),
         item('education', 'education', GraduationCap),
+        item('books', 'books', BookOpen),
         item('messages', 'messages', Mail),
         item('profile', 'profile', UserRound),
     ]

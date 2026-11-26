@@ -56,6 +56,9 @@ class PointsService
             if (! $item->is_active) {
                 throw ValidationException::withMessages(['item' => __('validation.custom.store.unavailable')]);
             }
+            if ($item->is_exclusive && ! $user->hasGrant('store_item', $item->id)) {
+                throw ValidationException::withMessages(['item' => __('validation.custom.store.subscribers')]);
+            }
             if (StorePurchase::where('user_id', $user->id)->where('store_item_id', $item->id)->exists()) {
                 throw ValidationException::withMessages(['item' => __('validation.custom.store.owned')]);
             }

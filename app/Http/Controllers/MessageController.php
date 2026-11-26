@@ -6,6 +6,7 @@ use App\Http\Requests\MessageRequest;
 use App\Http\Resources\MessageResource;
 use App\Models\Broadcast;
 use App\Models\Message;
+use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,6 +21,8 @@ class MessageController extends Controller
 
         return response()->json([
             'messages' => MessageResource::collection($user->messages()->with('sender')->oldest()->oldest('id')->get()),
+            // A note from the administration shown above the conversation (how to subscribe, …).
+            'notice' => Setting::where('key', 'subscription_notice')->value('value'),
         ]);
     }
 

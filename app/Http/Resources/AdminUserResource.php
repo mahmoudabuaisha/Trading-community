@@ -16,7 +16,8 @@ class AdminUserResource extends JsonResource
             'displayName' => $this->display_name,
             'email' => $this->email,
             'role' => $this->role,
-            'isPremium' => (bool) $this->is_premium,
+            'isPremium' => $this->hasActiveSubscription(),
+            'premiumUntil' => $this->premium_until?->toISOString(),
             'permissions' => $this->effectivePermissions(),
             'createdAt' => $this->created_at?->toISOString(),
         ];

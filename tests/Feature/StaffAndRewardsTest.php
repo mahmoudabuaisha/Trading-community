@@ -39,7 +39,7 @@ class StaffAndRewardsTest extends TestCase
         $this->getJson("/api/admin/threads/{$member->id}")->assertForbidden();
         $this->postJson("/api/admin/threads/{$member->id}", ['body' => 'hi'])->assertForbidden();
         // Staff read subscriber-only lessons.
-        $this->assertTrue($moderator->canReadPremium());
+        $this->assertTrue($moderator->hasGrant('lesson', 1));
 
         foreach ([['GET', '/api/admin/users'], ['GET', '/api/admin/motivations'], ['GET', '/api/admin/badges'], ['GET', '/api/admin/settings'],
             ['PATCH', "/api/admin/users/{$member->id}"], ['POST', "/api/admin/users/{$member->id}/revoke-sessions"]] as [$method, $uri]) {

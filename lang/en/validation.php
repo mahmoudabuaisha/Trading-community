@@ -181,7 +181,7 @@ return [
     */
 
     'custom' => [
-        'store' => ['unavailable' => 'This item is not available right now.', 'owned' => 'You already own this item.', 'points' => 'You do not have enough points for this item.', 'notOwned' => 'Buy this item first.'],
+        'store' => ['subscribers' => 'This item is only for the subscribers it was opened for.', 'unavailable' => 'This item is not available right now.', 'owned' => 'You already own this item.', 'points' => 'You do not have enough points for this item.', 'notOwned' => 'Buy this item first.'],
         'tips' => ['empty' => 'No tips have been added yet.'],
         'areas' => ['limit' => 'You have reached the maximum number of areas (:max).'],
         'vision' => ['boards' => 'You have reached the maximum number of boards.', 'items' => 'This board has reached its maximum number of items.'],

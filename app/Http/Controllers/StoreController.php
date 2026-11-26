@@ -65,9 +65,11 @@ class StoreController extends Controller
     {
         $user->refresh();
         $owned = StorePurchase::where('user_id', $user->id)->pluck('store_item_id')->flip();
+        $granted = $user->grantedIds('store_item');
         $equipped = collect($user->equipped ?? [])->filter()->flip();
         $items = StoreItem::where('is_active', true)->orWhereIn('id', $owned->keys())->orderBy('price')->orderBy('id')->get()
-            ->each(function (StoreItem $item) use ($owned, $equipped, $user): void {
+            ->each(function (StoreItem $item) use ($owned, $equipped, $user, $granted): void {
+                $item->allowed = ! $item->is_exclusive || $user->isStaff() || in_array($item->id, $granted, true);
                 $item->owned = $owned->has($item->id);
                 $item->equipped = $item->kind === 'avatar'
                     ? $item->owned && $user->avatar_url === $item->imageUrl()

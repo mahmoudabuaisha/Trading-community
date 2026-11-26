@@ -26,6 +26,9 @@ class StoreItemResource extends JsonResource
             'imageUrl' => $this->imageUrl(),
             'price' => $this->price,
             'isActive' => $this->is_active,
+            'isExclusive' => $this->is_exclusive,
+            // On the member's store: whether this member may buy a reserved item.
+            'allowed' => $this->when(isset($this->allowed), fn () => (bool) $this->allowed),
             // Present on the member's store; absent in the admin list.
             'owned' => $this->when(isset($this->owned), fn () => (bool) $this->owned),
             'equipped' => $this->when(isset($this->equipped), fn () => (bool) $this->equipped),

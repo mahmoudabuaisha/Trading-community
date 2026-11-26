@@ -32,6 +32,7 @@ const blank = () => ({
     isActive: true,
     categoryId: null as number | null,
     link: '',
+    isExclusive: false,
 })
 
 // ── Sections added by the administrators ("Books", "Courses", …) ─────────
@@ -118,6 +119,7 @@ function edit(item: StoreItem): void {
         isActive: item.isActive,
         categoryId: item.categoryId,
         link: item.link ?? '',
+        isExclusive: item.isExclusive,
     })
     file.value = null
     removeFile.value = false
@@ -386,6 +388,9 @@ async function confirmDelete(): Promise<void> {
                 <label class="check"
                     ><input v-model="draft.isActive" type="checkbox" /> {{ t('admin.stActive') }}</label
                 >
+                <label class="check" :title="t('admin.stExclusiveHint')"
+                    ><input v-model="draft.isExclusive" type="checkbox" /> {{ t('admin.stExclusive') }}</label
+                >
                 <button type="submit" class="btn" :disabled="saving">
                     <Plus :size="15" aria-hidden="true" />
                     {{ saving ? t('common.saving') : t(draft.id === null ? 'admin.stAdd' : 'admin.saveEdit') }}
@@ -407,7 +412,8 @@ async function confirmDelete(): Promise<void> {
                                 : t(`store.kind.${item.kind}`)
                         }}
                         ·
-                        {{ t(item.isActive ? 'admin.stOnSale' : 'admin.stOffSale') }}
+                        {{ t(item.isActive ? 'admin.stOnSale' : 'admin.stOffSale')
+                        }}{{ item.isExclusive ? ` · ${t('admin.stExclusive')}` : '' }}
                     </span>
                     <span class="count-pill count-pill--gold"
                         ><Star :size="12" aria-hidden="true" /> {{ item.price }}</span

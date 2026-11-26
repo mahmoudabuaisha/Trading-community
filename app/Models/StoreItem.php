@@ -26,13 +26,13 @@ class StoreItem extends Model
 
     public const THEMES = ['emerald', 'sapphire', 'ruby', 'amethyst', 'silver'];
 
-    protected $fillable = ['name', 'description', 'kind', 'value', 'price', 'is_active', 'category_id', 'link'];
+    protected $fillable = ['name', 'description', 'kind', 'value', 'price', 'is_active', 'category_id', 'link', 'is_exclusive'];
 
     protected $attributes = ['description' => '', 'is_active' => true];
 
     protected function casts(): array
     {
-        return ['price' => 'integer', 'is_active' => 'boolean'];
+        return ['price' => 'integer', 'is_active' => 'boolean', 'is_exclusive' => 'boolean'];
     }
 
     public function imageUrl(): ?string
@@ -43,6 +43,7 @@ class StoreItem extends Model
     protected static function booted(): void
     {
         static::deleted(function (StoreItem $item): void {
+            SubscriptionGrant::forget('store_item', $item->id);
             if ($item->image_path) {
                 Storage::disk('public')->delete($item->image_path);
             }

@@ -10,6 +10,9 @@ import type {
     DeviceSession,
     Preferences,
     AdminBroadcasts,
+    Book,
+    GrantType,
+    SubscriptionSheet,
     Category,
     DailyTipItem,
     DailyTipState,
@@ -242,7 +245,7 @@ export const repository = {
     saveHabitNote: (month: string, body: string) =>
         request<{ note: string }>('PUT', `/habit-notes/${month}`, { body }).then((r) => r.note),
     loadLessons: () => request<{ lessons: Lesson[] }>('GET', '/lessons').then((r) => r.lessons),
-    loadMessages: () => request<{ messages: Message[] }>('GET', '/messages').then((r) => r.messages),
+    loadMessages: () => request<{ messages: Message[]; notice: string | null }>('GET', '/messages'),
     sendMessage: (body: string) => request<{ message: Message }>('POST', '/messages', { body }).then((r) => r.message),
     unreadCounts: () => request<UnreadCounts>('GET', '/messages/unread'),
 
@@ -252,6 +255,40 @@ export const repository = {
         request<Paginated<AdminUser>>('GET', `/admin/users?search=${encodeURIComponent(search)}&page=${page}`),
     adminUpdateUser: (id: number, patch: { role?: Role; isPremium?: boolean; permissions?: AdminArea[] }) =>
         request<{ user: AdminUser }>('PATCH', `/admin/users/${id}`, patch).then((r) => r.user),
+    books: () => request<{ books: Book[] }>('GET', '/books').then((r) => r.books),
+    adminBooks: () => request<{ books: Book[] }>('GET', '/admin/books').then((r) => r.books),
+    adminSaveBook: (
+        id: number | null,
+        input: {
+            title?: string
+            author?: string
+            description?: string
+            isPublished?: boolean
+            cover?: File | null
+            file?: File | null
+        },
+    ) => {
+        const form = new FormData()
+        for (const key of ['title', 'author', 'description'] as const) {
+            if (input[key] !== undefined) form.set(key, input[key]!)
+        }
+        if (input.isPublished !== undefined) form.set('isPublished', input.isPublished ? '1' : '0')
+        if (input.cover) form.set('cover', input.cover, input.cover.name)
+        if (input.file) form.set('file', input.file, input.file.name)
+        return request<{ books: Book[] }>('POST', id === null ? '/admin/books' : `/admin/books/${id}`, form).then(
+            (r) => r.books,
+        )
+    },
+    adminDeleteBook: (id: number) => request<void>('DELETE', `/admin/books/${id}`),
+    adminSubscription: (userId: number) => request<SubscriptionSheet>('GET', `/admin/users/${userId}/subscription`),
+    adminSaveSubscription: (
+        userId: number,
+        input: { isPremium: boolean; premiumUntil: string | null; grants: Record<GrantType, number[]> },
+    ) => request<SubscriptionSheet>('PUT', `/admin/users/${userId}/subscription`, input),
+    adminSubscriptionNotice: () =>
+        request<{ notice: string }>('GET', '/admin/subscription-notice').then((r) => r.notice),
+    adminSaveSubscriptionNotice: (notice: string) =>
+        request<{ notice: string }>('PUT', '/admin/subscription-notice', { notice }).then((r) => r.notice),
     adminUserDetails: (id: number) => request<UserDetails>('GET', `/admin/users/${id}`),
     adminBroadcastSchedules: () =>
         request<{ timezone: string; schedules: BroadcastSchedule[] }>('GET', '/admin/broadcast-schedules'),
@@ -333,6 +370,7 @@ function storeItemForm(input: Partial<StoreItemInput>): FormData {
     if (input.isActive !== undefined) form.set('isActive', input.isActive ? '1' : '0')
     if (input.removeImage) form.set('removeImage', '1')
     if (input.image) form.set('image', input.image, 'item.png')
+    if (input.isExclusive !== undefined) form.set('isExclusive', input.isExclusive ? '1' : '0')
     if (input.categoryId !== undefined)
         form.set('categoryId', input.categoryId === null ? '' : String(input.categoryId))
     if (input.link !== undefined) form.set('link', input.link)

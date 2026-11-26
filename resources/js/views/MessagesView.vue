@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Mail } from 'lucide-vue-next'
+import { Mail, Pin } from 'lucide-vue-next'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import MessageThread from '../components/MessageThread.vue'
 import { repository } from '../data/repository'
@@ -12,13 +12,17 @@ const workspace = useWorkspaceStore()
 const ui = useUiStore()
 
 const messages = ref<Message[]>([])
+/** A note from the administration shown above the conversation (how to subscribe, …). */
+const notice = ref<string | null>(null)
 const sending = ref(false)
 let poll = 0
 
 /** Loading the thread also marks the administrators' messages as read. */
 async function load(quiet = false): Promise<void> {
     try {
-        messages.value = await repository.loadMessages()
+        const result = await repository.loadMessages()
+        messages.value = result.messages
+        notice.value = result.notice
         workspace.unread.member = 0
     } catch (error) {
         if (!quiet) ui.failure(error)
@@ -52,6 +56,13 @@ onBeforeUnmount(() => window.clearInterval(poll))
                 <p>{{ t('messages.sub') }}</p>
             </div>
             <Mail :size="20" class="gold" aria-hidden="true" />
+        </div>
+        <div v-if="notice" class="panel message-notice">
+            <Pin :size="18" aria-hidden="true" />
+            <div>
+                <b>{{ t('messages.noticeTitle') }}</b>
+                <p>{{ notice }}</p>
+            </div>
         </div>
         <div class="panel">
             <MessageThread

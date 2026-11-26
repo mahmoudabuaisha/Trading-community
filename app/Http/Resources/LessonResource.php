@@ -13,7 +13,7 @@ class LessonResource extends JsonResource
     {
         // A subscriber-only lesson is listed for everyone, but its text and
         // picture are sent only to readers who are allowed to open it.
-        $locked = $this->is_premium && ! $request->user()?->canReadPremium();
+        $locked = $this->is_premium && ! $request->user()?->hasGrant('lesson', $this->id);
 
         return [
             'id' => $this->id,

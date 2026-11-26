@@ -24,6 +24,8 @@ import AdminSkills from '../../components/admin/AdminSkills.vue'
 import TranslateButton from '../../components/admin/TranslateButton.vue'
 import UserDetailsDialog from '../../components/admin/UserDetailsDialog.vue'
 import AdminDailyTips from '../../components/admin/AdminDailyTips.vue'
+import AdminBooks from '../../components/admin/AdminBooks.vue'
+import SubscriptionDialog from '../../components/admin/SubscriptionDialog.vue'
 import AdminStore from '../../components/admin/AdminStore.vue'
 import AdminBroadcasts from '../../components/admin/AdminBroadcasts.vue'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
@@ -78,11 +80,8 @@ const visibleTabs = computed(() => tabs.filter((item) => auth.can(item.id)))
 const tab = ref<TabId>(tabs.find((item) => auth.can(item.id))?.id ?? 'users')
 const workspace = useWorkspaceStore()
 
-const togglePremium = (user: AdminUser) =>
-    run(
-        () => admin.updateUser(user.id, { isPremium: !user.isPremium }),
-        user.isPremium ? 'admin.premiumRevoked' : 'admin.premiumGranted',
-    )
+/** The member whose subscription dialog is open. */
+const subscriptionOf = ref<AdminUser | null>(null)
 
 /** Jump to the inbox with this member's thread open (empty if they never wrote). */
 async function openMessages(user: AdminUser): Promise<void> {
@@ -132,7 +131,11 @@ const roleBadge = (user: AdminUser) =>
         ? t('admin.fullAdmin')
         : user.role === 'moderator'
           ? t('role.moderator')
-          : t(user.isPremium ? 'role.premium' : 'admin.member')
+          : user.isPremium
+            ? user.premiumUntil
+                ? t('admin.subUntilBadge', { date: formatDate(user.premiumUntil, { dateStyle: 'medium' }) })
+                : t('role.premium')
+            : t('admin.member')
 
 function askRevoke(user: AdminUser): void {
     confirm.value = {
@@ -336,13 +339,14 @@ function auditDetail(entry: AuditEntry): string {
                             {{ t('admin.access') }}
                         </button>
                         <button
-                            v-if="user.role !== 'admin'"
+                            v-if="user.role === 'user'"
                             type="button"
                             class="pill"
                             :class="{ 'pill--chosen': user.isPremium }"
-                            @click="togglePremium(user)"
+                            @click="subscriptionOf = user"
                         >
-                            {{ t(user.isPremium ? 'admin.premiumRevoke' : 'admin.premiumGrant') }}
+                            <Crown :size="12" aria-hidden="true" />
+                            {{ t(user.isPremium ? 'admin.subManage' : 'admin.premiumGrant') }}
                         </button>
                         <button v-if="auth.can('messages')" type="button" class="pill" @click="openMessages(user)">
                             {{ t('admin.message') }}
@@ -462,6 +466,8 @@ function auditDetail(entry: AuditEntry): string {
 
         <AdminLessons v-if="tab === 'education'" />
 
+        <AdminBooks v-if="tab === 'education'" />
+
         <AdminSkills v-if="tab === 'education'" />
 
         <AdminBadges v-if="tab === 'badges'" />
@@ -542,6 +548,13 @@ function auditDetail(entry: AuditEntry): string {
             </form>
         </dialog>
 
+        <SubscriptionDialog
+            v-if="subscriptionOf"
+            :user-id="subscriptionOf.id"
+            :name="subscriptionOf.displayName"
+            @saved="run(() => admin.loadUsers())"
+            @close="subscriptionOf = null"
+        />
         <UserDetailsDialog v-if="detailsOf !== null" :user-id="detailsOf" @close="detailsOf = null" />
     </section>
 </template>

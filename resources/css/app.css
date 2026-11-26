@@ -5778,3 +5778,100 @@ a.btn-metal {
     border: 0;
     border-radius: var(--radius-sm);
 }
+
+/* ── Books ──────────────────────────────────────────────────────────────── */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+    gap: var(--space-4);
+}
+.book-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+}
+.book-card__body {
+    flex: 1;
+    min-inline-size: 0;
+    display: grid;
+    gap: var(--space-2);
+    justify-items: start;
+}
+.book-card__body h3 {
+    color: var(--gold-200);
+    font-size: var(--text-lg);
+}
+.book-card__author {
+    color: var(--gold-300);
+    font-size: var(--text-sm);
+}
+.book-card__text {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+.book-cover {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 120px;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: linear-gradient(160deg, var(--gold-900), var(--bg-900));
+    color: var(--gold-300);
+    box-shadow: 6px 8px 18px rgb(0 0 0 / 0.5);
+}
+.book-cover img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+}
+.book-cover--sm {
+    inline-size: 64px;
+}
+.book-cover__lock {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgb(0 0 0 / 0.55);
+    color: var(--gold-200);
+}
+.book-card--locked .book-cover img {
+    filter: grayscale(0.4) brightness(0.8);
+}
+
+/* ── The administration's note above a private conversation ─────────────── */
+.message-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    border-color: var(--line-strong);
+}
+.message-notice > svg {
+    flex: none;
+    color: var(--gold-300);
+}
+.message-notice b {
+    color: var(--gold-200);
+}
+.message-notice p {
+    white-space: pre-wrap;
+}
+.message-notice-editor {
+    display: grid;
+    gap: var(--space-2);
+    padding-block-end: var(--space-4);
+    margin-block-end: var(--space-4);
+    border-block-end: 1px solid var(--line-soft);
+}
+.profile-hero__until {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}

@@ -82,6 +82,7 @@ class User extends Authenticatable
             'specialties' => 'array',
             'last_seen_at' => 'datetime',
             'is_premium' => 'boolean',
+            'premium_until' => 'datetime',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'weekly_goal' => 'integer',
@@ -90,9 +91,38 @@ class User extends Authenticatable
     }
 
     /** Subscriber-only lessons are open to premium members and to administrators. */
-    public function canReadPremium(): bool
+    /** Switched on by an administrator and not past its end date (none means it lasts). */
+    public function hasActiveSubscription(): bool
     {
-        return $this->is_premium || $this->isStaff();
+        return (bool) $this->is_premium && ($this->premium_until === null || $this->premium_until->isFuture());
+    }
+
+    /**
+     * May this member use one paid service? Staff always may; a member needs an
+     * active subscription and that service opened for them.
+     */
+    public function hasGrant(string $type, int $id): bool
+    {
+        if ($this->isStaff()) {
+            return true;
+        }
+
+        return $this->hasActiveSubscription() && $this->subscriptionGrants()->where('grantable_type', $type)->where('grantable_id', $id)->exists();
+    }
+
+    /** @return list<int> ids of one kind of service the member may use now (empty without an active subscription) */
+    public function grantedIds(string $type): array
+    {
+        if (! $this->hasActiveSubscription()) {
+            return [];
+        }
+
+        return $this->subscriptionGrants()->where('grantable_type', $type)->pluck('grantable_id')->map(fn ($id): int => (int) $id)->all();
+    }
+
+    public function subscriptionGrants(): HasMany
+    {
+        return $this->hasMany(SubscriptionGrant::class);
     }
 
     public function isStaff(): bool

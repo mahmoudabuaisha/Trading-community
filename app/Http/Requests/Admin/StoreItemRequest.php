@@ -16,7 +16,7 @@ class StoreItemRequest extends ApiRequest
     protected function prepareForValidation(): void
     {
         // Multipart fields arrive as strings; normalise the booleans.
-        foreach (['isActive', 'removeImage', 'removeFile'] as $flag) {
+        foreach (['isActive', 'removeImage', 'removeFile', 'isExclusive'] as $flag) {
             if ($this->has($flag)) {
                 $this->merge([$flag => filter_var($this->input($flag), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)]);
             }
@@ -46,6 +46,8 @@ class StoreItemRequest extends ApiRequest
             'value' => $valueNeeded ? $value : ['sometimes'],
             'price' => [$required, 'integer', 'min:0', 'max:1000000'],
             'isActive' => ['sometimes', 'boolean'],
+            // Reserved to the subscribers it is opened for.
+            'isExclusive' => ['sometimes', 'boolean'],
             'removeImage' => ['sometimes', 'boolean'],
             // A product sits in a section and may hand over a link and/or a file once bought.
             'categoryId' => [$kind === 'product' && (! $item || $this->has('kind')) ? 'required' : 'sometimes', 'nullable', 'integer', 'exists:store_categories,id'],

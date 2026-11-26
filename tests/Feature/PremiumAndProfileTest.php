@@ -34,7 +34,11 @@ class PremiumAndProfileTest extends TestCase
         ])->assertOk()->assertJsonPath('user.isPremium', false);
         $this->actingAs($member)->patchJson("/api/admin/users/{$member->id}", ['isPremium' => true])->assertForbidden();
 
+        // Switching the subscription on opens nothing by itself: each lesson is opened per member.
         $this->actingAs($admin)->patchJson("/api/admin/users/{$member->id}", ['isPremium' => true])->assertOk()->assertJsonPath('user.isPremium', true);
+        $this->actingAs($member->refresh())->getJson('/api/lessons')->assertJsonPath('lessons.1.locked', true);
+        $paid = Lesson::where('is_premium', true)->value('id');
+        $member->subscriptionGrants()->create(['grantable_type' => 'lesson', 'grantable_id' => $paid]);
         $this->actingAs($member->refresh())->getJson('/api/lessons')->assertJsonPath('lessons.1.locked', false)->assertJsonPath('lessons.1.body', 'نص سري')
             ->assertJsonPath('lessons.1.imageUrl', '/media/lessons/paid.jpg');
 

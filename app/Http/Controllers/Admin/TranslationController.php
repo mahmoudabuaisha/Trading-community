@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SetLocaleFromRequest;
 use App\Models\Badge;
+use App\Models\Book;
 use App\Models\Broadcast;
 use App\Models\BroadcastSchedule;
 use App\Models\ContentTranslation;
@@ -34,6 +35,7 @@ class TranslationController extends Controller
         'broadcast-schedule' => [BroadcastSchedule::class, 'growth'],
         'daily-tip' => [DailyTip::class, 'growth'],
         'lesson' => [Lesson::class, 'education'],
+        'book' => [Book::class, 'education'],
         'skill-path' => [SkillPath::class, 'education'],
         'skill-level' => [SkillLevel::class, 'education'],
         'badge' => [Badge::class, 'badges'],

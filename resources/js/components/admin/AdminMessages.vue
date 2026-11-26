@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Mail } from 'lucide-vue-next'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { repository } from '../../data/repository'
 import { formatDate, t } from '../../i18n'
 import { useAdminStore } from '../../stores/admin'
 import { useUiStore } from '../../stores/ui'
@@ -12,6 +13,28 @@ const admin = useAdminStore()
 const workspace = useWorkspaceStore()
 const ui = useUiStore()
 const sending = ref(false)
+
+// The automatic note every member sees above their private conversation.
+const notice = ref('')
+const savingNotice = ref(false)
+onMounted(async () => {
+    try {
+        notice.value = await repository.adminSubscriptionNotice()
+    } catch (error) {
+        ui.failure(error)
+    }
+})
+async function saveNotice(): Promise<void> {
+    savingNotice.value = true
+    try {
+        notice.value = await repository.adminSaveSubscriptionNotice(notice.value.trim())
+        ui.success(t('admin.ntSaved'))
+    } catch (error) {
+        ui.failure(error)
+    } finally {
+        savingNotice.value = false
+    }
+}
 let poll = 0
 
 async function open(userId: number): Promise<void> {
@@ -50,6 +73,19 @@ onBeforeUnmount(() => window.clearInterval(poll))
 
 <template>
     <div class="panel">
+        <form class="message-notice-editor" @submit.prevent="saveNotice">
+            <label class="field">
+                <span
+                    ><b>{{ t('admin.ntHead') }}</b> · {{ t('admin.ntSub') }}</span
+                >
+                <textarea v-model="notice" class="input" rows="3" maxlength="1500" :placeholder="t('admin.ntPh')" />
+            </label>
+            <div class="actions">
+                <button type="submit" class="btn btn--outline" :disabled="savingNotice">
+                    {{ savingNotice ? t('common.saving') : t('common.save') }}
+                </button>
+            </div>
+        </form>
         <div class="section-head">
             <div>
                 <span class="eyebrow">DIRECT LINE / INBOX</span>

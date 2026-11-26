@@ -35,6 +35,7 @@ class Lesson extends Model
             }
         });
         static::deleted(function (Lesson $lesson): void {
+            SubscriptionGrant::forget('lesson', $lesson->id);
             if ($lesson->image_path) {
                 Storage::disk('public')->delete($lesson->image_path);
             }

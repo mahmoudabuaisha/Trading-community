@@ -264,6 +264,12 @@ class AdminService
         });
     }
 
+    /** Write an audit row about one member's account. */
+    public function recordFor(User $admin, string $action, User $target, array $details = []): void
+    {
+        $this->audit($admin, $action, $target, ['name' => $target->display_name, ...$details]);
+    }
+
     /** Write an audit row for an action that needs no other bookkeeping. */
     public function record(User $admin, string $action, string $name): void
     {
