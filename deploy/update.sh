@@ -37,4 +37,6 @@ for SITE in /etc/nginx/sites-available/*; do
     fi
 done
 systemctl restart "$(systemctl list-units --type=service --no-legend 'php*-fpm.service' | awk '{print $1; exit}')"
+# Translate admin-written content that has no current translation (does nothing without ANTHROPIC_API_KEY).
+sudo -u www-data nohup php artisan translations:auto >> storage/logs/translations.log 2>&1 &
 echo "Updated to $(git rev-parse --short HEAD)."

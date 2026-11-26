@@ -45,6 +45,16 @@ class TranslationController extends Controller
         'design' => [Design::class, 'store'],
     ];
 
+    /**
+     * Every model whose text members can read translated.
+     *
+     * @return list<class-string<Model>>
+     */
+    public static function models(): array
+    {
+        return array_values(array_unique(array_column(self::TYPES, 0)));
+    }
+
     public function show(string $type, int $id): JsonResponse
     {
         return response()->json($this->payload($this->find($type, $id)));
@@ -74,7 +84,11 @@ class TranslationController extends Controller
                     $row = $model->translations()->firstOrNew(['field' => $field, 'locale' => $locale]);
                     if ($text === '' || $original === '') {
                         $row->exists && $row->delete();
+                    } elseif ($row->exists && $row->text === $text && $row->source_hash === sha1($original)) {
+                        // Unchanged: an automatic translation stays automatic.
+                        continue;
                     } else {
+                        $row->is_auto = false;
                         $row->fill(['text' => $text, 'source_hash' => sha1($original)])->save();
                     }
                 }
@@ -96,8 +110,7 @@ class TranslationController extends Controller
     /** @return list<string> the fields of this item that hold language */
     private function fields(Model $model): array
     {
-        // A store item's `value` is text only when the item is a title.
-        return array_values(array_filter($model::TRANSLATABLE, fn (string $field): bool => ! ($model instanceof StoreItem && $field === 'value' && $model->kind !== 'title')));
+        return $model->translatableFields();
     }
 
     private function payload(Model $model): array
@@ -113,6 +126,7 @@ class TranslationController extends Controller
                     'original' => $original,
                     'translations' => collect(SetLocaleFromRequest::SUPPORTED)->mapWithKeys(fn (string $locale): array => [$locale => $rows->get($locale)?->text ?? ''])->all(),
                     // Written for an earlier wording of the original: shown to the admin, not to members.
+                    'auto' => $rows->filter(fn (ContentTranslation $row): bool => $row->is_auto)->keys()->values()->all(),
                     'stale' => $rows->filter(fn (ContentTranslation $row): bool => $row->source_hash !== sha1($original))->keys()->values()->all(),
                 ];
             }, array_values(array_filter($this->fields($model), fn (string $field): bool => (string) $model->getAttribute($field) !== ''))),

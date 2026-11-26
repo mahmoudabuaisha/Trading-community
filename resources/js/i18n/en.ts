@@ -1153,6 +1153,7 @@ export const en: Messages = {
         trHead: 'Translate content',
         trSub: 'Write the text in each language. Members see the version for their language; a language left empty shows the original.',
         trOriginal: 'Original text',
+        trAuto: 'Automatic translation; edit it if you like and your wording will stay.',
         trStale: 'The original changed: review this translation',
         trPh: 'Leave empty to show the original',
         trSaved: 'Translation saved',

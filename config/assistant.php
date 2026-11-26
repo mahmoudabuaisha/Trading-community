@@ -10,4 +10,8 @@ return [
     'model' => env('ASSISTANT_MODEL', 'claude-opus-5-5'),
     // Messages a member may send per day; protects the monthly bill.
     'daily_limit' => (int) env('ASSISTANT_DAILY_LIMIT', 20),
+
+    // Admin-written content is machine-translated into every language when a key is set.
+    'auto_translate' => (bool) env('AUTO_TRANSLATE', true),
+    'translation_model' => env('TRANSLATION_MODEL', 'claude-haiku-5-5'),
 ];

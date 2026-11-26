@@ -116,6 +116,8 @@ bash deploy/update.sh
 
 After pointing a domain at the server, enable HTTPS with certbot (the install script prints the commands), then set `APP_URL=https://…` and `SESSION_SECURE_COOKIE=true` in `.env`.
 
+With `ANTHROPIC_API_KEY` set, admin-written content is also translated automatically: every new or reworded text is translated right after it is saved, and `php artisan translations:auto` (run by `deploy/update.sh`) fills in older content. A translation an administrator writes by hand is never overwritten. `TRANSLATION_MODEL` (default `claude-haiku-5-5`) picks the model and `AUTO_TRANSLATE=false` turns it off.
+
 The AI assistant stays off until `ANTHROPIC_API_KEY` is set in `.env`. `ASSISTANT_MODEL` (default `claude-opus-5-5`) and `ASSISTANT_DAILY_LIMIT` (default 20 questions per member per day) tune it. Each question sends the member's name, today's tasks, open goals, streak and points to Anthropic's API.
 
 Password-reset emails are written to `storage/logs` until SMTP is configured (`MAIL_*` in `.env`).

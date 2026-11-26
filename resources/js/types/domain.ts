@@ -400,7 +400,7 @@ export interface StoreCategory {
 /** One item's text in every language, for the admin's translation dialog. */
 export interface TranslationSheet {
     locales: Locale[]
-    fields: { field: string; original: string; translations: Record<string, string>; stale: string[] }[]
+    fields: { field: string; original: string; translations: Record<string, string>; auto: string[]; stale: string[] }[]
 }
 
 export interface StoreItemInput {

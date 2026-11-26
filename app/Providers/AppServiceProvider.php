@@ -6,6 +6,8 @@ use Anthropic\Client;
 use App\Models\User;
 use App\Services\Assistant\AssistantClient;
 use App\Services\Assistant\ClaudeAssistantClient;
+use App\Services\Translation\ClaudeTextTranslator;
+use App\Services\Translation\TextTranslator;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -19,7 +21,10 @@ class AppServiceProvider extends ServiceProvider
             new Client(apiKey: (string) config('assistant.api_key')),
             (string) config('assistant.model'),
         ));
-        //
+        $this->app->bind(TextTranslator::class, fn () => new ClaudeTextTranslator(
+            new Client(apiKey: (string) config('assistant.api_key')),
+            (string) config('assistant.translation_model'),
+        ));
     }
 
     public function boot(): void

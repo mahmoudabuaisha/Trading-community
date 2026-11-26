@@ -1189,6 +1189,7 @@ export const fr: Messages = {
         trHead: 'Traduire le contenu',
         trSub: "Écrivez le texte dans chaque langue. Les membres voient la version de leur langue ; une langue laissée vide affiche l'original.",
         trOriginal: 'Texte original',
+        trAuto: 'Traduction automatique ; modifiez-la si vous voulez, votre version sera conservée.',
         trStale: "L'original a changé : revoyez cette traduction",
         trPh: "Laisser vide pour afficher l'original",
         trSaved: 'Traduction enregistrée',

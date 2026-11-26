@@ -69,6 +69,7 @@ const dir = (locale: Locale) => (locale === 'ar' ? 'rtl' : 'ltr')
                     <span>
                         {{ LOCALE_NAMES[locale] }}
                         <small v-if="field.stale.includes(locale)" class="field__error">{{ t('admin.trStale') }}</small>
+                        <small v-else-if="field.auto.includes(locale)" class="hint">{{ t('admin.trAuto') }}</small>
                     </span>
                     <textarea
                         v-if="long(field.original)"

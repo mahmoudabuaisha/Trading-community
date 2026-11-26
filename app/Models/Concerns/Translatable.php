@@ -3,7 +3,9 @@
 namespace App\Models\Concerns;
 
 use App\Models\ContentTranslation;
+use App\Services\Translation\AutoTranslator;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Throwable;
 
 /**
  * Text written by the administrators that members read in their own language.
@@ -24,6 +26,29 @@ trait Translatable
     public static function bootTranslatable(): void
     {
         static::deleted(fn ($model) => $model->translations()->delete());
+
+        // Translate new or reworded text once the administrator has their answer.
+        static::saved(function ($model): void {
+            if (! AutoTranslator::enabled() || (! $model->wasRecentlyCreated && ! $model->wasChanged($model->translatableFields()))) {
+                return;
+            }
+            $class = $model::class;
+            $id = $model->getKey();
+            dispatch(function () use ($class, $id): void {
+                $fresh = $class::find($id);
+                try {
+                    $fresh && app(AutoTranslator::class)->translate($fresh);
+                } catch (Throwable $error) {
+                    report($error);
+                }
+            })->afterResponse();
+        });
+    }
+
+    /** @return list<string> the fields of this row that hold language */
+    public function translatableFields(): array
+    {
+        return static::TRANSLATABLE;
     }
 
     public function translations(): MorphMany

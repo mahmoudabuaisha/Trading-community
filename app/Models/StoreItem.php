@@ -72,4 +72,10 @@ class StoreItem extends Model
             }
         });
     }
+
+    /** `value` is language only when the item is a title; otherwise it is a colour or a code. */
+    public function translatableFields(): array
+    {
+        return $this->kind === 'title' ? self::TRANSLATABLE : ['name', 'description'];
+    }
 }
