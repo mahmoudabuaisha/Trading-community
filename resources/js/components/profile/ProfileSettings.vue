@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import AccountNotifications from '../AccountNotifications.vue'
-import NotificationSettings from '../NotificationSettings.vue'
 import { ApiError } from '../../data/http'
 import { LOCALE_NAMES, t } from '../../i18n'
 import { useAuthStore } from '../../stores/auth'
@@ -116,8 +114,5 @@ async function save(): Promise<void> {
                 </button>
             </div>
         </form>
-
-        <AccountNotifications />
-        <NotificationSettings />
     </div>
 </template>

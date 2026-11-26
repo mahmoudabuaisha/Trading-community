@@ -23,6 +23,7 @@ class UserResource extends JsonResource
             'premiumUntil' => $this->premium_until?->toISOString(),
             'permissions' => $this->effectivePermissions(),
             'preferences' => $this->preferenceValues(),
+            'privacy' => $this->privacyValues(),
             // Points left to spend, and everything earned so far.
             'points' => app(PointsService::class)->balance($this->resource),
             'pointsEarned' => app(PointsService::class)->earned($this->resource),

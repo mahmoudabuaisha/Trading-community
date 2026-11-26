@@ -147,6 +147,23 @@ class PointsAndStoreTest extends TestCase
         $this->assertArrayNotHasKey('email', $board['today'][0]);
     }
 
+    public function test_privacy_choices_shape_what_the_board_shows(): void
+    {
+        [$sara, $omar, $viewer] = [User::factory()->create(['display_name' => 'سارة', 'avatar_url' => 'data:image/png;base64,AAAA']), User::factory()->create(['display_name' => 'عمر']), User::factory()->create()];
+        $this->award($sara, 80);
+        $this->award($omar, 50);
+
+        $privacy = ['showName' => false, 'showAvatar' => false, 'showTitle' => true, 'showFrame' => true, 'showOnLeaderboard' => true];
+        $this->actingAs($sara)->putJson('/api/profile/privacy', $privacy)->assertOk()->assertJsonPath('user.privacy.showName', false);
+        $this->actingAs($omar)->putJson('/api/profile/privacy', [...$privacy, 'showName' => true, 'showOnLeaderboard' => false])->assertOk();
+
+        $points = $this->actingAs($viewer)->getJson('/api/leaderboard')->assertOk()->json('points');
+        $this->assertCount(1, $points);
+        $this->assertNull($points[0]['displayName']);
+        $this->assertNull($points[0]['avatarUrl']);
+        $this->assertSame(80, $points[0]['value']);
+    }
+
     public function test_admins_schedule_and_send_messages_that_members_receive_on_the_day(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

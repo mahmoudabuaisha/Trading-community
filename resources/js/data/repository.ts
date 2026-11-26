@@ -10,6 +10,7 @@ import type {
     AdminArea,
     DeviceSession,
     Preferences,
+    Privacy,
     AdminBroadcasts,
     AssistantStatus,
     Design,
@@ -111,6 +112,7 @@ export const repository = {
     sessions: () => request<{ sessions: DeviceSession[] }>('GET', '/profile/sessions').then((r) => r.sessions),
     savePreferences: (preferences: Preferences) =>
         request<{ user: User }>('PUT', '/profile/preferences', preferences).then((r) => r.user),
+    savePrivacy: (privacy: Privacy) => request<{ user: User }>('PUT', '/profile/privacy', privacy).then((r) => r.user),
     pointsHistory: (day: string) => request<PointsHistory>('GET', `/profile/points?date=${day}`),
     store: () => request<StoreView>('GET', '/store'),
     buyItem: (id: number) => request<StoreView>('POST', `/store/${id}/buy`),

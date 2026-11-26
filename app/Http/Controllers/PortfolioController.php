@@ -70,7 +70,7 @@ class PortfolioController extends Controller
         abort_unless($allowed, 404);
 
         return response()->json([
-            'owner' => ['displayName' => $owner->display_name, 'avatarUrl' => $owner->avatar_url, 'bio' => $owner->bio, 'specialties' => $owner->specialties ?? []],
+            'owner' => [...($viewer?->id === $owner->id ? ['displayName' => $owner->display_name, 'avatarUrl' => $owner->avatar_url] : $owner->publicIdentity()), 'bio' => $owner->bio, 'specialties' => $owner->specialties ?? []],
             'projects' => $owner->portfolioProjects()->orderByDesc('completed_on')->orderByDesc('id')->get()->map(fn (PortfolioProject $project): array => $project->toApi()),
         ]);
     }

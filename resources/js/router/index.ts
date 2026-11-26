@@ -33,7 +33,7 @@ const routes: RouteRecordRaw[] = [
             { path: 'achievements', name: 'achievements', component: () => import('../views/AchievementsView.vue') },
             { path: 'growth', name: 'growth', component: () => import('../views/GrowthView.vue') },
             {
-                path: 'profile/:section(settings|security|stats|rewards)?',
+                path: 'profile/:section(settings|notifications|privacy|security|stats|rewards)?',
                 name: 'profile',
                 component: () => import('../views/ProfileView.vue'),
             },

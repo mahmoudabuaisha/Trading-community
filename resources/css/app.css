@@ -6474,3 +6474,144 @@ a.btn-metal {
         animation: none;
     }
 }
+
+/* ── Profile photo: always a true circle ────────────────────────────── */
+.profile-hero__avatar {
+    flex: none;
+    align-self: center;
+    justify-self: center;
+    block-size: auto;
+    overflow: hidden;
+}
+.profile-hero__avatar img {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: 1;
+}
+.profile-hero__camera {
+    z-index: 1;
+}
+
+/* ── Profile groups and privacy ─────────────────────────────────────── */
+.profile-list__head {
+    margin: 0;
+    padding: var(--space-3) var(--space-4) var(--space-1);
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.setting-row--off {
+    opacity: 0.55;
+}
+.privacy-preview {
+    margin-block: var(--space-2);
+}
+
+/* ── Honour board ───────────────────────────────────────────────────── */
+.leader-star {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-6);
+    border-color: rgb(var(--accent-rgb) / 0.55);
+    background: radial-gradient(circle at 15% 50%, rgb(var(--accent-rgb) / 0.18), transparent 55%), var(--surface);
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+}
+.leader-star--me {
+    outline: 1px solid var(--gold-500);
+}
+.leader-star__crown {
+    position: absolute;
+    inset-block-start: var(--space-3);
+    inset-inline-end: var(--space-4);
+    color: var(--gold-500);
+}
+.leader-star__text {
+    display: grid;
+    gap: var(--space-1);
+}
+.leader-star__text h3 {
+    margin: 0;
+    font-size: var(--text-xl);
+}
+.leader-star__text small {
+    color: var(--gold-300);
+}
+.leader-star__text p {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--text-soft);
+}
+.leader-table {
+    inline-size: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+    font-size: var(--text-sm);
+}
+.leader-table th {
+    padding: 0 var(--space-2) var(--space-1);
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-align: start;
+}
+.leader-table td {
+    padding: var(--space-2);
+    background: var(--surface-sunken);
+    border-block: 1px solid var(--line-soft);
+}
+.leader-table td:first-child {
+    border-inline-start: 1px solid var(--line-soft);
+    border-start-start-radius: var(--radius-md);
+    border-end-start-radius: var(--radius-md);
+}
+.leader-table td:last-child {
+    border-inline-end: 1px solid var(--line-soft);
+    border-start-end-radius: var(--radius-md);
+    border-end-end-radius: var(--radius-md);
+}
+.leader-table__rank {
+    inline-size: 44px;
+    text-align: center;
+    color: var(--gold-300);
+    font-weight: 700;
+    font-size: var(--text-md);
+}
+.leader-table__who {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-inline-size: 0;
+}
+.leader-table__score {
+    white-space: nowrap;
+    color: var(--gold-200);
+    font-weight: 600;
+    text-align: end;
+}
+.leader-table__row--podium td {
+    background: rgb(var(--accent-rgb) / 0.09);
+    border-color: var(--line);
+}
+.leader-table__row--me td {
+    border-color: var(--gold-500);
+}
+.leader-table__row--open td {
+    opacity: 0.5;
+}
+@media (max-width: 560px) {
+    .leader-star {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-5);
+    }
+    .leader-star__text p {
+        justify-content: center;
+    }
+}

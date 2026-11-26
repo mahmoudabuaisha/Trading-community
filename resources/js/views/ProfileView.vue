@@ -2,12 +2,14 @@
 import {
     BadgeCheck,
     BarChart3,
+    Bell,
     Camera,
     ChevronLeft,
     ChevronRight,
     Crown,
     Gift,
     House,
+    Lock,
     LogOut,
     Mail,
     Pencil,
@@ -18,6 +20,8 @@ import {
 } from 'lucide-vue-next'
 import { computed, nextTick, reactive, ref, type Component } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ProfileNotifications from '../components/profile/ProfileNotifications.vue'
+import ProfilePrivacy from '../components/profile/ProfilePrivacy.vue'
 import ProfileRewards from '../components/profile/ProfileRewards.vue'
 import ProfileSecurity from '../components/profile/ProfileSecurity.vue'
 import ProfileSettings from '../components/profile/ProfileSettings.vue'
@@ -37,16 +41,31 @@ const route = useRoute()
 const router = useRouter()
 
 const user = computed(() => auth.user!)
-type Section = 'settings' | 'security' | 'stats' | 'rewards'
+type Section = 'settings' | 'notifications' | 'privacy' | 'security' | 'stats' | 'rewards'
 const section = computed(() => (route.params.section || null) as Section | null)
-const sections: { id: Section; icon: Component }[] = [
-    { id: 'settings', icon: Settings },
-    { id: 'security', icon: ShieldCheck },
-    { id: 'stats', icon: BarChart3 },
-    { id: 'rewards', icon: Gift },
+/** Grouped the way most apps do: how the app behaves, then the member's own record. */
+const groups: { id: string; items: { id: Section; icon: Component }[] }[] = [
+    {
+        id: 'settings',
+        items: [
+            { id: 'settings', icon: Settings },
+            { id: 'notifications', icon: Bell },
+            { id: 'privacy', icon: Lock },
+            { id: 'security', icon: ShieldCheck },
+        ],
+    },
+    {
+        id: 'record',
+        items: [
+            { id: 'stats', icon: BarChart3 },
+            { id: 'rewards', icon: Gift },
+        ],
+    },
 ]
 const panels: Record<Section, Component> = {
     settings: ProfileSettings,
+    notifications: ProfileNotifications,
+    privacy: ProfilePrivacy,
     security: ProfileSecurity,
     stats: ProfileStats,
     rewards: ProfileRewards,
@@ -223,16 +242,20 @@ async function signOut(): Promise<void> {
                 </button>
             </div>
 
-            <div class="dash-card profile-list">
+            <div v-for="group in groups" :key="group.id" class="dash-card profile-list">
+                <h3 class="profile-list__head">{{ t(`profile.group.${group.id}`) }}</h3>
                 <RouterLink
-                    v-for="item in sections"
+                    v-for="item in group.items"
                     :key="item.id"
                     :to="{ name: 'profile', params: { section: item.id } }"
                     class="profile-row"
                 >
                     <component :is="item.icon" :size="24" class="profile-row__icon" aria-hidden="true" />
                     <span class="profile-row__label">{{ t(`profile.section.${item.id}`) }}</span>
-                    <span v-if="item.id === 'rewards'" class="profile-row__value">{{
+                    <span v-if="item.id === 'privacy'" class="profile-row__value">{{
+                        t(user.privacy.showOnLeaderboard ? 'privacy.visible' : 'privacy.hidden')
+                    }}</span>
+                    <span v-else-if="item.id === 'rewards'" class="profile-row__value">{{
                         t('rewards.count', { n: user.points })
                     }}</span>
                     <component :is="OpenIcon" :size="20" class="profile-row__open" aria-hidden="true" />

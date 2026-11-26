@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileRequest;
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use App\Services\PointsService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -74,6 +75,16 @@ class ProfileController extends Controller
         ]);
         $user = $request->user();
         $user->forceFill(['preferences' => $data])->save();
+
+        return response()->json(['user' => new UserResource($user)]);
+    }
+
+    /** What other members see of this account. */
+    public function privacy(Request $request): JsonResponse
+    {
+        $data = $request->validate(array_fill_keys(array_keys(User::DEFAULT_PRIVACY), ['required', 'boolean']));
+        $user = $request->user();
+        $user->forceFill(['privacy' => array_map('boolval', $data)])->save();
 
         return response()->json(['user' => new UserResource($user)]);
     }

@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
             <div class="bell__head">
                 <b>{{ t('notify.title') }}</b>
                 <RouterLink
-                    :to="{ name: 'profile', params: { section: 'settings' }, hash: '#notifications' }"
+                    :to="{ name: 'profile', params: { section: 'notifications' } }"
                     class="inline-link"
                     @click="open = false"
                     >{{ t('notify.settings') }}</RouterLink

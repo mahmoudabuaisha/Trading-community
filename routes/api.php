@@ -78,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('profile/sign-out-others', [ProfileController::class, 'signOutOthers']);
     Route::get('profile/sessions', [ProfileController::class, 'sessions']);
     Route::put('profile/preferences', [ProfileController::class, 'preferences']);
+    Route::put('profile/privacy', [ProfileController::class, 'privacy']);
     Route::get('profile/points', [ProfileController::class, 'points']);
     Route::get('store', [StoreController::class, 'index']);
     Route::post('store/{item}/buy', [StoreController::class, 'buy'])->middleware('throttle:30,1');

@@ -45,6 +45,15 @@ class User extends Authenticatable
         'wakeTime' => null,
     ];
 
+    /** What other members may see of this account; everything is shown until the member hides it. */
+    public const DEFAULT_PRIVACY = [
+        'showName' => true,
+        'showAvatar' => true,
+        'showTitle' => true,
+        'showFrame' => true,
+        'showOnLeaderboard' => true,
+    ];
+
     /** Starter categories every account gets, whichever path creates it. */
     public const DEFAULT_CATEGORIES = [
         ['name' => 'تداول', 'color' => '#70d6ad'],
@@ -78,6 +87,7 @@ class User extends Authenticatable
         return [
             'permissions' => 'array',
             'preferences' => 'array',
+            'privacy' => 'array',
             'equipped' => 'array',
             'specialties' => 'array',
             'designs' => 'array',
@@ -160,6 +170,28 @@ class User extends Authenticatable
     public function preferenceValues(): array
     {
         return array_merge(self::DEFAULT_PREFERENCES, array_intersect_key($this->preferences ?? [], self::DEFAULT_PREFERENCES));
+    }
+
+    /** @return array<string, bool> */
+    public function privacyValues(): array
+    {
+        return array_merge(self::DEFAULT_PRIVACY, array_intersect_key($this->privacy ?? [], self::DEFAULT_PRIVACY));
+    }
+
+    /**
+     * How this member appears to other members, after their privacy choices.
+     * A hidden name is sent as null; the app shows "SN member" in its place.
+     *
+     * @return array{displayName: string|null, avatarUrl: string|null}
+     */
+    public function publicIdentity(): array
+    {
+        $privacy = $this->privacyValues();
+
+        return [
+            'displayName' => $privacy['showName'] ? $this->display_name : null,
+            'avatarUrl' => $privacy['showAvatar'] ? $this->avatar_url : null,
+        ];
     }
 
     public function isAdmin(): bool

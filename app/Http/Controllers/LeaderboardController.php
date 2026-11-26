@@ -27,8 +27,12 @@ class LeaderboardController extends Controller
         [, $weekStart, $weekEnd] = AchievementService::period('weekly', $today);
 
         // Daily tasks of one day or a range, per member: how many, and how many completed.
+
+        // Members who chose to stay off the board.
+        $hidden = User::whereNotNull('privacy')->get(['id', 'privacy'])
+            ->reject(fn (User $user): bool => $user->privacyValues()['showOnLeaderboard'])->pluck('id')->all();
         $daily = fn (string $from, string $to) => Task::query()->where('period_type', 'daily')->where('status', '!=', 'cancelled')
-            ->whereDate('period_start', '>=', $from)->whereDate('period_start', '<=', $to);
+            ->whereNotIn('user_id', $hidden)->whereDate('period_start', '>=', $from)->whereDate('period_start', '<=', $to);
 
         $todayRows = $daily($today->toDateString(), $today->toDateString())
             ->selectRaw('user_id, COUNT(*) as total, SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as done', [Task::STATUS_COMPLETED])
@@ -46,20 +50,23 @@ class LeaderboardController extends Controller
             ->groupBy('user_id')->havingRaw('SUM(done) > 0')->orderByDesc('perfect')->orderByDesc('completed')->limit(self::SIZE)->get()
             ->map(fn ($row): array => ['userId' => (int) $row->user_id, 'value' => (int) $row->perfect, 'completed' => (int) $row->completed]);
 
-        $points = fn (?string $from) => DB::table('badge_awards')->when($from, fn ($query) => $query->whereDate('day', '>=', $from))
+        $points = fn (?string $from, ?string $to = null) => DB::table('badge_awards')->whereNotIn('user_id', $hidden)
+            ->when($from, fn ($query) => $query->whereDate('day', '>=', $from))->when($to, fn ($query) => $query->whereDate('day', '<=', $to))
             ->selectRaw('user_id, SUM(points) as total')->groupBy('user_id')->havingRaw('SUM(points) > 0')
             ->orderByDesc('total')->limit(self::SIZE)->get()
             ->map(fn ($row): array => ['userId' => (int) $row->user_id, 'value' => (int) $row->total]);
         $pointRows = $points(null);
         $monthRows = $points($today->startOfMonth()->toDateString());
+        $weekPointRows = $points($weekStart->toDateString(), $weekEnd->toDateString());
 
-        $people = $this->people(collect([$todayRows, $weekRows, $pointRows, $monthRows])->flatten(1)->pluck('userId')->unique());
+        $people = $this->people(collect([$todayRows, $weekRows, $weekPointRows, $pointRows, $monthRows])->flatten(1)->pluck('userId')->unique());
         $withPeople = fn (Collection $rows) => $rows->filter(fn (array $row): bool => $people->has($row['userId']))
             ->map(fn (array $row): array => [...$people[$row['userId']], ...$row])->values();
 
         return response()->json([
             'today' => $withPeople($todayRows),
             'week' => $withPeople($weekRows),
+            'weekPoints' => $withPeople($weekPointRows),
             'points' => $withPeople($pointRows),
             'month' => $withPeople($monthRows),
         ]);
@@ -73,15 +80,18 @@ class LeaderboardController extends Controller
      */
     private function people(Collection $ids): Collection
     {
-        $users = User::whereIn('id', $ids)->get(['id', 'display_name', 'avatar_url', 'equipped']);
+        $users = User::whereIn('id', $ids)->get(['id', 'display_name', 'avatar_url', 'equipped', 'privacy']);
         $items = StoreItem::whereIn('id', $users->flatMap(fn (User $user) => array_filter($user->equipped ?? []))->unique())->get()->keyBy('id');
         $worn = fn (User $user, string $kind): ?string => $kind === 'title' ? $items->get($user->equipped[$kind] ?? null)?->tr('value') : $items->get($user->equipped[$kind] ?? null)?->value;
 
-        return $users->mapWithKeys(fn (User $user): array => [$user->id => [
-            'displayName' => $user->display_name,
-            'avatarUrl' => $user->avatar_url,
-            'title' => $worn($user, 'title'),
-            'frame' => $worn($user, 'frame') ?? 'none',
-        ]]);
+        return $users->mapWithKeys(function (User $user) use ($worn): array {
+            $privacy = $user->privacyValues();
+
+            return [$user->id => [
+                ...$user->publicIdentity(),
+                'title' => $privacy['showTitle'] ? $worn($user, 'title') : null,
+                'frame' => $privacy['showFrame'] ? ($worn($user, 'frame') ?? 'none') : 'none',
+            ]];
+        });
     }
 }

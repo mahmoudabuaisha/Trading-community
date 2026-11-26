@@ -43,6 +43,7 @@ export interface User {
     premiumUntil: string | null
     permissions: AdminArea[]
     preferences: Preferences
+    privacy: Privacy
     /** Points left to spend in the store. */
     points: number
     /** Every point earned so far; this is what the honour board ranks. */
@@ -349,6 +350,15 @@ export interface Badge {
 export type BadgeInput = Omit<Badge, 'id' | 'key'>
 
 /** Per-account notification choices. Times are `HH:MM` in the member's own clock, or null. */
+/** What other members see of an account. */
+export interface Privacy {
+    showName: boolean
+    showAvatar: boolean
+    showTitle: boolean
+    showFrame: boolean
+    showOnLeaderboard: boolean
+}
+
 export interface Preferences {
     notifyReminders: boolean
     notifyMorning: boolean
@@ -425,7 +435,8 @@ export interface StoreItemInput {
 
 export interface LeaderboardRow {
     userId: number
-    displayName: string
+    /** Null when the member hides their name. */
+    displayName: string | null
     avatarUrl: string | null
     title: string | null
     frame: string
@@ -437,6 +448,7 @@ export interface LeaderboardRow {
 export interface Leaderboard {
     today: LeaderboardRow[]
     week: LeaderboardRow[]
+    weekPoints: LeaderboardRow[]
     points: LeaderboardRow[]
     month: LeaderboardRow[]
 }
