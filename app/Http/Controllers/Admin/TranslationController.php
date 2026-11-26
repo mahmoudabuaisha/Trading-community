@@ -10,6 +10,7 @@ use App\Models\Broadcast;
 use App\Models\BroadcastSchedule;
 use App\Models\ContentTranslation;
 use App\Models\DailyTip;
+use App\Models\Design;
 use App\Models\Lesson;
 use App\Models\Motivation;
 use App\Models\SkillLevel;
@@ -41,6 +42,7 @@ class TranslationController extends Controller
         'badge' => [Badge::class, 'badges'],
         'store-item' => [StoreItem::class, 'store'],
         'store-category' => [StoreCategory::class, 'store'],
+        'design' => [Design::class, 'store'],
     ];
 
     public function show(string $type, int $id): JsonResponse

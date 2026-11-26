@@ -29,6 +29,7 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Honour board | Today's top finishers, the most committed members of the week, and the most points overall and this month |
 | Broadcasts | Administrators send a notification to every member on the spot, or schedule one message per day for the week |
 | Growth journey | Performance DNA (best day and time, on-time rate, 30-day comparison, rule-based tips), a growth timeline of automatic milestones with personal notes, goal roadmaps (stages, steps, next step), vision boards (images, quotes, dreams linked to goals), admin-written skill paths with levels, quizzes and challenges, and a portfolio shareable by link with privacy settings |
+| Map and tree designs | Goal roadmaps are drawn as a connected map (mind map, branches or orbits) and skill paths as a tree, a pyramid or a staircase. Two designs per drawing are free; administrators add more by dressing a built-in layout (colour, node shape, background), naming and pricing them in points |
 | Backup | Members download all their data as JSON; `deploy/backup.sh` backs the database and uploads up nightly and reports its status in the app |
 | Admin center | Platform stats, user search, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log. A full administrator can appoint moderators and choose which areas each one manages; the server enforces it per area |
 

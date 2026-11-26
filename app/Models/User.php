@@ -80,6 +80,7 @@ class User extends Authenticatable
             'preferences' => 'array',
             'equipped' => 'array',
             'specialties' => 'array',
+            'designs' => 'array',
             'last_seen_at' => 'datetime',
             'is_premium' => 'boolean',
             'premium_until' => 'datetime',
@@ -171,6 +172,11 @@ class User extends Authenticatable
         'student_school', 'student_university', 'trader_learning', 'trader_beginner', 'trader_pro',
         'merchant', 'freelancer', 'employee', 'business_owner', 'content_creator', 'other',
     ];
+
+    public function designPurchases(): HasMany
+    {
+        return $this->hasMany(DesignPurchase::class);
+    }
 
     public function dailyTipDraws(): HasMany
     {

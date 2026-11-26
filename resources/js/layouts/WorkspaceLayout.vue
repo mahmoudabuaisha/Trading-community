@@ -301,7 +301,7 @@ async function signOut(): Promise<void> {
                 <button type="button" class="btn" @click="workspace.load(true)">↻</button>
             </EmptyState>
             <!-- Keyed by language: switching it reloads the page's data, so admin-written text arrives translated. -->
-            <RouterView v-else :key="locale" />
+            <RouterView v-else :key="`${locale}:${route.path}`" />
         </section>
     </main>
 </template>

@@ -5875,3 +5875,206 @@ a.btn-metal {
     color: var(--text-muted);
     font-size: var(--text-sm);
 }
+
+/* ── Goal map and skill tree drawings ───────────────────────────────────── */
+.design-canvas {
+    --design-accent: var(--gold-500);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-lg);
+    background:
+        radial-gradient(70% 60% at 50% 45%, color-mix(in srgb, var(--design-accent) 12%, transparent), transparent 70%),
+        var(--surface-sunken);
+}
+.design-canvas__bg {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    opacity: 0.35;
+}
+.design-canvas__svg {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    max-block-size: 680px;
+}
+.design-canvas--compact .design-canvas__svg {
+    max-block-size: 190px;
+}
+.design-canvas--compact .dnode__label {
+    display: none;
+}
+.design-link {
+    fill: none;
+    stroke: color-mix(in srgb, var(--design-accent) 45%, transparent);
+    stroke-width: 3;
+}
+.design-link--thin {
+    stroke-width: 2;
+}
+.design-link--done {
+    stroke: var(--design-accent);
+}
+.design-ring {
+    fill: none;
+    stroke: color-mix(in srgb, var(--design-accent) 25%, transparent);
+    stroke-dasharray: 6 8;
+}
+.design-click {
+    cursor: pointer;
+    outline: none;
+}
+.design-click:focus-visible .dnode__body {
+    stroke-width: 4;
+}
+.dnode__body {
+    fill: var(--bg-900);
+    stroke: var(--design-accent);
+    stroke-width: 2.5;
+    transition: fill var(--motion-fast);
+}
+.dnode--done .dnode__body {
+    fill: var(--design-accent);
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--design-accent) 60%, transparent));
+}
+.dnode--open .dnode__body {
+    animation: node-glow 2.4s ease-in-out infinite;
+}
+.dnode--locked .dnode__body {
+    fill: var(--bg-800);
+    stroke: var(--steel-600);
+}
+.dnode--locked .dnode__label {
+    fill: var(--text-muted);
+}
+.dnode--root .dnode__body {
+    fill: color-mix(in srgb, var(--design-accent) 22%, var(--bg-900));
+    stroke-width: 3;
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--design-accent) 45%, transparent));
+}
+.dnode--complete .dnode__body {
+    fill: var(--design-accent);
+}
+.dnode__halo {
+    fill: none;
+    stroke: var(--text);
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+}
+.dnode__label {
+    fill: var(--text);
+    font-size: 15px;
+    font-family: var(--font-sans);
+}
+.dnode__root-label {
+    fill: var(--gold-200);
+    font-size: 18px;
+    font-weight: 700;
+    font-family: var(--font-sans);
+}
+.dnode__stem {
+    fill: none;
+    stroke: #6b4a2a;
+    stroke-width: 2;
+}
+.dnode__leaf {
+    fill: #5aa86b;
+}
+.design-click:hover .dnode__body {
+    fill: color-mix(in srgb, var(--design-accent) 35%, var(--bg-900));
+}
+.design-click:hover .dnode--done .dnode__body {
+    fill: var(--design-accent);
+}
+@keyframes node-glow {
+    50% {
+        filter: drop-shadow(0 0 10px color-mix(in srgb, var(--design-accent) 70%, transparent));
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .dnode--open .dnode__body {
+        animation: none;
+    }
+}
+.tree-crown {
+    fill: color-mix(in srgb, #3f7a4d 30%, transparent);
+    stroke: color-mix(in srgb, #5aa86b 35%, transparent);
+    stroke-width: 2;
+}
+.tree-trunk {
+    fill: #5a3d22;
+}
+.tree-branch {
+    fill: none;
+    stroke: #6b4a2a;
+    stroke-width: 6;
+    stroke-linecap: round;
+}
+.tree-ground {
+    stroke: color-mix(in srgb, var(--design-accent) 35%, transparent);
+    stroke-width: 2;
+}
+.stairs-step {
+    fill: color-mix(in srgb, var(--design-accent) 10%, transparent);
+    stroke: color-mix(in srgb, var(--design-accent) 40%, transparent);
+}
+.stairs-step--done {
+    fill: color-mix(in srgb, var(--design-accent) 30%, transparent);
+}
+.map-panel {
+    display: grid;
+    gap: var(--space-3);
+}
+.skill-node--detail {
+    margin-block-start: var(--space-3);
+}
+
+/* Design picker and editor */
+.design-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: var(--space-3);
+}
+.design-card {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+}
+.design-card--on {
+    border-color: var(--gold-300);
+}
+.design-card__body {
+    display: grid;
+    gap: var(--space-1);
+}
+.design-card__body small {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+}
+.design-editor {
+    display: grid;
+    gap: var(--space-3);
+}
+.design-editor__color {
+    block-size: 44px;
+    padding: 4px;
+}
+.design-editor__preview {
+    display: grid;
+    gap: var(--space-2);
+    max-inline-size: 520px;
+}
+.design-swatch {
+    display: inline-block;
+    inline-size: 12px;
+    block-size: 12px;
+    border-radius: 50%;
+    vertical-align: middle;
+}

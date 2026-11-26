@@ -11,6 +11,7 @@ import {
 } from 'lucide-vue-next'
 import { computed, type Component } from 'vue'
 import { isRtl, t } from '../../i18n'
+import { useWorkspaceStore } from '../../stores/workspace'
 
 /** The growth hub: one door to each tool that looks at the long run rather than today. */
 const tiles: { id: string; route: string; icon: Component }[] = [
@@ -21,6 +22,13 @@ const tiles: { id: string; route: string; icon: Component }[] = [
     { id: 'skills', route: 'skills', icon: GitBranch },
     { id: 'portfolio', route: 'portfolio', icon: BriefcaseBusiness },
 ]
+const workspace = useWorkspaceStore()
+/** The goal map opens on the first unfinished goal (or the goals list when there is none). */
+const target = (tile: { id: string; route: string }) => {
+    if (tile.id !== 'roadmap') return { name: tile.route }
+    const goal = workspace.goals.find((item) => item.status !== 'completed') ?? workspace.goals[0]
+    return goal ? { name: 'roadmap', params: { id: goal.id } } : { name: 'goals' }
+}
 const OpenIcon = computed(() => (isRtl.value ? ChevronLeft : ChevronRight))
 </script>
 
@@ -34,7 +42,7 @@ const OpenIcon = computed(() => (isRtl.value ? ChevronLeft : ChevronRight))
             </div>
         </div>
         <div class="journey-grid">
-            <RouterLink v-for="tile in tiles" :key="tile.id" :to="{ name: tile.route }" class="dash-card journey-tile">
+            <RouterLink v-for="tile in tiles" :key="tile.id" :to="target(tile)" class="dash-card journey-tile">
                 <span class="journey-tile__icon"><component :is="tile.icon" :size="26" aria-hidden="true" /></span>
                 <span class="journey-tile__body">
                     <b>{{ t(`journey.tiles.${tile.id}.title`) }}</b>

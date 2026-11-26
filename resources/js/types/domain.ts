@@ -724,3 +724,22 @@ export interface Book {
     /** Opened for this member (always for staff). */
     unlocked: boolean
 }
+
+// ── Designs of the goal map and the skill tree ──────────────────────────
+
+export type DesignTarget = 'goal_map' | 'skill_tree'
+
+/** A built-in layout dressed by the administrators; price 0 is free for everyone. */
+export interface Design {
+    id: number
+    target: DesignTarget
+    layout: string
+    name: string
+    description: string
+    price: number
+    accent: string
+    nodeShape: string
+    backgroundUrl: string | null
+    isActive: boolean
+    owned?: boolean
+}

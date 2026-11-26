@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\BadgeAward;
+use App\Models\DesignPurchase;
 use App\Models\StoreItem;
 use App\Models\StorePurchase;
 use App\Models\User;
@@ -24,7 +25,8 @@ class PointsService
 
     public function balance(User $user): int
     {
-        return $this->earned($user) - (int) StorePurchase::where('user_id', $user->id)->sum('price');
+        // Points go on store items and on map and tree designs.
+        return $this->earned($user) - (int) StorePurchase::where('user_id', $user->id)->sum('price') - (int) DesignPurchase::where('user_id', $user->id)->sum('price');
     }
 
     /**

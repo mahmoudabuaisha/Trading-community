@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ArrowDown, ArrowUp, Check, CircleDot, Plus, Trash2 } from 'lucide-vue-next'
+import { ArrowDown, ArrowUp, Check, CircleDot, Plus, Trash2, Palette } from 'lucide-vue-next'
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import EmptyState from '../../components/EmptyState.vue'
+import DesignPicker from '../../components/designs/DesignPicker.vue'
+import GoalMap from '../../components/designs/GoalMap.vue'
+import { useDesignsStore } from '../../stores/designs'
 import JourneyHead from '../../components/JourneyHead.vue'
 import { repository } from '../../data/repository'
 import { t } from '../../i18n'
@@ -12,10 +15,14 @@ import { useWorkspaceStore } from '../../stores/workspace'
 import type { GoalStep } from '../../types/domain'
 
 const route = useRoute()
+const router = useRouter()
+const designs = useDesignsStore()
+const picking = ref(false)
 const workspace = useWorkspaceStore()
 const ui = useUiStore()
 
 const goalId = Number(route.params.id)
+const mapDesign = computed(() => designs.current('goal_map'))
 const goal = computed(() => workspace.goals.find((item) => item.id === goalId))
 const steps = ref<GoalStep[]>([])
 const loaded = ref(false)
@@ -59,6 +66,7 @@ async function run(action: () => Promise<unknown>): Promise<void> {
     }
 }
 onMounted(async () => {
+    void designs.load().catch(ui.failure)
     await run(() => repository.roadmap(goalId))
     loaded.value = true
 })
@@ -78,6 +86,20 @@ async function addStep(stageId: number): Promise<void> {
     await run(() => repository.addStep(goalId, { title, parentId: stageId }))
     stepDrafts[stageId] = ''
 }
+/** The map's branches: each stage with its steps. */
+const mapStages = computed(() =>
+    stages.value.map(({ stage, children, complete }) => ({
+        id: stage.id,
+        title: stage.title,
+        isDone: complete,
+        children: children.map((step) => ({ id: step.id, title: step.title, isDone: step.isDone })),
+    })),
+)
+function toggleById(id: number): void {
+    const step = steps.value.find((item) => item.id === id)
+    if (step) void toggle(step)
+}
+
 const toggle = (step: GoalStep) => run(() => repository.updateStep(step.id, { isDone: !step.isDone }))
 const move = (step: GoalStep, direction: 'up' | 'down') =>
     run(() => repository.updateStep(step.id, { move: direction }))
@@ -98,6 +120,42 @@ async function rename(step: GoalStep, event: Event): Promise<void> {
         >
             <span class="points-chip">{{ overall }}%</span>
         </JourneyHead>
+
+        <div class="panel map-panel">
+            <div class="section-head">
+                <div>
+                    <h3>{{ t('designs.mapHead') }}</h3>
+                    <p>{{ t('designs.mapSub') }}</p>
+                </div>
+                <div class="head-actions">
+                    <select
+                        v-if="workspace.goals.length > 1"
+                        class="input input--auto"
+                        :value="goalId"
+                        :aria-label="t('designs.otherGoal')"
+                        @change="
+                            router.push({ name: 'roadmap', params: { id: ($event.target as HTMLSelectElement).value } })
+                        "
+                    >
+                        <option v-for="item in workspace.goals" :key="item.id" :value="item.id">
+                            {{ item.title }}
+                        </option>
+                    </select>
+                    <button type="button" class="btn btn--outline" @click="picking = true">
+                        <Palette :size="15" aria-hidden="true" /> {{ t('designs.choose') }}
+                    </button>
+                </div>
+            </div>
+            <GoalMap
+                v-if="mapDesign"
+                :title="goal?.title ?? ''"
+                :stages="mapStages"
+                :design="mapDesign"
+                @toggle="toggleById"
+            />
+            <p v-if="!stages.length" class="hint">{{ t('designs.mapEmpty') }}</p>
+        </div>
+        <DesignPicker v-if="picking" target="goal_map" @close="picking = false" />
 
         <div v-if="next" class="panel roadmap-next">
             <CircleDot :size="22" class="gold" aria-hidden="true" />

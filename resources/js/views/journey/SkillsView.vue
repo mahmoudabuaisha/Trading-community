@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { BookOpen, Check, Lock, Swords } from 'lucide-vue-next'
-import { onMounted, reactive, ref } from 'vue'
+import { Palette } from 'lucide-vue-next'
+import { computed, onMounted, reactive, ref } from 'vue'
 import EmptyState from '../../components/EmptyState.vue'
+import DesignPicker from '../../components/designs/DesignPicker.vue'
+import SkillLevelCard from '../../components/designs/SkillLevelCard.vue'
+import SkillShape from '../../components/designs/SkillShape.vue'
+import { useDesignsStore } from '../../stores/designs'
 import JourneyHead from '../../components/JourneyHead.vue'
 import { ApiError } from '../../data/http'
 import { repository } from '../../data/repository'
@@ -17,8 +21,28 @@ const loaded = ref(false)
 const openId = ref<number | null>(null)
 const answers = reactive<Record<number, number>>({})
 const busy = ref(false)
+const designs = useDesignsStore()
+const treeDesign = computed(() => designs.current('skill_tree'))
+const picking = ref(false)
+/** The level shown under each path's drawing, by path. */
+const chosen = reactive<Record<number, number>>({})
+
+/** The picked level, or else the one to work on next (the first open one), or the last. */
+function selectedLevel(path: SkillPath): SkillLevel | null {
+    return (
+        path.levels.find((level) => level.id === chosen[path.id]) ??
+        path.levels.find((level) => level.unlocked && !level.passed) ??
+        path.levels.at(-1) ??
+        null
+    )
+}
+function select(path: SkillPath, id: number): void {
+    chosen[path.id] = id
+    openId.value = null
+}
 
 onMounted(async () => {
+    void designs.load().catch(ui.failure)
     try {
         paths.value = await repository.skills()
     } catch (error) {
@@ -60,7 +84,12 @@ async function attempt(level: SkillLevel): Promise<void> {
 
 <template>
     <section class="stack">
-        <JourneyHead eyebrow="SKILL TREE" :title="t('journey.tiles.skills.title')" :text="t('journey.skills.sub')" />
+        <JourneyHead eyebrow="SKILL TREE" :title="t('journey.tiles.skills.title')" :text="t('journey.skills.sub')">
+            <button type="button" class="btn btn--outline" @click="picking = true">
+                <Palette :size="15" aria-hidden="true" /> {{ t('designs.choose') }}
+            </button>
+        </JourneyHead>
+        <DesignPicker v-if="picking" target="skill_tree" @close="picking = false" />
 
         <article v-for="path in paths" :key="path.id" class="panel">
             <div class="section-head">
@@ -76,69 +105,24 @@ async function attempt(level: SkillLevel): Promise<void> {
                 <i :style="{ inlineSize: `${percent(passedCount(path), path.levels.length || 1)}%` }" />
             </div>
 
-            <ol class="skill-tree">
-                <li
-                    v-for="(level, index) in path.levels"
-                    :key="level.id"
-                    class="skill-node"
-                    :class="{ 'skill-node--passed': level.passed, 'skill-node--locked': !level.unlocked }"
-                >
-                    <span class="skill-node__badge">
-                        <Check v-if="level.passed" :size="18" :aria-label="t('journey.skills.done')" />
-                        <Lock v-else-if="!level.unlocked" :size="16" :aria-label="t('journey.skills.locked')" />
-                        <template v-else>{{ index + 1 }}</template>
-                    </span>
-                    <div class="skill-node__body">
-                        <h4>{{ level.title }}</h4>
-                        <p v-if="level.description && level.unlocked">{{ level.description }}</p>
-                        <p v-if="!level.unlocked" class="hint">{{ t('journey.skills.lockedHint') }}</p>
-                        <div v-if="level.unlocked" class="row-actions">
-                            <RouterLink
-                                v-if="level.lessonId"
-                                :to="{ name: 'lesson', params: { id: level.lessonId } }"
-                                class="pill"
-                                ><BookOpen :size="13" aria-hidden="true" /> {{ t('journey.skills.lesson') }}</RouterLink
-                            >
-                            <button v-if="!level.passed" type="button" class="pill pill--chosen" @click="open(level)">
-                                <Swords :size="13" aria-hidden="true" />
-                                {{ t(level.quiz.length ? 'journey.skills.takeQuiz' : 'journey.skills.challenge') }}
-                            </button>
-                        </div>
-
-                        <form v-if="openId === level.id" class="skill-quiz" @submit.prevent="attempt(level)">
-                            <p v-if="level.challenge" class="skill-quiz__challenge">
-                                <b>{{ t('journey.skills.challengeLabel') }}</b> {{ level.challenge }}
-                            </p>
-                            <fieldset
-                                v-for="(question, questionIndex) in level.quiz"
-                                :key="questionIndex"
-                                class="perm-list condition-list"
-                            >
-                                <legend>{{ questionIndex + 1 }}. {{ question.question }}</legend>
-                                <label
-                                    v-for="(option, optionIndex) in question.options"
-                                    :key="optionIndex"
-                                    class="check"
-                                >
-                                    <input
-                                        v-model="answers[questionIndex]"
-                                        type="radio"
-                                        :name="`q-${level.id}-${questionIndex}`"
-                                        :value="optionIndex"
-                                        required
-                                    />
-                                    {{ option }}
-                                </label>
-                            </fieldset>
-                            <div class="actions">
-                                <button type="submit" class="btn" :disabled="busy">
-                                    {{ t(level.quiz.length ? 'journey.skills.submit' : 'journey.skills.confirm') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </li>
-            </ol>
+            <SkillShape
+                v-if="treeDesign && path.levels.length"
+                :title="path.title"
+                :levels="path.levels"
+                :design="treeDesign"
+                :selected-id="selectedLevel(path)?.id"
+                @select="(id) => select(path, id)"
+            />
+            <SkillLevelCard
+                v-if="selectedLevel(path)"
+                :level="selectedLevel(path)!"
+                :index="path.levels.indexOf(selectedLevel(path)!)"
+                :open="openId === selectedLevel(path)!.id"
+                :busy="busy"
+                :answers="answers"
+                @open="open(selectedLevel(path)!)"
+                @attempt="attempt(selectedLevel(path)!)"
+            />
             <p v-if="!path.levels.length" class="hint">{{ t('journey.skills.noLevels') }}</p>
         </article>
         <EmptyState

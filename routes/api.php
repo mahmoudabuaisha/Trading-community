@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BookController as AdminBookController;
 use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
 use App\Http\Controllers\Admin\BroadcastScheduleController as AdminBroadcastScheduleController;
 use App\Http\Controllers\Admin\DailyTipController as AdminDailyTipController;
+use App\Http\Controllers\Admin\DesignController as AdminDesignController;
 use App\Http\Controllers\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Admin\MotivationController as AdminMotivationController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DailyTipController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DesignController;
 use App\Http\Controllers\FocusSessionController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\HabitController;
@@ -80,6 +82,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::put('store/equip', [StoreController::class, 'equip']);
     Route::get('store/{item}/download', [StoreController::class, 'download']);
     Route::get('leaderboard', [LeaderboardController::class, 'show']);
+    Route::get('designs', [DesignController::class, 'index']);
+    Route::post('designs/{design}/buy', [DesignController::class, 'buy'])->middleware('throttle:30,1');
+    Route::put('designs/select', [DesignController::class, 'select']);
 
     Route::post('categories', [CategoryController::class, 'store']);
     Route::patch('categories/{category}', [CategoryController::class, 'update']);
@@ -165,6 +170,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
         // POST, not PATCH: the update carries an optional image as multipart form data.
         Route::post('store-items/{item}', [AdminStoreItemController::class, 'update'])->middleware('area:store');
         Route::delete('store-items/{item}', [AdminStoreItemController::class, 'destroy'])->middleware('area:store');
+        Route::get('designs', [AdminDesignController::class, 'index'])->middleware('area:store');
+        Route::post('designs', [AdminDesignController::class, 'store'])->middleware('area:store');
+        // POST, not PATCH: the update may carry a background picture as multipart form data.
+        Route::post('designs/{design}', [AdminDesignController::class, 'update'])->middleware('area:store');
+        Route::delete('designs/{design}', [AdminDesignController::class, 'destroy'])->middleware('area:store');
         Route::get('store-categories', [AdminStoreCategoryController::class, 'index'])->middleware('area:store');
         Route::post('store-categories', [AdminStoreCategoryController::class, 'store'])->middleware('area:store');
         Route::patch('store-categories/{category}', [AdminStoreCategoryController::class, 'update'])->middleware('area:store');

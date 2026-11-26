@@ -26,6 +26,7 @@ import UserDetailsDialog from '../../components/admin/UserDetailsDialog.vue'
 import AdminDailyTips from '../../components/admin/AdminDailyTips.vue'
 import AdminBooks from '../../components/admin/AdminBooks.vue'
 import SubscriptionDialog from '../../components/admin/SubscriptionDialog.vue'
+import AdminDesigns from '../../components/admin/AdminDesigns.vue'
 import AdminStore from '../../components/admin/AdminStore.vue'
 import AdminBroadcasts from '../../components/admin/AdminBroadcasts.vue'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
@@ -473,6 +474,8 @@ function auditDetail(entry: AuditEntry): string {
         <AdminBadges v-if="tab === 'badges'" />
 
         <AdminStore v-if="tab === 'store'" />
+
+        <AdminDesigns v-if="tab === 'store'" />
 
         <AdminMessages v-if="tab === 'messages'" />
 

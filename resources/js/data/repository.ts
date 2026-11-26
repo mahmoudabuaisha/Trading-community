@@ -10,6 +10,8 @@ import type {
     DeviceSession,
     Preferences,
     AdminBroadcasts,
+    Design,
+    DesignTarget,
     Book,
     GrantType,
     SubscriptionSheet,
@@ -73,6 +75,9 @@ import type {
 /** What the store answers with: the items, the admin-made sections, and the member's fresh balance. */
 type StoreView = { items: StoreItem[]; categories: StoreCategory[]; user: User }
 
+type DesignsView = { designs: Design[]; selected: Record<DesignTarget, number | null>; user: User }
+type AdminDesignsView = { designs: Design[]; layouts: Record<DesignTarget, string[]>; nodeShapes: string[] }
+
 export const repository = {
     // Auth
     me: () => request<{ user: User }>('GET', '/auth/me').then((r) => r.user),
@@ -123,6 +128,28 @@ export const repository = {
     adminSaveDailyTip: (id: number, patch: { body?: string; isActive?: boolean }) =>
         request<{ tips: DailyTipItem[] }>('PATCH', `/admin/daily-tips/${id}`, patch).then((r) => r.tips),
     adminDeleteDailyTip: (id: number) => request<void>('DELETE', `/admin/daily-tips/${id}`),
+    designs: () => request<DesignsView>('GET', '/designs'),
+    buyDesign: (id: number) => request<DesignsView>('POST', `/designs/${id}/buy`),
+    selectDesign: (id: number) => request<DesignsView>('PUT', '/designs/select', { designId: id }),
+    adminDesigns: () => request<AdminDesignsView>('GET', '/admin/designs'),
+    adminSaveDesign: (
+        id: number | null,
+        input: Partial<Omit<Design, 'id' | 'backgroundUrl' | 'owned'>> & {
+            background?: File | null
+            removeBackground?: boolean
+        },
+    ) => {
+        const form = new FormData()
+        for (const key of ['target', 'layout', 'name', 'description', 'accent', 'nodeShape'] as const) {
+            if (input[key] !== undefined) form.set(key, input[key]!)
+        }
+        if (input.price !== undefined) form.set('price', String(input.price))
+        if (input.isActive !== undefined) form.set('isActive', input.isActive ? '1' : '0')
+        if (input.removeBackground) form.set('removeBackground', '1')
+        if (input.background) form.set('background', input.background, input.background.name)
+        return request<AdminDesignsView>('POST', id === null ? '/admin/designs' : `/admin/designs/${id}`, form)
+    },
+    adminDeleteDesign: (id: number) => request<void>('DELETE', `/admin/designs/${id}`),
     insights: (day: string) => request<Insights>('GET', `/insights?date=${day}`),
     timeline: () => request<Timeline>('GET', '/timeline'),
     saveTimelineNote: (key: string, note: string) => request<void>('PUT', `/timeline/notes/${key}`, { note }),
