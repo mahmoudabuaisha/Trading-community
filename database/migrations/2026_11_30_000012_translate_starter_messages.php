@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\ContentTranslation;
 use App\Models\Motivation;
 use Illuminate\Database\Migrations\Migration;
 
@@ -33,12 +32,8 @@ return new class extends Migration
                 foreach ($locales as $locale => $fields) {
                     foreach ($fields as $field => $text) {
                         $original = (string) $message->getAttribute($field);
-                        $row = ContentTranslation::firstOrNew([
-                            'translatable_type' => $message->getMorphClass(),
-                            'translatable_id' => $message->id,
-                            'field' => $field,
-                            'locale' => $locale,
-                        ]);
+                        // Through the relation, so the row is linked to its message.
+                        $row = $message->translations()->firstOrNew(['field' => $field, 'locale' => $locale]);
                         // Keep a current translation someone already wrote.
                         if ($row->exists && $row->source_hash === sha1($original)) {
                             continue;

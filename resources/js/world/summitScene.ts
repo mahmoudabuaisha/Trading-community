@@ -75,9 +75,7 @@ export interface SummitWorld {
     dispose: () => void
 }
 
-/** How many ordered places each group has before a counter takes over. */
-export const PLACES = { lanterns: 48, flags: 6, plots: 30, areas: 8, beads: 36 } as const
-export const POINTS_PER_BEAD = 25
+import { PLACES, POINTS_PER_BEAD } from './places'
 
 const BASE_RADIUS = 4.6
 const PEDESTAL_TOP = 0

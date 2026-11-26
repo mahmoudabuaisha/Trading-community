@@ -6,7 +6,8 @@ import { repository } from '../data/repository'
 import { t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
-import { PLACES, POINTS_PER_BEAD, type SummitWorld, type WorldData } from '../world/summitScene'
+import { PLACES, POINTS_PER_BEAD } from '../world/places'
+import type { SummitWorld, WorldData } from '../world/summitScene'
 
 /**
  * "My summit": the member's record as a 3D diorama. Nothing is written over
