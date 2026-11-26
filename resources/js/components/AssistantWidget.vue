@@ -205,18 +205,18 @@ async function send(): Promise<void> {
 </script>
 
 <template>
-    <div class="assistant" :class="{ 'assistant--open': open }">
+    <div class="sn-helper" :class="{ 'sn-helper--open': open }">
         <button
             v-if="!open"
             type="button"
-            class="assistant__fab"
+            class="sn-helper__fab"
             :aria-label="t('assistant.openWidget')"
             @click="open = true"
         >
             <Bot :size="24" aria-hidden="true" />
         </button>
-        <section v-else class="assistant__panel" role="dialog" :aria-label="t('assistant.title')">
-            <header class="assistant__head">
+        <section v-else class="sn-helper__panel" role="dialog" :aria-label="t('assistant.title')">
+            <header class="sn-helper__head">
                 <Bot :size="20" aria-hidden="true" />
                 <b>{{ t('assistant.title') }}</b>
                 <button
@@ -228,7 +228,7 @@ async function send(): Promise<void> {
                     <X :size="16" />
                 </button>
             </header>
-            <nav class="assistant__tabs">
+            <nav class="sn-helper__tabs">
                 <button
                     type="button"
                     :class="{ on: mode === 'guide' }"
@@ -242,24 +242,24 @@ async function send(): Promise<void> {
                 </button>
             </nav>
 
-            <div ref="scroller" class="assistant__log" aria-live="polite">
+            <div ref="scroller" class="sn-helper__log" aria-live="polite">
                 <div
                     v-for="(bubble, index) in shown"
                     :key="index"
-                    class="assistant__bubble"
-                    :class="`assistant__bubble--${bubble.from}`"
+                    class="sn-helper__bubble"
+                    :class="`sn-helper__bubble--${bubble.from}`"
                 >
                     <p dir="auto">{{ bubble.text }}</p>
                     <RouterLink v-if="bubble.link" :to="bubble.link.to" class="pill" @click="open = false">{{
                         bubble.link.label
                     }}</RouterLink>
                 </div>
-                <div v-if="thinking" class="assistant__bubble assistant__bubble--bot assistant__typing">
+                <div v-if="thinking" class="sn-helper__bubble sn-helper__bubble--bot sn-helper__typing">
                     <i /><i /><i />
                 </div>
 
                 <template v-if="mode === 'ai' && status && !status.allowed">
-                    <div class="assistant__locked">
+                    <div class="sn-helper__locked">
                         <Lock :size="22" aria-hidden="true" />
                         <p>{{ t('assistant.aiLocked') }}</p>
                         <RouterLink :to="{ name: 'messages' }" class="btn btn--outline" @click="open = false">{{
@@ -273,7 +273,7 @@ async function send(): Promise<void> {
                 <p v-else-if="mode === 'ai' && !chat.length" class="hint">{{ t('assistant.aiHello') }}</p>
             </div>
 
-            <div v-if="mode === 'guide'" class="assistant__chips">
+            <div v-if="mode === 'guide'" class="sn-helper__chips">
                 <button
                     v-for="topic in ['today', 'performance', 'goal', 'points', 'contact'] as const"
                     :key="topic"
@@ -283,7 +283,7 @@ async function send(): Promise<void> {
                 >
                     {{ t(`assistant.q.${topic}`) }}
                 </button>
-                <details class="assistant__explain">
+                <details class="sn-helper__explain">
                     <summary class="pill">{{ t('assistant.explainMenu') }}</summary>
                     <div>
                         <button
@@ -298,7 +298,7 @@ async function send(): Promise<void> {
                     </div>
                 </details>
             </div>
-            <form v-else-if="status?.allowed && status.configured" class="assistant__input" @submit.prevent="send">
+            <form v-else-if="status?.allowed && status.configured" class="sn-helper__input" @submit.prevent="send">
                 <input
                     v-model="draft"
                     class="input"

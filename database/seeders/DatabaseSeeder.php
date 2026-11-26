@@ -52,5 +52,7 @@ class DatabaseSeeder extends Seeder
             $motivation->created_by = $admin?->id;
             $motivation->save();
         }
+        // Their English and French versions.
+        (require database_path('migrations/2026_11_30_000012_translate_starter_messages.php'))->up();
     }
 }

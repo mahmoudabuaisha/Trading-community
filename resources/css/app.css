@@ -6280,13 +6280,13 @@ a.btn-metal {
 }
 
 /* ── Assistant ──────────────────────────────────────────────────────── */
-.assistant {
+.sn-helper {
     position: fixed;
     inset-block-end: var(--space-5);
     inset-inline-start: var(--space-5);
     z-index: 55;
 }
-.assistant__fab {
+.sn-helper__fab {
     inline-size: 56px;
     block-size: 56px;
     border-radius: 50%;
@@ -6299,10 +6299,10 @@ a.btn-metal {
     box-shadow: var(--shadow-card), var(--shadow-glow);
     transition: transform var(--motion-base);
 }
-.assistant__fab:hover {
+.sn-helper__fab:hover {
     transform: translateY(-2px) scale(1.04);
 }
-.assistant__panel {
+.sn-helper__panel {
     inline-size: min(380px, calc(100vw - 2 * var(--space-4)));
     block-size: min(580px, calc(100vh - 7rem));
     display: flex;
@@ -6314,7 +6314,7 @@ a.btn-metal {
     overflow: hidden;
     animation: rise var(--motion-base);
 }
-.assistant__head {
+.sn-helper__head {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -6322,16 +6322,16 @@ a.btn-metal {
     border-block-end: 1px solid var(--line-soft);
     color: var(--gold-500);
 }
-.assistant__head b {
+.sn-helper__head b {
     flex: 1;
     color: var(--text);
 }
-.assistant__tabs {
+.sn-helper__tabs {
     display: flex;
     gap: var(--space-1);
     padding: var(--space-2) var(--space-3);
 }
-.assistant__tabs button {
+.sn-helper__tabs button {
     flex: 1;
     display: inline-flex;
     align-items: center;
@@ -6346,12 +6346,12 @@ a.btn-metal {
     font-size: var(--text-sm);
     cursor: pointer;
 }
-.assistant__tabs button.on {
+.sn-helper__tabs button.on {
     border-color: rgb(var(--accent-rgb) / 0.7);
     background: rgb(var(--accent-rgb) / 0.14);
     color: var(--text);
 }
-.assistant__log {
+.sn-helper__log {
     flex: 1;
     overflow-y: auto;
     display: flex;
@@ -6359,7 +6359,7 @@ a.btn-metal {
     gap: var(--space-2);
     padding: var(--space-3);
 }
-.assistant__bubble {
+.sn-helper__bubble {
     max-inline-size: 88%;
     display: grid;
     gap: var(--space-2);
@@ -6369,38 +6369,38 @@ a.btn-metal {
     font-size: var(--text-sm);
     line-height: 1.6;
 }
-.assistant__bubble p {
+.sn-helper__bubble p {
     margin: 0;
     white-space: pre-line;
 }
-.assistant__bubble--bot {
+.sn-helper__bubble--bot {
     align-self: flex-start;
     background: var(--surface-raised);
     border: 1px solid var(--line-soft);
 }
-.assistant__bubble--me {
+.sn-helper__bubble--me {
     align-self: flex-end;
     background: rgb(var(--accent-rgb) / 0.18);
     border: 1px solid rgb(var(--accent-rgb) / 0.35);
 }
-.assistant__typing {
+.sn-helper__typing {
     display: flex;
     gap: 4px;
 }
-.assistant__typing i {
+.sn-helper__typing i {
     inline-size: 6px;
     block-size: 6px;
     border-radius: 50%;
     background: var(--gold-500);
-    animation: assistant-dot 1s infinite ease-in-out;
+    animation: sn-helper-dot 1s infinite ease-in-out;
 }
-.assistant__typing i:nth-child(2) {
+.sn-helper__typing i:nth-child(2) {
     animation-delay: 0.15s;
 }
-.assistant__typing i:nth-child(3) {
+.sn-helper__typing i:nth-child(3) {
     animation-delay: 0.3s;
 }
-@keyframes assistant-dot {
+@keyframes sn-helper-dot {
     0%,
     100% {
         opacity: 0.25;
@@ -6409,7 +6409,7 @@ a.btn-metal {
         opacity: 1;
     }
 }
-.assistant__locked {
+.sn-helper__locked {
     display: grid;
     justify-items: center;
     gap: var(--space-2);
@@ -6418,10 +6418,10 @@ a.btn-metal {
     color: var(--text-soft);
     font-size: var(--text-sm);
 }
-.assistant__locked svg {
+.sn-helper__locked svg {
     color: var(--gold-500);
 }
-.assistant__chips {
+.sn-helper__chips {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
@@ -6430,47 +6430,47 @@ a.btn-metal {
     max-block-size: 40%;
     overflow-y: auto;
 }
-.assistant__chips .pill,
-.assistant__explain summary {
+.sn-helper__chips .pill,
+.sn-helper__explain summary {
     cursor: pointer;
 }
-.assistant__explain {
+.sn-helper__explain {
     inline-size: 100%;
 }
-.assistant__explain summary {
+.sn-helper__explain summary {
     display: inline-flex;
     list-style: none;
 }
-.assistant__explain > div {
+.sn-helper__explain > div {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
     margin-block-start: var(--space-2);
 }
-.assistant__input {
+.sn-helper__input {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: var(--space-2);
     padding: var(--space-3);
     border-block-start: 1px solid var(--line-soft);
 }
-.assistant__input small {
+.sn-helper__input small {
     grid-column: 1 / -1;
 }
 @media (max-width: 640px) {
-    .assistant {
+    .sn-helper {
         inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
         inset-inline-start: var(--space-3);
     }
-    .assistant--open {
+    .sn-helper--open {
         inset-inline-end: var(--space-3);
     }
-    .assistant__panel {
+    .sn-helper__panel {
         inline-size: 100%;
     }
 }
 @media (prefers-reduced-motion: reduce) {
-    .assistant__typing i {
+    .sn-helper__typing i {
         animation: none;
     }
 }
@@ -6874,4 +6874,96 @@ a.btn-metal {
 }
 .store-art .avatar--frame-picture {
     transform: scale(0.72);
+}
+
+/* ── My summit: save button and legend keys ─────────────────────────── */
+.world-stage {
+    block-size: min(74vh, 680px);
+}
+.world-stage__save {
+    position: absolute;
+    inset-block-end: var(--space-3);
+    inset-inline-end: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    background: rgba(8, 8, 9, 0.6);
+    backdrop-filter: blur(6px);
+    color: var(--gold-200);
+    font: inherit;
+    font-size: var(--text-xs);
+    cursor: pointer;
+}
+.world-stage__save:hover:not(:disabled) {
+    border-color: var(--gold-500);
+}
+.world-legend li {
+    flex-wrap: wrap;
+}
+.world-legend i {
+    flex: none;
+    inline-size: 10px;
+    block-size: 10px;
+    border-radius: 50%;
+    background: var(--gold-500);
+    box-shadow: 0 0 8px rgb(var(--accent-rgb) / 0.7);
+}
+.world-legend__item--trees i {
+    background: #3f8f6a;
+    box-shadow: 0 0 8px #3f8f6a;
+}
+.world-legend__item--obelisks i {
+    background: linear-gradient(135deg, #5a94f0, #e8566f, #3fc48a);
+    border-radius: 2px;
+}
+.world-legend__item--aurora i {
+    background: linear-gradient(180deg, transparent, var(--gold-500), #7fe0b0);
+}
+.world-legend small {
+    flex-basis: 100%;
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+}
+@media (max-width: 560px) {
+    .world-stage {
+        block-size: 72vh;
+        min-block-size: 420px;
+    }
+}
+
+/* ── Depth: layered backdrop and tilting cards ──────────────────────── */
+.backdrop__summit {
+    transform: translate3d(0, calc(var(--depth-scroll, 0) * -0.12px), 0);
+}
+.backdrop__fog {
+    transform: translate3d(0, calc(var(--depth-scroll, 0) * -0.22px), 0);
+}
+.backdrop__sky {
+    transform: translate3d(0, calc(var(--depth-scroll, 0) * -0.04px), 0) scale(1.08);
+}
+.dash-card,
+.store-card,
+.leader-card,
+.tier-option,
+.goal-card,
+.stat-card {
+    transition:
+        transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+        box-shadow 0.45s ease;
+}
+.is-tilting {
+    transform: perspective(1100px) rotateX(var(--tilt-y, 0deg)) rotateY(var(--tilt-x, 0deg)) translateZ(0);
+    box-shadow:
+        var(--shadow-card),
+        0 18px 40px rgb(var(--accent-rgb) / 0.12);
+}
+@media (prefers-reduced-motion: reduce) {
+    .backdrop__summit,
+    .backdrop__fog,
+    .backdrop__sky {
+        transform: none;
+    }
 }

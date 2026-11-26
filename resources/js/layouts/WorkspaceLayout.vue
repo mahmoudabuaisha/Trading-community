@@ -40,6 +40,7 @@ import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { useSiteCopy } from '../lib/content'
 import { applyTheme } from '../lib/theme'
+import { installDepth } from '../lib/depth'
 import { roleName } from '../lib/roles'
 import { describeError } from '../stores/ui'
 import { formatDate, locale, setLocale, t, cycleLocale } from '../i18n'
@@ -141,7 +142,15 @@ function onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') navOpen.value = false
 }
 
+// Whatever changes the language (top bar or settings), reload the content in it:
+// the workspace data here, and the open page through the RouterView key.
+watch(locale, (next, previous) => {
+    if (next !== previous && workspace.loaded) void workspace.load(true)
+})
+
+let removeDepth: (() => void) | null = null
 onMounted(() => {
+    removeDepth = installDepth()
     if (auth.user) setLocale(auth.user.language)
     stopTheme = watchEffect(() => {
         // The member's bought theme recolours the whole app; signed out, it goes back to gold.
@@ -154,6 +163,7 @@ onMounted(() => {
     window.addEventListener('keydown', onKeydown)
 })
 onBeforeUnmount(() => {
+    removeDepth?.()
     stopTheme()
     applyTheme(null)
     window.clearInterval(clock)
@@ -166,8 +176,6 @@ async function switchLanguage(): Promise<void> {
     cycleLocale()
     try {
         await workspace.patchProfile({ language: locale.value })
-        // Forced: the data is already loaded, but in the previous language.
-        await workspace.load(true)
     } catch (error) {
         useUiStore().failure(error)
     }

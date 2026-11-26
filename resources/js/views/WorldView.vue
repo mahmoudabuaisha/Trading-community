@@ -1,42 +1,43 @@
 <script setup lang="ts">
-import { Camera, Clapperboard, Mountain } from 'lucide-vue-next'
+import { Download, Mountain } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ApiError } from '../data/http'
 import { repository } from '../data/repository'
-import { isRtl, t } from '../i18n'
+import { t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
-import { CARD_HEIGHT, CARD_WIDTH, download, drawCard, videoSupport, type CardText } from '../world/shareCard'
-import type { SummitWorld, WorldData } from '../world/summitScene'
+import { PLACES, POINTS_PER_BEAD, type SummitWorld, type WorldData } from '../world/summitScene'
 
 /**
- * "My summit": the member's 3D world. Its height, lanterns, peaks, flags,
- * trees, crystals and aurora come from what they actually did.
+ * "My summit": the member's record as a 3D diorama. Nothing is written over
+ * the scene, so a screenshot or screen recording is ready for a story or a
+ * reel; "Save picture" downloads a clean, story-sized image of it.
  */
 const auth = useAuthStore()
 const ui = useUiStore()
 const host = ref<HTMLElement | null>(null)
 const data = ref<Omit<WorldData, 'accent'> | null>(null)
 const fallback = ref(false)
-const recording = ref(0)
+const saving = ref(false)
 let world: SummitWorld | null = null
 
-const video = videoSupport()
 const accent = computed(() => auth.user?.theme?.accent ?? '#d6ad62')
-const legend = computed(() =>
-    data.value
-        ? [
-              { key: 'height', value: data.value.tasksCompleted },
-              { key: 'peaks', value: data.value.areas.length },
-              { key: 'flags', value: data.value.goalsCompleted.length },
-              { key: 'trees', value: data.value.habitChecks },
-              { key: 'aurora', value: data.value.streak },
-              { key: 'crystals', value: data.value.pointsEarned },
-          ]
-        : [],
-)
+/** What each part of the scene stands for, with the member's numbers. */
+const legend = computed(() => {
+    const d = data.value
+    if (!d) return []
+    return [
+        { key: 'lanterns', value: d.tasksCompleted, places: PLACES.lanterns },
+        { key: 'flags', value: d.goalsCompleted.length, places: PLACES.flags },
+        { key: 'trees', value: d.habitChecks, places: PLACES.plots },
+        { key: 'obelisks', value: d.areas.length, places: PLACES.areas },
+        { key: 'beads', value: d.pointsEarned, places: PLACES.beads * POINTS_PER_BEAD },
+        { key: 'aurora', value: d.streak, places: 0 },
+    ]
+})
 
-onMounted(async () => {
+/** Reload when the member comes back to the tab, so new tasks and goals show without a refresh. */
+async function build(): Promise<void> {
     try {
         data.value = await repository.world()
     } catch (error) {
@@ -53,80 +54,47 @@ onMounted(async () => {
         (navigator.hardwareConcurrency ?? 8) <= 4 ||
         ((navigator as { deviceMemory?: number }).deviceMemory ?? 8) <= 4 ||
         matchMedia('(pointer: coarse)').matches
+    world?.dispose()
     world = createSummitWorld(
         host.value,
         { ...data.value, accent: accent.value },
         { reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches, lowPower },
     )
+}
+
+let hiddenAt = 0
+function onVisibility(): void {
+    if (document.visibilityState === 'hidden') hiddenAt = Date.now()
+    else if (hiddenAt && Date.now() - hiddenAt > 30_000) void build()
+}
+
+onMounted(() => {
+    void build()
+    document.addEventListener('visibilitychange', onVisibility)
 })
-onBeforeUnmount(() => world?.dispose())
+onBeforeUnmount(() => {
+    document.removeEventListener('visibilitychange', onVisibility)
+    world?.dispose()
+})
 
-function cardText(): CardText {
-    const d = data.value!
-    return {
-        name: d.name,
-        title: d.title,
-        lines: [
-            t('world.card.line1', { streak: d.streak, tasks: d.tasksCompleted }),
-            t('world.card.line2', { points: d.pointsEarned, goals: d.goalsCompleted.length }),
-        ],
-        brand: 'SN TASKS',
-        dir: isRtl.value ? 'rtl' : 'ltr',
+async function savePicture(): Promise<void> {
+    if (!world || saving.value) return
+    saving.value = true
+    try {
+        const blob = await world.capture(1080, 1920)
+        if (!blob) throw new ApiError(t('world.saveFailed'), 422)
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'my-summit.png'
+        link.click()
+        setTimeout(() => URL.revokeObjectURL(url), 2000)
+        ui.success(t('world.saved'))
+    } catch (error) {
+        ui.failure(error)
+    } finally {
+        saving.value = false
     }
-}
-
-function cardCanvas(): CanvasRenderingContext2D {
-    const canvas = document.createElement('canvas')
-    canvas.width = CARD_WIDTH
-    canvas.height = CARD_HEIGHT
-    return canvas.getContext('2d')!
-}
-
-async function snapshot(): Promise<void> {
-    if (!world) return
-    await document.fonts.ready
-    const ctx = cardCanvas()
-    world.renderNow()
-    drawCard(ctx, world.canvas, cardText(), accent.value)
-    ctx.canvas.toBlob((blob) => blob && download(blob, 'my-summit.png'), 'image/png')
-    ui.success(t('world.saved'))
-}
-
-/** Ten seconds, one full turn around the summit, drawn into the card and recorded. */
-async function record(): Promise<void> {
-    if (!world || !video || recording.value) return
-    await document.fonts.ready
-    const ctx = cardCanvas()
-    const stream = ctx.canvas.captureStream(30)
-    const recorder = new MediaRecorder(stream, { mimeType: video.mimeType, videoBitsPerSecond: 6_000_000 })
-    const chunks: Blob[] = []
-    recorder.ondataavailable = (event) => event.data.size && chunks.push(event.data)
-    const text = cardText()
-    const seconds = 10
-    const started = performance.now()
-    world.setAutoRotate(false)
-    let turned = 0
-    world.onFrame(() => {
-        const progress = Math.min(1, (performance.now() - started) / (seconds * 1000))
-        const target = progress * Math.PI * 2
-        world!.turn(target - turned)
-        turned = target
-        recording.value = Math.max(1, Math.ceil(seconds * (1 - progress)))
-        drawCard(ctx, world!.canvas, text, accent.value)
-    })
-    recorder.start(250)
-    await new Promise((resolve) => setTimeout(resolve, seconds * 1000))
-    recorder.stop()
-    await new Promise((resolve) => (recorder.onstop = resolve))
-    world.onFrame(null)
-    world.setAutoRotate(true)
-    recording.value = 0
-    if (!chunks.length) {
-        ui.failure(new ApiError(t('world.videoFailed'), 422))
-        return
-    }
-    download(new Blob(chunks, { type: video.mimeType }), `my-summit.${video.extension}`)
-    ui.success(t('world.saved'))
 }
 </script>
 
@@ -134,47 +102,38 @@ async function record(): Promise<void> {
     <section class="stack">
         <div class="section-head">
             <div>
-                <span class="eyebrow">MY SUMMIT</span>
                 <h2>{{ t('world.head') }}</h2>
                 <p>{{ t('world.sub') }}</p>
             </div>
-            <div class="head-actions">
-                <button
-                    type="button"
-                    class="btn btn--outline"
-                    :disabled="!data || fallback || recording > 0"
-                    @click="snapshot"
-                >
-                    <Camera :size="16" aria-hidden="true" /> {{ t('world.photo') }}
-                </button>
-                <button
-                    v-if="video"
-                    type="button"
-                    class="btn"
-                    :disabled="!data || fallback || recording > 0"
-                    @click="record"
-                >
-                    <Clapperboard :size="16" aria-hidden="true" />
-                    {{ recording ? t('world.recording', { n: recording }) : t('world.video') }}
-                </button>
-            </div>
         </div>
 
-        <div class="world-stage" :class="{ 'world-stage--recording': recording }">
+        <div class="world-stage">
             <div ref="host" class="world-stage__canvas" :aria-label="t('world.alt')" role="img" />
             <div v-if="fallback" class="world-stage__fallback">
                 <Mountain :size="48" aria-hidden="true" />
                 <p>{{ t('world.noWebgl') }}</p>
             </div>
-            <span v-if="data && !fallback" class="world-stage__hint">{{ t('world.drag') }}</span>
+            <button
+                v-if="data && !fallback"
+                type="button"
+                class="world-stage__save"
+                :disabled="saving"
+                :aria-label="t('world.save')"
+                :title="t('world.save')"
+                @click="savePicture"
+            >
+                <Download :size="15" aria-hidden="true" />
+                <span>{{ t('world.save') }}</span>
+            </button>
         </div>
 
         <ul v-if="data" class="world-legend">
-            <li v-for="item in legend" :key="item.key">
+            <li v-for="item in legend" :key="item.key" :class="`world-legend__item--${item.key}`">
+                <i aria-hidden="true" />
                 <b>{{ item.value }}</b>
                 <span>{{ t(`world.legend.${item.key}`) }}</span>
+                <small v-if="item.places && item.value > item.places">{{ t('world.counterNote') }}</small>
             </li>
         </ul>
-        <p v-if="!video" class="hint">{{ t('world.noVideo') }}</p>
     </section>
 </template>

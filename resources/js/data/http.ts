@@ -1,3 +1,4 @@
+import { locale } from '../i18n'
 /**
  * Minimal JSON client for the Laravel API (Sanctum SPA cookie auth).
  * Only `repository.ts` imports this file.
@@ -33,7 +34,8 @@ export async function request<T>(method: string, path: string, body?: unknown, r
         credentials: 'same-origin',
         headers: {
             Accept: 'application/json',
-            'Accept-Language': document.documentElement.lang || 'ar',
+            // The app's language right now (the page's lang attribute updates a moment later).
+            'Accept-Language': locale.value,
             'X-Requested-With': 'XMLHttpRequest',
             // A FormData body sets its own multipart Content-Type (with boundary).
             ...(body !== undefined && !(body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
