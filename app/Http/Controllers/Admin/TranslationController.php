@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\SetLocaleFromRequest;
 use App\Models\Badge;
 use App\Models\Broadcast;
+use App\Models\BroadcastSchedule;
 use App\Models\ContentTranslation;
 use App\Models\Lesson;
 use App\Models\Motivation;
@@ -29,6 +30,7 @@ class TranslationController extends Controller
     private const TYPES = [
         'motivation' => [Motivation::class, 'growth'],
         'broadcast' => [Broadcast::class, 'growth'],
+        'broadcast-schedule' => [BroadcastSchedule::class, 'growth'],
         'lesson' => [Lesson::class, 'education'],
         'skill-path' => [SkillPath::class, 'education'],
         'skill-level' => [SkillLevel::class, 'education'],

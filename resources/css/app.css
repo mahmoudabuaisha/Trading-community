@@ -5541,3 +5541,47 @@ a.btn-metal {
     gap: var(--space-2);
     color: var(--gold-200);
 }
+
+/* Account details (admin) */
+.user-details__who {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+.user-details__who h3 {
+    color: var(--gold-200);
+    font-size: var(--text-lg);
+}
+.user-details__who p {
+    color: var(--text-muted);
+}
+.user-details__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+}
+.user-details__facts dt {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+}
+.user-details__facts dd {
+    margin: 0;
+}
+.user-details__wide {
+    grid-column: 1 / -1;
+}
+.user-details__section {
+    display: grid;
+    gap: var(--space-2);
+}
+.user-details__section h4 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--gold-200);
+}
+.user-details__list {
+    max-block-size: 260px;
+    overflow-y: auto;
+}

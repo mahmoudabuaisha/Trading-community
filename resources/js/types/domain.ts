@@ -26,6 +26,8 @@ export type Role = 'admin' | 'moderator' | 'user'
 /** Areas of the admin center a moderator can be granted. Administrators have all of them. */
 export const ADMIN_AREAS = ['users', 'content', 'growth', 'education', 'badges', 'store', 'messages', 'audit'] as const
 export type AdminArea = (typeof ADMIN_AREAS)[number]
+/** Areas a moderator can be given. Members' private messages stay with full administrators. */
+export const GRANTABLE_AREAS = ADMIN_AREAS.filter((area) => area !== 'messages')
 export const LOCALES = ['ar', 'en', 'fr'] as const
 export type Locale = (typeof LOCALES)[number]
 
@@ -429,9 +431,65 @@ export interface PointsHistory {
 
 /** A message from the administrators to every member. */
 export interface Broadcast {
-    id: number
-    kind: 'scheduled' | 'instant'
+    /** A number for a dated message; a string unique to the day for an occurrence of a repeating one. */
+    id: number | string
+    kind: 'scheduled' | 'instant' | 'recurring'
     body: string
+}
+
+/** A message that repeats every day, or every week on a weekday (1 = Monday … 7 = Sunday), at a set time. */
+export interface BroadcastSchedule {
+    id: number
+    frequency: 'daily' | 'weekly'
+    weekday: number | null
+    time: string
+    body: string
+    isActive: boolean
+}
+
+interface DetailTask {
+    id: number
+    title: string
+    periodType: PeriodType
+    status: TaskStatus
+    createdAt: string
+    completedAt: string | null
+}
+
+/** Everything the administrators see about one account. */
+export interface UserDetails {
+    user: AdminUser & {
+        surname: string
+        nickname: string
+        bio: string
+        specialties: Specialty[]
+        timezone: string
+        language: Locale
+        lastSeenAt: string | null
+        title: string | null
+        frame: string
+        theme: string
+    }
+    points: { balance: number; earned: number }
+    counts: Record<
+        | 'tasks'
+        | 'tasksCompleted'
+        | 'goals'
+        | 'goalsCompleted'
+        | 'habits'
+        | 'focusMinutes'
+        | 'streak'
+        | 'skillLevels'
+        | 'projects'
+        | 'visionBoards',
+        number
+    >
+    tasks: DetailTask[]
+    completedTasks: DetailTask[]
+    goals: { id: number; title: string; status: string; currentValue: number; targetValue: number }[]
+    achievements: { key: string; title: string | null; points: number; times: number; earnedAt: string }[]
+    badges: { key: string; title: string | null; points: number; times: number; earnedAt: string }[]
+    purchases: { name: string; kind: StoreKind; price: number; boughtAt: string }[]
 }
 
 export interface AdminBroadcasts {

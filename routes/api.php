@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\BadgeController as AdminBadgeController;
 use App\Http\Controllers\Admin\BroadcastController as AdminBroadcastController;
+use App\Http\Controllers\Admin\BroadcastScheduleController as AdminBroadcastScheduleController;
 use App\Http\Controllers\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Admin\MotivationController as AdminMotivationController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
@@ -124,6 +125,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::middleware('staff')->prefix('admin')->group(function (): void {
         Route::get('overview', [AdminOverviewController::class, 'show']);
         Route::get('users', [AdminUserController::class, 'index'])->middleware('area:users');
+        Route::get('users/{user}', [AdminUserController::class, 'show'])->middleware('area:users');
         Route::patch('users/{user}', [AdminUserController::class, 'update'])->middleware('area:users');
         Route::post('users/{user}/revoke-sessions', [AdminUserController::class, 'revokeSessions'])->middleware('area:users');
         Route::get('motivations', [AdminMotivationController::class, 'index'])->middleware('area:growth');
@@ -149,6 +151,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('broadcasts', [AdminBroadcastController::class, 'index'])->middleware('area:growth');
         Route::post('broadcasts', [AdminBroadcastController::class, 'send'])->middleware('area:growth');
         Route::put('broadcasts/schedule/{day}', [AdminBroadcastController::class, 'schedule'])->middleware('area:growth')->where('day', '\\d{4}-\\d{2}-\\d{2}');
+        Route::get('broadcast-schedules', [AdminBroadcastScheduleController::class, 'index'])->middleware('area:growth');
+        Route::post('broadcast-schedules', [AdminBroadcastScheduleController::class, 'store'])->middleware('area:growth');
+        Route::patch('broadcast-schedules/{schedule}', [AdminBroadcastScheduleController::class, 'update'])->middleware('area:growth');
+        Route::delete('broadcast-schedules/{schedule}', [AdminBroadcastScheduleController::class, 'destroy'])->middleware('area:growth');
         Route::delete('broadcasts/{broadcast}', [AdminBroadcastController::class, 'destroy'])->middleware('area:growth');
         Route::get('skill-paths', [SkillController::class, 'adminIndex'])->middleware('area:education');
         Route::post('skill-paths', [SkillController::class, 'savePath'])->middleware('area:education');

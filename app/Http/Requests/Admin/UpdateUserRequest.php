@@ -22,12 +22,10 @@ class UpdateUserRequest extends ApiRequest
     public function rules(): array
     {
         return [
-            'displayName' => ['sometimes', 'string', 'min:1', 'max:120'],
-            'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
             'role' => ['sometimes', Rule::in(User::ROLES)],
             'isPremium' => ['sometimes', 'boolean'],
             'permissions' => ['sometimes', 'array'],
-            'permissions.*' => ['string', Rule::in(User::PERMISSIONS)],
+            'permissions.*' => ['string', Rule::in(User::GRANTABLE)],
         ];
     }
 }

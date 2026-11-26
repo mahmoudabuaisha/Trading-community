@@ -88,20 +88,17 @@ class AdminTest extends TestCase
         $member = User::factory()->create(['display_name' => 'Old', 'email' => 'old@example.com']);
         $this->actingAs($admin);
 
-        $this->patchJson("/api/admin/users/{$member->id}", ['displayName' => 'New', 'email' => 'new@example.com'])
-            ->assertOk()->assertJsonPath('user.displayName', 'New')->assertJsonPath('user.email', 'new@example.com');
+        // Names and e-mail addresses belong to their owners: the admin API no longer changes them.
+        $this->patchJson("/api/admin/users/{$member->id}", ['displayName' => 'New', 'email' => 'new@example.com'])->assertOk();
+        $this->assertSame(['Old', 'old@example.com'], [$member->refresh()->display_name, $member->email]);
 
         $this->patchJson("/api/admin/users/{$member->id}", ['role' => 'admin'])
             ->assertOk()->assertJsonPath('user.role', 'admin');
 
-        $this->patchJson("/api/admin/users/{$member->id}", ['email' => $admin->email])
-            ->assertStatus(422)->assertJsonValidationErrors('email');
-
         $audits = AdminAudit::orderBy('id')->get();
-        $this->assertSame(['user_updated', 'role_changed'], $audits->pluck('action')->all());
-        $this->assertSame(['name' => 'New', 'emailChanged' => true], $audits[0]->details);
-        $this->assertSame(['name' => 'New', 'from' => 'user', 'to' => 'admin'], $audits[1]->details);
-        $this->assertSame($member->id, $audits[1]->target_user_id);
+        $this->assertSame(['role_changed'], $audits->pluck('action')->all());
+        $this->assertSame(['name' => 'Old', 'from' => 'user', 'to' => 'admin'], $audits[0]->details);
+        $this->assertSame($member->id, $audits[0]->target_user_id);
 
         $this->getJson('/api/admin/overview')
             ->assertJsonPath('audit.0.action', 'role_changed')

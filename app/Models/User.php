@@ -33,6 +33,9 @@ class User extends Authenticatable
     /** Areas of the admin center. An administrator has all of them; a moderator has those granted. */
     public const PERMISSIONS = ['users', 'content', 'growth', 'education', 'badges', 'store', 'messages', 'audit'];
 
+    /** Areas a moderator can be given. Members' private messages are not among them. */
+    public const GRANTABLE = ['users', 'content', 'growth', 'education', 'badges', 'store', 'audit'];
+
     public const DEFAULT_PREFERENCES = [
         'notifyReminders' => true,
         'notifyMorning' => true,
@@ -100,6 +103,11 @@ class User extends Authenticatable
     /** May this user work in the given area of the admin center? */
     public function hasPermission(string $area): bool
     {
+        // Members write to the administration in confidence: only full administrators read it.
+        if ($area === 'messages') {
+            return $this->isAdmin();
+        }
+
         return $this->isAdmin() || ($this->role === self::ROLE_MODERATOR && in_array($area, $this->permissions ?? [], true));
     }
 

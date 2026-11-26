@@ -3,8 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\AdminAudit;
+use App\Models\BroadcastSchedule;
+use App\Models\Task;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -22,16 +26,18 @@ class StaffAndRewardsTest extends TestCase
 
     public function test_a_moderator_reaches_only_the_areas_they_were_granted(): void
     {
-        $moderator = $this->moderator(['education', 'messages']);
+        $moderator = $this->moderator(['education', 'messages']);   // "messages" is ignored: see below
         $member = User::factory()->create();
         $this->actingAs($moderator);
 
-        $this->getJson('/api/auth/me')->assertJsonPath('user.role', 'moderator')->assertJsonPath('user.permissions', ['education', 'messages']);
+        $this->getJson('/api/auth/me')->assertJsonPath('user.role', 'moderator')->assertJsonPath('user.permissions', ['education']);
         $this->getJson('/api/admin/overview')->assertOk()->assertJsonCount(0, 'audit');
         $this->getJson('/api/admin/lessons')->assertOk();
         $this->post('/api/admin/lessons', ['title' => 't', 'body' => 'b'], ['Accept' => 'application/json'])->assertCreated();
-        $this->getJson('/api/admin/threads')->assertOk();
-        $this->postJson("/api/admin/threads/{$member->id}", ['body' => 'hi'])->assertCreated();
+        // Private messages stay with full administrators, whatever a moderator's permissions say.
+        $this->getJson('/api/admin/threads')->assertForbidden();
+        $this->getJson("/api/admin/threads/{$member->id}")->assertForbidden();
+        $this->postJson("/api/admin/threads/{$member->id}", ['body' => 'hi'])->assertForbidden();
         // Staff read subscriber-only lessons.
         $this->assertTrue($moderator->canReadPremium());
 
@@ -48,7 +54,7 @@ class StaffAndRewardsTest extends TestCase
         $member = User::factory()->create();
 
         // A moderator with the users area edits accounts and grants premium…
-        $this->actingAs($usersModerator)->patchJson("/api/admin/users/{$member->id}", ['displayName' => 'جديد', 'isPremium' => true])->assertOk()->assertJsonPath('user.isPremium', true);
+        $this->actingAs($usersModerator)->patchJson("/api/admin/users/{$member->id}", ['isPremium' => true])->assertOk()->assertJsonPath('user.isPremium', true);
         // …but cannot promote anyone, including themselves, or hand out permissions.
         $this->actingAs($usersModerator)->patchJson("/api/admin/users/{$member->id}", ['role' => 'moderator'])->assertForbidden();
         $this->actingAs($usersModerator)->patchJson("/api/admin/users/{$usersModerator->id}", ['role' => 'admin'])->assertForbidden();
@@ -94,5 +100,76 @@ class StaffAndRewardsTest extends TestCase
         $this->travelTo('2026-11-14 10:00:00');
         $this->getJson('/api/dashboard?date=2026-11-14')->assertJsonPath('absenceDays', 2);
         $this->getJson('/api/dashboard?date=2026-11-14')->assertJsonPath('absenceDays', 0);
+    }
+
+    public function test_private_messages_reach_only_their_member_and_full_administrators(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$sara, $omar] = [User::factory()->create(), User::factory()->create()];
+        $moderator = $this->moderator(['users', 'growth', 'audit']);
+
+        $this->actingAs($sara)->postJson('/api/messages', ['body' => 'سؤال خاص'])->assertCreated();
+        $this->actingAs($admin)->postJson("/api/admin/threads/{$sara->id}", ['body' => 'رد خاص'])->assertCreated();
+
+        // Sara sees her own thread; Omar sees nothing of it, by any route.
+        $this->actingAs($sara)->getJson('/api/messages')->assertJsonCount(2, 'messages');
+        $this->actingAs($omar)->getJson('/api/messages')->assertJsonCount(0, 'messages');
+        foreach ([$omar, $moderator] as $outsider) {
+            $this->actingAs($outsider)->getJson('/api/admin/threads')->assertForbidden();
+            $this->actingAs($outsider)->getJson("/api/admin/threads/{$sara->id}")->assertForbidden();
+            $this->actingAs($outsider)->postJson("/api/admin/threads/{$sara->id}", ['body' => 'x'])->assertForbidden();
+        }
+        // A moderator who manages accounts sees the account, never its messages; and the area cannot be granted.
+        $details = $this->actingAs($moderator)->getJson("/api/admin/users/{$sara->id}")->assertOk()->json();
+        $this->assertStringNotContainsString('سؤال خاص', json_encode($details, JSON_UNESCAPED_UNICODE));
+        $this->actingAs($admin)->patchJson("/api/admin/users/{$moderator->id}", ['permissions' => ['messages']])->assertUnprocessable();
+        $this->actingAs($admin)->getJson('/api/admin/threads')->assertOk()->assertJsonCount(1, 'threads');
+    }
+
+    public function test_account_details_gather_what_a_member_did(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $member = User::factory()->create(['nickname' => 'أبو خالد']);
+        Task::factory()->for($member)->create(['title' => 'منجزة', 'status' => 'completed', 'completed_at' => now()]);
+        Task::factory()->for($member)->create(['title' => 'معلقة']);
+        Task::factory()->for($admin)->create(['title' => 'مهمة غيره']);
+
+        $this->actingAs($member)->getJson("/api/admin/users/{$member->id}")->assertForbidden();
+        $this->actingAs($admin)->getJson("/api/admin/users/{$member->id}")->assertOk()
+            ->assertJsonPath('user.nickname', 'أبو خالد')->assertJsonPath('user.email', $member->email)
+            ->assertJsonPath('counts.tasks', 2)->assertJsonPath('counts.tasksCompleted', 1)
+            ->assertJsonCount(2, 'tasks')->assertJsonCount(1, 'completedTasks')->assertJsonPath('completedTasks.0.title', 'منجزة')
+            ->assertJsonPath('points.balance', 0)->assertJsonCount(0, 'purchases');
+    }
+
+    public function test_recurring_messages_arrive_at_their_time_in_the_schedule_timezone(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $member = User::factory()->create();
+        // Thursday 26 November 2026, 07:30 in Palestine (05:30 UTC).
+        $at = fn (string $utc) => [CarbonImmutable::setTestNow($utc), Carbon::setTestNow($utc)];
+        $at('2026-11-26 05:30:00');
+
+        $this->actingAs($member)->postJson('/api/admin/broadcast-schedules', ['frequency' => 'daily', 'time' => '08:00', 'body' => 'x'])->assertForbidden();
+        $this->actingAs($admin)->postJson('/api/admin/broadcast-schedules', ['frequency' => 'weekly', 'time' => '08:00', 'body' => 'x'])->assertUnprocessable()->assertJsonValidationErrors('weekday');
+        $this->postJson('/api/admin/broadcast-schedules', ['frequency' => 'daily', 'time' => '08:00', 'body' => 'صباح الخير'])->assertCreated()->assertJsonPath('timezone', 'Asia/Hebron');
+        $this->postJson('/api/admin/broadcast-schedules', ['frequency' => 'weekly', 'weekday' => 4, 'time' => '20:00', 'body' => 'مراجعة الأسبوع'])->assertCreated()->assertJsonCount(2, 'schedules');
+        $this->postJson('/api/admin/broadcast-schedules', ['frequency' => 'weekly', 'weekday' => 5, 'time' => '06:00', 'body' => 'رسالة الجمعة'])->assertCreated();
+
+        $bodies = fn () => array_column($this->actingAs($member)->getJson('/api/messages/unread')->json('broadcasts'), 'body');
+        $this->assertSame([], $bodies());                       // 07:30 — nothing is due yet
+        $at('2026-11-26 06:05:00');
+        $this->assertSame(['صباح الخير'], $bodies());          // 08:05 — the daily one
+        $at('2026-11-26 18:30:00');
+        $this->assertSame(['صباح الخير', 'مراجعة الأسبوع'], $bodies());   // 20:30 on a Thursday
+        $first = $this->getJson('/api/messages/unread')->json('broadcasts.0.id');
+        $at('2026-11-27 06:30:00');
+        $this->assertSame(['رسالة الجمعة', 'صباح الخير'], $bodies());    // Friday 08:30: a new day, a new occurrence
+        $this->assertNotSame($first, $this->getJson('/api/messages/unread')->json('broadcasts.1.id'));
+
+        $id = BroadcastSchedule::where('frequency', 'daily')->value('id');
+        $this->actingAs($admin)->patchJson("/api/admin/broadcast-schedules/{$id}", ['isActive' => false])->assertOk();
+        $this->assertSame(['رسالة الجمعة'], $bodies());
+        $this->actingAs($admin)->deleteJson("/api/admin/broadcast-schedules/{$id}")->assertNoContent();
     }
 }

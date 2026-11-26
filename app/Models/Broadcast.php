@@ -29,11 +29,14 @@ class Broadcast extends Model
     /**
      * What a member should see on their local `day`.
      *
-     * @return list<array{id: int, kind: string, body: string}>
+     * @return list<array{id: int|string, kind: string, body: string}>
      */
     public static function forDay(string $day): array
     {
-        return self::whereDate('day', $day)->orderBy('id')->get()
+        $dated = self::whereDate('day', $day)->orderBy('id')->get()
             ->map(fn (Broadcast $item): array => ['id' => $item->id, 'kind' => $item->kind, 'body' => $item->tr('body')])->all();
+
+        // Repeating messages join once their time has come.
+        return [...$dated, ...BroadcastSchedule::dueNow()];
     }
 }

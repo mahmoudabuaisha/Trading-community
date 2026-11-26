@@ -10,6 +10,8 @@ import type {
     DeviceSession,
     Preferences,
     AdminBroadcasts,
+    BroadcastSchedule,
+    UserDetails,
     DayEntry,
     Badge,
     BadgeInput,
@@ -230,10 +232,18 @@ export const repository = {
     adminOverview: () => request<{ stats: AdminStats; audit: AuditEntry[] }>('GET', '/admin/overview'),
     adminUsers: (search: string, page: number) =>
         request<Paginated<AdminUser>>('GET', `/admin/users?search=${encodeURIComponent(search)}&page=${page}`),
-    adminUpdateUser: (
-        id: number,
-        patch: { displayName?: string; email?: string; role?: Role; isPremium?: boolean; permissions?: AdminArea[] },
-    ) => request<{ user: AdminUser }>('PATCH', `/admin/users/${id}`, patch).then((r) => r.user),
+    adminUpdateUser: (id: number, patch: { role?: Role; isPremium?: boolean; permissions?: AdminArea[] }) =>
+        request<{ user: AdminUser }>('PATCH', `/admin/users/${id}`, patch).then((r) => r.user),
+    adminUserDetails: (id: number) => request<UserDetails>('GET', `/admin/users/${id}`),
+    adminBroadcastSchedules: () =>
+        request<{ timezone: string; schedules: BroadcastSchedule[] }>('GET', '/admin/broadcast-schedules'),
+    adminSaveBroadcastSchedule: (id: number | null, input: Partial<Omit<BroadcastSchedule, 'id'>>) =>
+        request<{ timezone: string; schedules: BroadcastSchedule[] }>(
+            id === null ? 'POST' : 'PATCH',
+            id === null ? '/admin/broadcast-schedules' : `/admin/broadcast-schedules/${id}`,
+            input,
+        ),
+    adminDeleteBroadcastSchedule: (id: number) => request<void>('DELETE', `/admin/broadcast-schedules/${id}`),
     adminRevokeSessions: (id: number) => request<void>('POST', `/admin/users/${id}/revoke-sessions`),
     adminMotivations: () =>
         request<{ motivations: Motivation[] }>('GET', '/admin/motivations').then((r) => r.motivations),

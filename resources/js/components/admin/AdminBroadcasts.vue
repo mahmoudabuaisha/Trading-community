@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { BellRing, ChevronLeft, ChevronRight, Send } from 'lucide-vue-next'
+import { BellRing, CalendarClock, ChevronLeft, ChevronRight, Plus, Repeat, Send, Trash2 } from 'lucide-vue-next'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { repository } from '../../data/repository'
-import { formatDate, isRtl, t } from '../../i18n'
+import { formatDate, isRtl, messages, t } from '../../i18n'
 import { addDays, periodRange, today } from '../../lib/dates'
 import { useAdminStore } from '../../stores/admin'
 import { useUiStore } from '../../stores/ui'
-import type { AdminBroadcasts } from '../../types/domain'
+import type { AdminBroadcasts, BroadcastSchedule } from '../../types/domain'
 import TranslateButton from './TranslateButton.vue'
 
 /**
@@ -76,6 +76,55 @@ async function sendNow(): Promise<void> {
         busy.value = false
     }
 }
+
+// ── Repeating messages: every day, or every week on a weekday, at a set time ──
+const schedules = ref<BroadcastSchedule[]>([])
+const timezone = ref('')
+const blank = () => ({ frequency: 'daily' as BroadcastSchedule['frequency'], weekday: 1, time: '08:00', body: '' })
+const scheduleForm = reactive(blank())
+const weekdayNames = computed(() => messages.value.journey.weekdays)
+
+async function runSchedules(
+    action: () => Promise<{ timezone: string; schedules: BroadcastSchedule[] } | void>,
+    successKey?: string,
+): Promise<boolean> {
+    try {
+        const result = (await action()) ?? (await repository.adminBroadcastSchedules())
+        schedules.value = result.schedules
+        timezone.value = result.timezone
+        if (successKey) ui.success(t(successKey))
+        return true
+    } catch (error) {
+        ui.failure(error)
+        return false
+    }
+}
+onMounted(() => runSchedules(() => repository.adminBroadcastSchedules()))
+
+async function addSchedule(): Promise<void> {
+    if (!scheduleForm.body.trim()) return
+    const { frequency, weekday, time, body } = scheduleForm
+    if (
+        await runSchedules(
+            () =>
+                repository.adminSaveBroadcastSchedule(null, {
+                    frequency,
+                    weekday: frequency === 'weekly' ? weekday : null,
+                    time,
+                    body: body.trim(),
+                }),
+            'admin.rcSaved',
+        )
+    )
+        Object.assign(scheduleForm, blank())
+}
+const toggleSchedule = (item: BroadcastSchedule) =>
+    runSchedules(() => repository.adminSaveBroadcastSchedule(item.id, { isActive: !item.isActive }), 'admin.rcSaved')
+const removeSchedule = (item: BroadcastSchedule) => runSchedules(() => repository.adminDeleteBroadcastSchedule(item.id))
+const when = (item: BroadcastSchedule) =>
+    item.frequency === 'daily'
+        ? t('admin.rcEveryDay', { time: item.time })
+        : t('admin.rcEveryWeek', { day: weekdayNames.value[(item.weekday ?? 1) - 1], time: item.time })
 
 async function remove(id: number): Promise<void> {
     try {
@@ -162,5 +211,75 @@ async function remove(id: number): Promise<void> {
                 {{ busy ? t('common.saving') : t('admin.bcSaveWeek') }}
             </button>
         </div>
+
+        <div class="section-head">
+            <div>
+                <h3><Repeat :size="17" aria-hidden="true" /> {{ t('admin.rcHead') }}</h3>
+                <p>
+                    {{ t('admin.rcSub', { zone: t('admin.rcZone') }) }} <bdi class="muted">({{ timezone }})</bdi>
+                </p>
+            </div>
+            <CalendarClock :size="19" class="gold" aria-hidden="true" />
+        </div>
+        <form class="stack stack--tight" @submit.prevent="addSchedule">
+            <div class="head-actions">
+                <select v-model="scheduleForm.frequency" class="input input--auto" :aria-label="t('admin.rcFrequency')">
+                    <option value="daily">{{ t('admin.rcDaily') }}</option>
+                    <option value="weekly">{{ t('admin.rcWeekly') }}</option>
+                </select>
+                <select
+                    v-if="scheduleForm.frequency === 'weekly'"
+                    v-model.number="scheduleForm.weekday"
+                    class="input input--auto"
+                    :aria-label="t('admin.rcDay')"
+                >
+                    <option v-for="(name, index) in weekdayNames" :key="index" :value="index + 1">{{ name }}</option>
+                </select>
+                <input
+                    v-model="scheduleForm.time"
+                    class="input input--auto"
+                    type="time"
+                    required
+                    dir="ltr"
+                    :aria-label="t('admin.rcTime')"
+                />
+            </div>
+            <div class="broadcast-now">
+                <input
+                    v-model="scheduleForm.body"
+                    class="input"
+                    required
+                    maxlength="500"
+                    :placeholder="t('admin.rcPh')"
+                    :aria-label="t('admin.rcPh')"
+                />
+                <button type="submit" class="btn"><Plus :size="15" aria-hidden="true" /> {{ t('admin.rcAdd') }}</button>
+            </div>
+        </form>
+        <ul v-if="schedules.length" class="device-list">
+            <li v-for="item in schedules" :key="item.id" class="device-row">
+                <Repeat :size="16" aria-hidden="true" />
+                <span>
+                    <b>{{ item.body }}</b>
+                    <small>{{ when(item) }}</small>
+                </span>
+                <span class="count-pill" :class="{ 'count-pill--ok': item.isActive }">{{
+                    t(item.isActive ? 'admin.rcOn' : 'admin.rcOff')
+                }}</span>
+                <TranslateButton type="broadcast-schedule" :id="item.id" />
+                <button type="button" class="pill" @click="toggleSchedule(item)">
+                    {{ t(item.isActive ? 'admin.rcPause' : 'admin.rcResume') }}
+                </button>
+                <button
+                    type="button"
+                    class="icon-btn icon-btn--sm"
+                    :aria-label="t('common.delete')"
+                    @click="removeSchedule(item)"
+                >
+                    <Trash2 :size="14" />
+                </button>
+            </li>
+        </ul>
+        <p v-else class="hint">{{ t('admin.rcEmpty') }}</p>
     </div>
 </template>

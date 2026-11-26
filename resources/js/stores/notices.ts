@@ -7,7 +7,7 @@ export interface Notice {
     id: number
     kind: NoticeKind
     /** For a message from the administrators: its id, so it is listed once. */
-    broadcastId?: number
+    broadcastId?: number | string
     title: string
     text: string
 }
@@ -22,10 +22,10 @@ export const useNoticesStore = defineStore('notices', () => {
         items.value = [{ id: nextId++, kind, title, text }, ...items.value.filter((notice) => notice.kind !== kind)]
     }
 
-    const dismissed = new Set<number>()
+    const dismissed = new Set<number | string>()
 
     /** List a message from the administrators (once per id); a dismissed one stays dismissed for this visit. */
-    function addBroadcast(broadcastId: number, title: string, text: string, toFront: boolean): void {
+    function addBroadcast(broadcastId: number | string, title: string, text: string, toFront: boolean): void {
         if (dismissed.has(broadcastId) || items.value.some((notice) => notice.broadcastId === broadcastId)) return
         const notice: Notice = { id: nextId++, kind: 'broadcast', broadcastId, title, text }
         items.value = toFront ? [notice, ...items.value] : [...items.value, notice]

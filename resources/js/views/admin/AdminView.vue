@@ -22,20 +22,20 @@ import AdminLessons from '../../components/admin/AdminLessons.vue'
 import AdminMessages from '../../components/admin/AdminMessages.vue'
 import AdminSkills from '../../components/admin/AdminSkills.vue'
 import TranslateButton from '../../components/admin/TranslateButton.vue'
+import UserDetailsDialog from '../../components/admin/UserDetailsDialog.vue'
 import AdminStore from '../../components/admin/AdminStore.vue'
 import AdminBroadcasts from '../../components/admin/AdminBroadcasts.vue'
 import ConfirmDialog from '../../components/ConfirmDialog.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import StatCard from '../../components/StatCard.vue'
 import UserAvatar from '../../components/UserAvatar.vue'
-import { ApiError } from '../../data/http'
 import { formatDate, messages, t } from '../../i18n'
 import { useAdminStore } from '../../stores/admin'
 import { useAuthStore } from '../../stores/auth'
 import { useUiStore } from '../../stores/ui'
 import { useWorkspaceStore } from '../../stores/workspace'
 import {
-    ADMIN_AREAS,
+    GRANTABLE_AREAS,
     MOTIVATION_CATEGORIES,
     type AdminArea,
     type AdminUser,
@@ -147,33 +147,8 @@ async function runConfirm(): Promise<void> {
     await pending?.action()
 }
 
-const editing = ref<AdminUser | null>(null)
-const editForm = reactive({ displayName: '', email: '' })
-const editErrors = ref<Record<string, string[]>>({})
-const editDialog = ref<HTMLDialogElement | null>(null)
-
-function openEdit(user: AdminUser): void {
-    editing.value = user
-    editForm.displayName = user.displayName
-    editForm.email = user.email
-    editErrors.value = {}
-    requestAnimationFrame(() => editDialog.value?.showModal())
-}
-
-async function saveEdit(): Promise<void> {
-    if (!editing.value) return
-    try {
-        await admin.updateUser(editing.value.id, {
-            displayName: editForm.displayName.trim(),
-            email: editForm.email.trim(),
-        })
-        ui.success(t('admin.userUpdated'))
-        editing.value = null
-    } catch (error) {
-        if (error instanceof ApiError && error.status === 422) editErrors.value = error.errors
-        else ui.failure(error)
-    }
-}
+/** The account whose details are open. */
+const detailsOf = ref<number | null>(null)
 
 // ── Motivation studio ────────────────────────────────────────────────────
 const draft = reactive({
@@ -353,7 +328,9 @@ function auditDetail(entry: AuditEntry): string {
                     </span>
                     <span role="cell" class="muted">{{ formatDate(user.createdAt, { dateStyle: 'medium' }) }}</span>
                     <div role="cell" class="row-actions">
-                        <button type="button" class="pill" @click="openEdit(user)">{{ t('common.edit') }}</button>
+                        <button type="button" class="pill" @click="detailsOf = user.id">
+                            {{ t('admin.details') }}
+                        </button>
                         <button v-if="auth.isAdmin" type="button" class="pill" @click="openAccess(user)">
                             {{ t('admin.access') }}
                         </button>
@@ -548,7 +525,7 @@ function auditDetail(entry: AuditEntry): string {
                 </label>
                 <fieldset v-if="accessForm.role === 'moderator'" class="perm-list">
                     <legend>{{ t('admin.permsLegend') }}</legend>
-                    <label v-for="area in ADMIN_AREAS" :key="area" class="check">
+                    <label v-for="area in GRANTABLE_AREAS" :key="area" class="check">
                         <input v-model="accessForm.permissions" type="checkbox" :value="area" />
                         {{ t(`admin.areas.${area}`) }}
                     </label>
@@ -562,37 +539,6 @@ function auditDetail(entry: AuditEntry): string {
             </form>
         </dialog>
 
-        <dialog
-            v-if="editing"
-            ref="editDialog"
-            class="dialog"
-            @cancel.prevent="editing = null"
-            @click.self="editing = null"
-        >
-            <form class="dialog__body" @submit.prevent="saveEdit">
-                <div class="dialog__head">
-                    <h2>{{ t('admin.editUser') }}</h2>
-                    <button type="button" class="icon-btn" :aria-label="t('common.close')" @click="editing = null">
-                        <X :size="18" />
-                    </button>
-                </div>
-                <label class="field">
-                    <span>{{ t('admin.name') }}</span>
-                    <input v-model="editForm.displayName" class="input" required maxlength="80" />
-                    <small v-if="editErrors.displayName" class="field__error">{{ editErrors.displayName[0] }}</small>
-                </label>
-                <label class="field">
-                    <span>{{ t('profile.email') }}</span>
-                    <input v-model="editForm.email" class="input" type="email" required dir="ltr" />
-                    <small v-if="editErrors.email" class="field__error">{{ editErrors.email[0] }}</small>
-                </label>
-                <div class="actions">
-                    <button type="button" class="btn btn--outline" @click="editing = null">
-                        {{ t('common.cancel') }}
-                    </button>
-                    <button type="submit" class="btn">{{ t('common.save') }}</button>
-                </div>
-            </form>
-        </dialog>
+        <UserDetailsDialog v-if="detailsOf !== null" :user-id="detailsOf" @close="detailsOf = null" />
     </section>
 </template>

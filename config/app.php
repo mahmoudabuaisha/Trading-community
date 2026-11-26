@@ -65,6 +65,9 @@ return [
     |
     */
 
+    // Wall-clock timezone of repeating broadcasts ("every day at 08:00").
+    'schedule_timezone' => env('SCHEDULE_TIMEZONE', 'Asia/Hebron'),
+
     'timezone' => 'UTC',
 
     /*
