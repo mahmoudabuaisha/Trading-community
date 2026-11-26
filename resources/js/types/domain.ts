@@ -39,6 +39,8 @@ export interface User {
     nickname: string
     /** A subscription switched on by an administrator and not past its end. */
     isPremium: boolean
+    /** The membership name while subscribed: a preset tier key or the admin's own name. */
+    premiumTier: string | null
     /** Its end, if it has one. */
     premiumUntil: string | null
     permissions: AdminArea[]
@@ -374,6 +376,9 @@ export interface Preferences {
     wakeTime: string | null
 }
 
+/** Preset membership names, from the lightest subscription to the fullest. */
+export const TIERS = ['premium', 'silver', 'gold', 'platinum', 'elite'] as const
+
 export const STORE_KINDS = ['title', 'frame', 'emblem', 'theme', 'avatar', 'product'] as const
 export type StoreKind = (typeof STORE_KINDS)[number]
 /** Built-in looks an item can apply; the CSS for each lives in app.css. */
@@ -688,6 +693,8 @@ export interface SkillPath {
     title: string
     description: string
     isActive: boolean
+    /** The member's own path (skills of their choosing, ticked in any order). */
+    own?: boolean
     levels: SkillLevel[]
 }
 
@@ -733,6 +740,7 @@ export type GrantType = 'lesson' | 'book' | 'store_item' | 'assistant'
 
 export interface SubscriptionSheet {
     isPremium: boolean
+    tier: string | null
     active: boolean
     /** Last day (YYYY-MM-DD) in the platform's timezone; null means no end. */
     premiumUntil: string | null

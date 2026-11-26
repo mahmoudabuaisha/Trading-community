@@ -30,6 +30,7 @@ use App\Http\Controllers\JourneyController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MySkillController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -120,6 +121,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('vision-items/{item}', [VisionController::class, 'destroyItem']);
 
     Route::get('skills', [SkillController::class, 'index']);
+    Route::get('my-skills', [MySkillController::class, 'index']);
+    Route::post('my-skills', [MySkillController::class, 'savePath']);
+    Route::patch('my-skills/{path}', [MySkillController::class, 'savePath']);
+    Route::delete('my-skills/{path}', [MySkillController::class, 'destroyPath']);
+    Route::post('my-skills/{path}/levels', [MySkillController::class, 'saveLevel']);
+    Route::patch('my-skills/{path}/levels/{level}', [MySkillController::class, 'saveLevel']);
+    Route::delete('my-skills/{path}/levels/{level}', [MySkillController::class, 'destroyLevel']);
+    Route::post('my-skills/{path}/levels/{level}/toggle', [MySkillController::class, 'toggle']);
     Route::post('skill-levels/{level}/attempt', [SkillController::class, 'attempt'])->middleware('throttle:30,1');
 
     Route::get('portfolio', [PortfolioController::class, 'index']);

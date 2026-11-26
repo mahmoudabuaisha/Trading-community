@@ -73,6 +73,18 @@ class SubscriptionAndBooksTest extends TestCase
         $this->assertSame(['premium_granted', 'premium_granted', 'premium_revoked'], array_values(array_intersect(AdminAudit::orderBy('id')->pluck('action')->all(), ['premium_granted', 'premium_revoked', 'subscription_updated'])));
     }
 
+    public function test_an_admin_names_the_membership_and_it_shows_only_while_active(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $member = User::factory()->create();
+        $this->actingAs($admin)->putJson("/api/admin/users/{$member->id}/subscription", ['isPremium' => true, 'premiumUntil' => null, 'tier' => 'gold', 'grants' => []])
+            ->assertOk()->assertJsonPath('tier', 'gold');
+        $this->actingAs($member->refresh())->getJson('/api/auth/me')->assertJsonPath('user.premiumTier', 'gold');
+
+        $this->actingAs($admin)->putJson("/api/admin/users/{$member->id}/subscription", ['isPremium' => false, 'premiumUntil' => null, 'tier' => 'gold', 'grants' => []])->assertOk();
+        $this->actingAs($member->refresh())->getJson('/api/auth/me')->assertJsonPath('user.premiumTier', null);
+    }
+
     public function test_the_subscription_note_appears_above_every_private_conversation(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

@@ -30,7 +30,7 @@ import ProfileStats from '../components/profile/ProfileStats.vue'
 import { ApiError } from '../data/http'
 import { formatDate, isRtl, t } from '../i18n'
 import { fileToAvatar } from '../lib/image'
-import { roleName } from '../lib/roles'
+import { standingName } from '../lib/roles'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import { useWorkspaceStore } from '../stores/workspace'
@@ -75,7 +75,8 @@ const panels: Record<Section, Component> = {
 /** "Back" points against the reading direction; rows open in the reading direction. */
 const BackIcon = computed(() => (isRtl.value ? ChevronRight : ChevronLeft))
 const OpenIcon = computed(() => (isRtl.value ? ChevronLeft : ChevronRight))
-const roleLabel = computed(() => roleName(user.value))
+// The title shows on its own line, so this line is the member's standing.
+const roleLabel = computed(() => standingName(user.value))
 const verified = computed(() => user.value.role !== 'user' || user.value.isPremium)
 
 function goBack(): void {

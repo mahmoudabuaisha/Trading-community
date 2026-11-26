@@ -32,6 +32,8 @@ class SubscriptionController extends Controller
             'isPremium' => ['required', 'boolean'],
             // The last day of the subscription, in the platform's schedule timezone; none means no end.
             'premiumUntil' => ['present', 'nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
+            // A preset tier key or the admin's own name for this membership.
+            'tier' => ['sometimes', 'nullable', 'string', 'max:40'],
             'grants' => ['present', 'array'],
             'grants.*' => ['array'],
             'grants.*.*' => ['integer'],
@@ -47,7 +49,8 @@ class SubscriptionController extends Controller
 
         DB::transaction(function () use ($request, $user, $admin, $data, $until, $wanted): void {
             $wasOn = $user->hasActiveSubscription();
-            $user->forceFill(['is_premium' => $data['isPremium'], 'premium_until' => $data['isPremium'] ? $until : null])->save();
+            $tier = trim((string) ($data['tier'] ?? ''));
+            $user->forceFill(['is_premium' => $data['isPremium'], 'premium_until' => $data['isPremium'] ? $until : null, 'premium_tier' => $data['isPremium'] && $tier !== '' ? $tier : null])->save();
             $user->subscriptionGrants()->delete();
             foreach ($wanted as $type => $ids) {
                 foreach ($ids as $id) {
@@ -89,6 +92,7 @@ class SubscriptionController extends Controller
 
         return [
             'isPremium' => (bool) $user->is_premium,
+            'tier' => $user->premium_tier,
             'active' => $user->hasActiveSubscription(),
             // The last day as the admin picked it (schedule timezone).
             'premiumUntil' => $user->premium_until?->setTimezone(config('app.schedule_timezone'))->toDateString(),

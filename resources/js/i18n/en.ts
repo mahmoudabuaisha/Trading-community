@@ -402,6 +402,54 @@ export const en: Messages = {
             custom: 'My tone',
         },
     },
+    tiers: {
+        premium: {
+            name: 'Premium member',
+            text: 'One or two services: a first subscription.',
+        },
+        silver: {
+            name: 'Silver member',
+            text: 'Several lessons or books of one kind.',
+        },
+        gold: {
+            name: 'Gold member',
+            text: 'Two kinds of service, such as lessons and books.',
+        },
+        platinum: {
+            name: 'Platinum member',
+            text: 'Most services, or services with the AI assistant.',
+        },
+        elite: {
+            name: 'Elite member',
+            text: 'Every service open, the AI assistant included.',
+        },
+    },
+    mySkills: {
+        tabs: 'Skill tree sections',
+        platform: 'Platform paths',
+        mine: 'My skills',
+        addPath: 'New skill path',
+        pathTitle: 'Path name',
+        pathTitlePh: 'e.g. Programming, Trading, English',
+        pathDescription: 'Description or goal (optional)',
+        pathDescriptionPh: 'Why are you building this path?',
+        addSkill: 'Add a skill',
+        skillTitle: 'Skill',
+        skillTitlePh: 'e.g. Reading candlestick charts',
+        notes: 'Your notes',
+        notesPh: 'What you are learning, your sources, how you practise, what you achieved…',
+        noNotes: 'No notes yet. Tap edit to write yours.',
+        markDone: 'Mastered',
+        undo: 'Not mastered',
+        count: '{done} of {total} skills',
+        saved: 'Saved',
+        deleted: 'Deleted',
+        deletePath: 'Delete the path "{name}" and all its skills?',
+        deleteSkill: 'Delete the skill "{name}"?',
+        emptyTitle: 'Build your own tree',
+        emptyText:
+            'Create a path, add the skills you want to learn with your notes, and mark what you master. It is drawn with the design you picked.',
+    },
     privacy: {
         showEmblem: 'Show my badge',
         showEmblemHint: 'The badge next to your name.',
@@ -1121,6 +1169,11 @@ export const en: Messages = {
         },
     },
     admin: {
+        tierHead: 'Membership name',
+        tierSub: 'Pick the name the member sees under their name. Suggested from what you opened: "{name}".',
+        tierSuggested: 'Suggested',
+        tierCustom: 'My own name',
+        tierCustomPh: 'e.g. VIP member, Success partner…',
         stEmblemValue: 'Badge symbol (emoji)',
         stEmblemPh: 'e.g. 🏆, ⭐ or 🔥',
         stEmblemHint:

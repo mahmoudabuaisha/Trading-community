@@ -29,7 +29,7 @@ trait Translatable
 
         // Translate new or reworded text once the administrator has their answer.
         static::saved(function ($model): void {
-            if (! AutoTranslator::enabled() || (! $model->wasRecentlyCreated && ! $model->wasChanged($model->translatableFields()))) {
+            if (! AutoTranslator::enabled() || ! $model->isSharedContent() || (! $model->wasRecentlyCreated && ! $model->wasChanged($model->translatableFields()))) {
                 return;
             }
             $class = $model::class;
@@ -43,6 +43,12 @@ trait Translatable
                 }
             })->afterResponse();
         });
+    }
+
+    /** Written by the administrators for everyone (members' own notes are never sent to a translator). */
+    public function isSharedContent(): bool
+    {
+        return true;
     }
 
     /** @return list<string> the fields of this row that hold language */

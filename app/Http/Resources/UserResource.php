@@ -20,6 +20,8 @@ class UserResource extends JsonResource
             'nickname' => $this->nickname,
             // The subscription as it stands now: an ended one reads as off.
             'isPremium' => $this->hasActiveSubscription(),
+            // Shown only while the subscription is active.
+            'premiumTier' => $this->hasActiveSubscription() ? $this->premium_tier : null,
             'premiumUntil' => $this->premium_until?->toISOString(),
             'permissions' => $this->effectivePermissions(),
             'preferences' => $this->preferenceValues(),

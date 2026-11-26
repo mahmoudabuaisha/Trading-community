@@ -406,6 +406,54 @@ export const fr: Messages = {
             custom: 'Ma sonnerie',
         },
     },
+    tiers: {
+        premium: {
+            name: 'Membre premium',
+            text: 'Un ou deux services : un premier abonnement.',
+        },
+        silver: {
+            name: 'Membre argent',
+            text: "Plusieurs leçons ou livres d'un même type.",
+        },
+        gold: {
+            name: 'Membre or',
+            text: 'Deux types de services, comme leçons et livres.',
+        },
+        platinum: {
+            name: 'Membre platine',
+            text: "La plupart des services, ou des services avec l'assistant IA.",
+        },
+        elite: {
+            name: 'Membre élite',
+            text: 'Tous les services ouverts, assistant IA compris.',
+        },
+    },
+    mySkills: {
+        tabs: "Sections de l'arbre",
+        platform: 'Parcours de la plateforme',
+        mine: 'Mes compétences',
+        addPath: 'Nouveau parcours',
+        pathTitle: 'Nom du parcours',
+        pathTitlePh: 'ex. Programmation, Trading, Anglais',
+        pathDescription: 'Description ou objectif (facultatif)',
+        pathDescriptionPh: 'Pourquoi ce parcours ?',
+        addSkill: 'Ajouter une compétence',
+        skillTitle: 'Compétence',
+        skillTitlePh: 'ex. Lire les chandeliers japonais',
+        notes: 'Vos notes',
+        notesPh: 'Ce que vous apprenez, vos sources, votre pratique, vos acquis…',
+        noNotes: 'Pas encore de notes. Touchez modifier pour écrire.',
+        markDone: 'Maîtrisée',
+        undo: 'Non maîtrisée',
+        count: '{done} sur {total} compétences',
+        saved: 'Enregistré',
+        deleted: 'Supprimé',
+        deletePath: 'Supprimer le parcours « {name} » et toutes ses compétences ?',
+        deleteSkill: 'Supprimer la compétence « {name} » ?',
+        emptyTitle: 'Construisez votre arbre',
+        emptyText:
+            'Créez un parcours, ajoutez les compétences à apprendre avec vos notes, et cochez celles maîtrisées. Il est dessiné avec le design choisi.',
+    },
     privacy: {
         showEmblem: 'Afficher mon badge',
         showEmblemHint: 'Le badge à côté de votre nom.',
@@ -1156,6 +1204,12 @@ export const fr: Messages = {
         },
     },
     admin: {
+        tierHead: "Nom de l'adhésion",
+        tierSub:
+            'Choisissez le nom affiché sous le nom du membre. Suggestion selon ce que vous avez ouvert : « {name} ».',
+        tierSuggested: 'Suggéré',
+        tierCustom: 'Mon propre nom',
+        tierCustomPh: 'ex. Membre VIP, Partenaire…',
         stEmblemValue: 'Symbole du badge (emoji)',
         stEmblemPh: 'ex. 🏆, ⭐ ou 🔥',
         stEmblemHint: 'Tapez un emoji, ou laissez vide et importez une petite icône carrée (PNG à fond transparent).',

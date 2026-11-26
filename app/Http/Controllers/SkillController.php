@@ -16,7 +16,7 @@ class SkillController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        return response()->json(['paths' => $this->paths($request, SkillPath::where('is_active', true))]);
+        return response()->json(['paths' => $this->paths($request, SkillPath::where('is_active', true)->whereNull('user_id'))]);
     }
 
     /**
@@ -27,7 +27,7 @@ class SkillController extends Controller
     {
         $user = $request->user();
         $path = $level->path;
-        abort_unless($path->is_active, 404);
+        abort_unless($path->is_active && $path->user_id === null, 404);
         $passed = DB::table('skill_progress')->where('user_id', $user->id)->pluck('skill_level_id');
         // Levels open in order: every earlier level of the path must be passed.
         $earlier = $path->levels->takeWhile(fn (SkillLevel $other): bool => $other->id !== $level->id);
@@ -45,7 +45,7 @@ class SkillController extends Controller
             DB::table('skill_progress')->insertOrIgnore(['user_id' => $user->id, 'skill_level_id' => $level->id, 'passed_at' => now()]);
         }
 
-        return response()->json(['passed' => $ok, 'score' => $score, 'needed' => SkillLevel::PASS_PERCENT, 'paths' => $this->paths($request, SkillPath::where('is_active', true))]);
+        return response()->json(['passed' => $ok, 'score' => $score, 'needed' => SkillLevel::PASS_PERCENT, 'paths' => $this->paths($request, SkillPath::where('is_active', true)->whereNull('user_id'))]);
     }
 
     // ── Administration (the "education" area) ────────────────────────────
@@ -54,12 +54,13 @@ class SkillController extends Controller
     {
         Gate::authorize('area', 'education');
 
-        return response()->json(['paths' => $this->paths($request, SkillPath::query(), withAnswers: true)]);
+        return response()->json(['paths' => $this->paths($request, SkillPath::whereNull('user_id'), withAnswers: true)]);
     }
 
     public function savePath(Request $request, AdminService $admin, ?SkillPath $path = null): JsonResponse
     {
         Gate::authorize('area', 'education');
+        abort_if($path?->user_id !== null, 404);
         $data = $request->validate([
             'title' => [$path ? 'sometimes' : 'required', 'string', 'max:120'],
             'description' => ['sometimes', 'nullable', 'string', 'max:500'],
@@ -77,12 +78,13 @@ class SkillController extends Controller
         $path->save();
         $admin->record($request->user(), $creating ? 'skill_path_created' : 'skill_path_updated', $path->title);
 
-        return response()->json(['paths' => $this->paths($request, SkillPath::query(), withAnswers: true)], $creating ? 201 : 200);
+        return response()->json(['paths' => $this->paths($request, SkillPath::whereNull('user_id'), withAnswers: true)], $creating ? 201 : 200);
     }
 
     public function destroyPath(Request $request, SkillPath $path, AdminService $admin): Response
     {
         Gate::authorize('area', 'education');
+        abort_if($path?->user_id !== null, 404);
         $path->delete();
         $admin->record($request->user(), 'skill_path_deleted', $path->title);
 
@@ -92,6 +94,7 @@ class SkillController extends Controller
     public function saveLevel(Request $request, SkillPath $path, ?SkillLevel $level = null): JsonResponse
     {
         Gate::authorize('area', 'education');
+        abort_if($path?->user_id !== null, 404);
         abort_if($level && $level->skill_path_id !== $path->id, 404);
         $data = $request->validate([
             'title' => [$level ? 'sometimes' : 'required', 'string', 'max:120'],
@@ -131,12 +134,13 @@ class SkillController extends Controller
         }
         $level->save();
 
-        return response()->json(['paths' => $this->paths($request, SkillPath::query(), withAnswers: true)]);
+        return response()->json(['paths' => $this->paths($request, SkillPath::whereNull('user_id'), withAnswers: true)]);
     }
 
     public function destroyLevel(SkillPath $path, SkillLevel $level): Response
     {
         Gate::authorize('area', 'education');
+        abort_if($path?->user_id !== null, 404);
         abort_if($level->skill_path_id !== $path->id, 404);
         $level->delete();
 

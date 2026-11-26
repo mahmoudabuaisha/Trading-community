@@ -202,6 +202,25 @@ export const repository = {
     deleteVisionItem: (id: number) => request<void>('DELETE', `/vision-items/${id}`),
 
     skills: () => request<{ paths: SkillPath[] }>('GET', '/skills').then((r) => r.paths),
+    mySkills: () => request<{ paths: SkillPath[] }>('GET', '/my-skills').then((r) => r.paths),
+    saveMySkillPath: (id: number | null, input: { title: string; description: string }) =>
+        request<{ paths: SkillPath[] }>(
+            id === null ? 'POST' : 'PATCH',
+            id === null ? '/my-skills' : `/my-skills/${id}`,
+            input,
+        ).then((r) => r.paths),
+    deleteMySkillPath: (id: number) =>
+        request<{ paths: SkillPath[] }>('DELETE', `/my-skills/${id}`).then((r) => r.paths),
+    saveMySkill: (pathId: number, id: number | null, input: { title: string; description: string }) =>
+        request<{ paths: SkillPath[] }>(
+            id === null ? 'POST' : 'PATCH',
+            id === null ? `/my-skills/${pathId}/levels` : `/my-skills/${pathId}/levels/${id}`,
+            input,
+        ).then((r) => r.paths),
+    deleteMySkill: (pathId: number, id: number) =>
+        request<{ paths: SkillPath[] }>('DELETE', `/my-skills/${pathId}/levels/${id}`).then((r) => r.paths),
+    toggleMySkill: (pathId: number, id: number) =>
+        request<{ paths: SkillPath[] }>('POST', `/my-skills/${pathId}/levels/${id}/toggle`).then((r) => r.paths),
     attemptLevel: (id: number, answers?: number[]) =>
         request<{ passed: boolean; score: number; needed: number; paths: SkillPath[] }>(
             'POST',
@@ -318,7 +337,12 @@ export const repository = {
     adminSubscription: (userId: number) => request<SubscriptionSheet>('GET', `/admin/users/${userId}/subscription`),
     adminSaveSubscription: (
         userId: number,
-        input: { isPremium: boolean; premiumUntil: string | null; grants: Record<GrantType, number[]> },
+        input: {
+            isPremium: boolean
+            premiumUntil: string | null
+            tier: string | null
+            grants: Record<GrantType, number[]>
+        },
     ) => request<SubscriptionSheet>('PUT', `/admin/users/${userId}/subscription`, input),
     adminSubscriptionNotice: () =>
         request<{ notice: string }>('GET', '/admin/subscription-notice').then((r) => r.notice),

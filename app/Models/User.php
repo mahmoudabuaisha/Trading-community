@@ -45,6 +45,9 @@ class User extends Authenticatable
         'wakeTime' => null,
     ];
 
+    /** Preset membership names, from the lightest subscription to the fullest. */
+    public const TIERS = ['premium', 'silver', 'gold', 'platinum', 'elite'];
+
     /** What other members may see of this account; everything is shown until the member hides it. */
     public const DEFAULT_PRIVACY = [
         'showName' => true,

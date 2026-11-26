@@ -22,6 +22,11 @@ class SkillPath extends Model
         return ['is_active' => 'boolean'];
     }
 
+    public function isSharedContent(): bool
+    {
+        return $this->user_id === null;
+    }
+
     public function levels(): HasMany
     {
         return $this->hasMany(SkillLevel::class)->orderBy('position')->orderBy('id');

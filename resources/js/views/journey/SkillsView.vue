@@ -4,6 +4,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import EmptyState from '../../components/EmptyState.vue'
 import DesignPicker from '../../components/designs/DesignPicker.vue'
 import SkillLevelCard from '../../components/designs/SkillLevelCard.vue'
+import MySkills from '../../components/designs/MySkills.vue'
 import SkillShape from '../../components/designs/SkillShape.vue'
 import { useDesignsStore } from '../../stores/designs'
 import JourneyHead from '../../components/JourneyHead.vue'
@@ -24,6 +25,8 @@ const busy = ref(false)
 const designs = useDesignsStore()
 const treeDesign = computed(() => designs.current('skill_tree'))
 const picking = ref(false)
+/** The platform's paths, or the member's own. */
+const tab = ref<'platform' | 'mine'>('platform')
 /** The level shown under each path's drawing, by path. */
 const chosen = reactive<Record<number, number>>({})
 
@@ -90,45 +93,65 @@ async function attempt(level: SkillLevel): Promise<void> {
             </button>
         </JourneyHead>
         <DesignPicker v-if="picking" target="skill_tree" @close="picking = false" />
-
-        <article v-for="path in paths" :key="path.id" class="panel">
-            <div class="section-head">
-                <div>
-                    <h3>{{ path.title }}</h3>
-                    <p v-if="path.description">{{ path.description }}</p>
+        <nav class="tabs" :aria-label="t('mySkills.tabs')">
+            <button
+                type="button"
+                :class="{ tabs__active: tab === 'platform' }"
+                :aria-pressed="tab === 'platform'"
+                @click="tab = 'platform'"
+            >
+                {{ t('mySkills.platform') }}
+            </button>
+            <button
+                type="button"
+                :class="{ tabs__active: tab === 'mine' }"
+                :aria-pressed="tab === 'mine'"
+                @click="tab = 'mine'"
+            >
+                {{ t('mySkills.mine') }}
+            </button>
+        </nav>
+        <MySkills v-if="tab === 'mine'" />
+        <template v-else>
+            <article v-for="path in paths" :key="path.id" class="panel">
+                <div class="section-head">
+                    <div>
+                        <h3>{{ path.title }}</h3>
+                        <p v-if="path.description">{{ path.description }}</p>
+                    </div>
+                    <span class="count-pill count-pill--gold">{{
+                        t('journey.skills.level', { done: passedCount(path), total: path.levels.length })
+                    }}</span>
                 </div>
-                <span class="count-pill count-pill--gold">{{
-                    t('journey.skills.level', { done: passedCount(path), total: path.levels.length })
-                }}</span>
-            </div>
-            <div class="goal-card__bar">
-                <i :style="{ inlineSize: `${percent(passedCount(path), path.levels.length || 1)}%` }" />
-            </div>
+                <div class="goal-card__bar">
+                    <i :style="{ inlineSize: `${percent(passedCount(path), path.levels.length || 1)}%` }" />
+                </div>
 
-            <SkillShape
-                v-if="treeDesign && path.levels.length"
-                :title="path.title"
-                :levels="path.levels"
-                :design="treeDesign"
-                :selected-id="selectedLevel(path)?.id"
-                @select="(id) => select(path, id)"
+                <SkillShape
+                    v-if="treeDesign && path.levels.length"
+                    :title="path.title"
+                    :levels="path.levels"
+                    :design="treeDesign"
+                    :selected-id="selectedLevel(path)?.id"
+                    @select="(id) => select(path, id)"
+                />
+                <SkillLevelCard
+                    v-if="selectedLevel(path)"
+                    :level="selectedLevel(path)!"
+                    :index="path.levels.indexOf(selectedLevel(path)!)"
+                    :open="openId === selectedLevel(path)!.id"
+                    :busy="busy"
+                    :answers="answers"
+                    @open="open(selectedLevel(path)!)"
+                    @attempt="attempt(selectedLevel(path)!)"
+                />
+                <p v-if="!path.levels.length" class="hint">{{ t('journey.skills.noLevels') }}</p>
+            </article>
+            <EmptyState
+                v-if="loaded && !paths.length"
+                :title="t('journey.skills.emptyTitle')"
+                :text="t('journey.skills.emptyText')"
             />
-            <SkillLevelCard
-                v-if="selectedLevel(path)"
-                :level="selectedLevel(path)!"
-                :index="path.levels.indexOf(selectedLevel(path)!)"
-                :open="openId === selectedLevel(path)!.id"
-                :busy="busy"
-                :answers="answers"
-                @open="open(selectedLevel(path)!)"
-                @attempt="attempt(selectedLevel(path)!)"
-            />
-            <p v-if="!path.levels.length" class="hint">{{ t('journey.skills.noLevels') }}</p>
-        </article>
-        <EmptyState
-            v-if="loaded && !paths.length"
-            :title="t('journey.skills.emptyTitle')"
-            :text="t('journey.skills.emptyText')"
-        />
+        </template>
     </section>
 </template>

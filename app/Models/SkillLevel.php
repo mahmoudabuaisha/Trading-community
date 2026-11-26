@@ -25,6 +25,11 @@ class SkillLevel extends Model
         return ['quiz' => 'array'];
     }
 
+    public function isSharedContent(): bool
+    {
+        return $this->path?->user_id === null;
+    }
+
     public function path(): BelongsTo
     {
         return $this->belongsTo(SkillPath::class, 'skill_path_id');

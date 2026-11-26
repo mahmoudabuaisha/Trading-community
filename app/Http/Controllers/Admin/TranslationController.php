@@ -104,7 +104,11 @@ class TranslationController extends Controller
         [$class, $area] = self::TYPES[$type];
         Gate::authorize('area', $area);
 
-        return $class::findOrFail($id);
+        $model = $class::findOrFail($id);
+        // Members' own skill paths are theirs alone.
+        abort_if(method_exists($model, 'isSharedContent') && ! $model->isSharedContent(), 404);
+
+        return $model;
     }
 
     /** @return list<string> the fields of this item that hold language */

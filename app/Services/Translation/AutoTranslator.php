@@ -22,6 +22,9 @@ class AutoTranslator
     /** Translate what is missing or out of date. Returns how many texts were written. */
     public function translate(Model $model): int
     {
+        if (method_exists($model, 'isSharedContent') && ! $model->isSharedContent()) {
+            return 0;
+        }
         $model->load('translations');
         $texts = [];
         $locales = [];

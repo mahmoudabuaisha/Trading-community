@@ -5,7 +5,8 @@ import { repository } from '../../data/repository'
 import { t } from '../../i18n'
 import { today } from '../../lib/dates'
 import { useUiStore } from '../../stores/ui'
-import type { GrantType, SubscriptionSheet } from '../../types/domain'
+import { tierName } from '../../lib/roles'
+import { TIERS, type GrantType, type SubscriptionSheet } from '../../types/domain'
 
 /**
  * A member's paid subscription: switched on by hand after payment outside
@@ -21,11 +22,26 @@ const form = reactive({
     isPremium: false,
     hasEnd: false,
     premiumUntil: '',
+    tier: '' as string,
     grants: { lesson: [] as number[], book: [] as number[], store_item: [] as number[], assistant: [] as number[] },
 })
 const saving = ref(false)
 const groups: GrantType[] = ['lesson', 'book', 'store_item', 'assistant']
 const chosen = computed(() => groups.reduce((sum, type) => sum + form.grants[type].length, 0))
+/** A name proposed from how much the subscription opens: kinds of service, and the AI assistant. */
+const suggested = computed(() => {
+    const kinds = groups.filter((type) => form.grants[type].length > 0).length
+    const all = groups.every(
+        (type) => !sheet.value?.options[type].length || form.grants[type].length === sheet.value.options[type].length,
+    )
+    if (kinds >= 3 && all) return 'elite'
+    if (kinds >= 3 || (kinds >= 2 && form.grants.assistant.length)) return 'platinum'
+    if (kinds === 2) return 'gold'
+    if (chosen.value >= 3) return 'silver'
+    return 'premium'
+})
+const isPreset = computed(() => (TIERS as readonly string[]).includes(form.tier) || form.tier === '')
+const customTier = ref(false)
 
 onMounted(async () => {
     dialog.value?.showModal()
@@ -36,6 +52,7 @@ onMounted(async () => {
             isPremium: data.isPremium,
             hasEnd: data.premiumUntil !== null,
             premiumUntil: data.premiumUntil ?? '',
+            tier: data.tier ?? '',
             grants: {
                 lesson: [...data.grants.lesson],
                 book: [...data.grants.book],
@@ -59,6 +76,7 @@ async function save(isPremium = form.isPremium): Promise<void> {
         await repository.adminSaveSubscription(props.userId, {
             isPremium,
             premiumUntil: isPremium && form.hasEnd && form.premiumUntil ? form.premiumUntil : null,
+            tier: form.tier.trim() || suggested.value,
             grants: form.grants,
         })
         ui.success(t(isPremium ? 'admin.subSaved' : 'admin.premiumRevoked'))
@@ -107,6 +125,54 @@ async function save(isPremium = form.isPremium): Promise<void> {
                     />
                     <small class="hint">{{ form.hasEnd ? t('admin.subUntilHint') : t('admin.subForever') }}</small>
                 </div>
+
+                <fieldset v-if="form.isPremium" class="perm-list tier-picker">
+                    <legend>{{ t('admin.tierHead') }}</legend>
+                    <p class="hint">{{ t('admin.tierSub', { name: tierName(suggested) }) }}</p>
+                    <div class="tier-grid">
+                        <label
+                            v-for="tier in TIERS"
+                            :key="tier"
+                            class="tier-option"
+                            :class="[
+                                `tier-option--${tier}`,
+                                { 'tier-option--on': (form.tier || suggested) === tier && !customTier },
+                            ]"
+                        >
+                            <input
+                                v-model="form.tier"
+                                class="sr-only"
+                                type="radio"
+                                name="tier"
+                                :value="tier"
+                                @change="customTier = false"
+                            />
+                            <b>{{ t(`tiers.${tier}.name`) }}</b>
+                            <small>{{ t(`tiers.${tier}.text`) }}</small>
+                            <span v-if="tier === suggested" class="count-pill count-pill--gold">{{
+                                t('admin.tierSuggested')
+                            }}</span>
+                        </label>
+                    </div>
+                    <label class="check">
+                        <input
+                            type="checkbox"
+                            :checked="customTier || !isPreset"
+                            @change="
+                                ((customTier = ($event.target as HTMLInputElement).checked),
+                                (form.tier = customTier ? '' : ''))
+                            "
+                        />
+                        {{ t('admin.tierCustom') }}
+                    </label>
+                    <input
+                        v-if="customTier || !isPreset"
+                        v-model="form.tier"
+                        class="input"
+                        maxlength="40"
+                        :placeholder="t('admin.tierCustomPh')"
+                    />
+                </fieldset>
 
                 <fieldset v-for="type in groups" :key="type" class="perm-list" :disabled="!form.isPremium">
                     <legend>{{ t(`admin.subGroups.${type}`) }}</legend>
