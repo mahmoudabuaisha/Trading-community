@@ -30,6 +30,8 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Broadcasts | Administrators send a notification to every member on the spot, or schedule one message per day for the week |
 | Growth journey | Performance DNA (best day and time, on-time rate, 30-day comparison, rule-based tips), a growth timeline of automatic milestones with personal notes, goal roadmaps (stages, steps, next step), vision boards (images, quotes, dreams linked to goals), admin-written skill paths with levels, quizzes and challenges, and a portfolio shareable by link with privacy settings |
 | Map and tree designs | Goal roadmaps are drawn as a connected map (mind map, branches or orbits) and skill paths as a tree, a pyramid or a staircase. Two designs per drawing are free; administrators add more by dressing a built-in layout (colour, node shape, background), naming and pricing them in points |
+| My summit | A low-poly 3D world (three.js, loaded only on that page) built from the member's record: tasks set the mountain's height and lanterns, life areas raise coloured peaks, completed goals plant flags, this month's habit checks grow trees, the streak lights an aurora and points orbit as crystals. Members save a 9:16 story picture or a 10-second reel video (where the browser can record one) |
+| Assistant | A floating assistant on every page. "My guide" is free: buttons answered from the member's own data (today's open tasks by priority, performance pattern, next roadmap step, how to earn points, what each section does, how to reach the team). "Ask freely" is an AI assistant (Claude) for members whose subscription includes it, with a daily limit |
 | Backup | Members download all their data as JSON; `deploy/backup.sh` backs the database and uploads up nightly and reports its status in the app |
 | Admin center | Platform stats, user search, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log. A full administrator can appoint moderators and choose which areas each one manages; the server enforces it per area |
 
@@ -113,6 +115,8 @@ bash deploy/update.sh
 ```
 
 After pointing a domain at the server, enable HTTPS with certbot (the install script prints the commands), then set `APP_URL=https://…` and `SESSION_SECURE_COOKIE=true` in `.env`.
+
+The AI assistant stays off until `ANTHROPIC_API_KEY` is set in `.env`. `ASSISTANT_MODEL` (default `claude-opus-5-5`) and `ASSISTANT_DAILY_LIMIT` (default 20 questions per member per day) tune it. Each question sends the member's name, today's tasks, open goals, streak and points to Anthropic's API.
 
 Password-reset emails are written to `storage/logs` until SMTP is configured (`MAIL_*` in `.env`).
 

@@ -183,6 +183,7 @@ return [
     'custom' => [
         'store' => ['subscribers' => 'This item is only for the subscribers it was opened for.', 'unavailable' => 'This item is not available right now.', 'owned' => 'You already own this item.', 'points' => 'You do not have enough points for this item.', 'notOwned' => 'Buy this item first.'],
         'tips' => ['empty' => 'No tips have been added yet.'],
+        'assistant' => ['off' => 'The AI assistant is not switched on yet.', 'subscribers' => 'The AI assistant is for subscribers it was opened for.', 'limit' => 'You reached the daily limit (:n questions). Come back tomorrow.', 'busy' => 'The assistant is busy right now; try again shortly.', 'refused' => 'I cannot help with that question. Try rephrasing, or ask about your tasks and goals.', 'service' => 'AI assistant'],
         'areas' => ['limit' => 'You have reached the maximum number of areas (:max).'],
         'vision' => ['boards' => 'You have reached the maximum number of boards.', 'items' => 'This board has reached its maximum number of items.'],
         'skills' => ['locked' => 'Pass the earlier levels first.', 'answer' => 'The correct answer of question :n is not among its options.'],

@@ -4,12 +4,14 @@
  * Everything above this file talks to `repository`; nothing above it knows
  * that the data lives behind a Laravel HTTP API.
  */
+import type { WorldData } from '../world/summitScene'
 import { request } from './http'
 import type {
     AdminArea,
     DeviceSession,
     Preferences,
     AdminBroadcasts,
+    AssistantStatus,
     Design,
     DesignTarget,
     Book,
@@ -150,6 +152,10 @@ export const repository = {
         return request<AdminDesignsView>('POST', id === null ? '/admin/designs' : `/admin/designs/${id}`, form)
     },
     adminDeleteDesign: (id: number) => request<void>('DELETE', `/admin/designs/${id}`),
+    world: () => request<Omit<WorldData, 'accent'>>('GET', '/world'),
+    assistantStatus: () => request<AssistantStatus>('GET', '/assistant'),
+    askAssistant: (messages: { role: 'user' | 'assistant'; content: string }[]) =>
+        request<AssistantStatus & { reply: string }>('POST', '/assistant', { messages }),
     insights: (day: string) => request<Insights>('GET', `/insights?date=${day}`),
     timeline: () => request<Timeline>('GET', '/timeline'),
     saveTimelineNote: (key: string, note: string) => request<void>('PUT', `/timeline/notes/${key}`, { note }),

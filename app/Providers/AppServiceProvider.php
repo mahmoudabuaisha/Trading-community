@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use Anthropic\Client;
 use App\Models\User;
+use App\Services\Assistant\AssistantClient;
+use App\Services\Assistant\ClaudeAssistantClient;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -11,6 +14,11 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // The AI assistant talks to Claude; tests swap in a fake.
+        $this->app->bind(AssistantClient::class, fn () => new ClaudeAssistantClient(
+            new Client(apiKey: (string) config('assistant.api_key')),
+            (string) config('assistant.model'),
+        ));
         //
     }
 

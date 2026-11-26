@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class SubscriptionGrant extends Model
 {
     /** What can be opened: subscriber-only lessons, books, and store items reserved to subscribers. */
-    public const TYPES = ['lesson', 'book', 'store_item'];
+    public const TYPES = ['lesson', 'book', 'store_item', 'assistant'];
 
     protected $fillable = ['grantable_type', 'grantable_id'];
 

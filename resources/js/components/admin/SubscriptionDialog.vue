@@ -21,10 +21,10 @@ const form = reactive({
     isPremium: false,
     hasEnd: false,
     premiumUntil: '',
-    grants: { lesson: [] as number[], book: [] as number[], store_item: [] as number[] },
+    grants: { lesson: [] as number[], book: [] as number[], store_item: [] as number[], assistant: [] as number[] },
 })
 const saving = ref(false)
-const groups: GrantType[] = ['lesson', 'book', 'store_item']
+const groups: GrantType[] = ['lesson', 'book', 'store_item', 'assistant']
 const chosen = computed(() => groups.reduce((sum, type) => sum + form.grants[type].length, 0))
 
 onMounted(async () => {
@@ -40,6 +40,7 @@ onMounted(async () => {
                 lesson: [...data.grants.lesson],
                 book: [...data.grants.book],
                 store_item: [...data.grants.store_item],
+                assistant: [...(data.grants.assistant ?? [])],
             },
         })
     } catch (error) {

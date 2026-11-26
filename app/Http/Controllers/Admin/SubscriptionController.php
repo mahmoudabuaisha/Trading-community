@@ -41,6 +41,8 @@ class SubscriptionController extends Controller
             'lesson' => Lesson::where('is_premium', true)->whereIn('id', $data['grants']['lesson'] ?? [])->pluck('id')->all(),
             'book' => Book::whereIn('id', $data['grants']['book'] ?? [])->pluck('id')->all(),
             'store_item' => StoreItem::where('is_exclusive', true)->whereIn('id', $data['grants']['store_item'] ?? [])->pluck('id')->all(),
+            // The AI assistant is one service with no id of its own.
+            'assistant' => in_array(0, $data['grants']['assistant'] ?? [], true) ? [0] : [],
         ];
 
         DB::transaction(function () use ($request, $user, $admin, $data, $until, $wanted): void {
@@ -95,6 +97,7 @@ class SubscriptionController extends Controller
                 'lesson' => Lesson::where('is_premium', true)->orderBy('position')->get(['id', 'title']),
                 'book' => Book::orderBy('position')->get(['id', 'title']),
                 'store_item' => StoreItem::where('is_exclusive', true)->orderBy('price')->get(['id', 'name as title']),
+                'assistant' => [['id' => 0, 'title' => __('validation.custom.assistant.service')]],
             ],
         ];
     }

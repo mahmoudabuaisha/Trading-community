@@ -13,6 +13,7 @@ import {
     LogOut,
     Mail,
     Menu,
+    Mountain,
     PanelLeftClose,
     PanelLeftOpen,
     Rocket,
@@ -29,6 +30,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch, type Component, watch
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import BrandLogo from '../components/BrandLogo.vue'
 import EmptyState from '../components/EmptyState.vue'
+import AssistantWidget from '../components/AssistantWidget.vue'
 import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import NotificationBell from '../components/NotificationBell.vue'
 import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
@@ -103,6 +105,7 @@ const navItems = computed<NavItem[]>(() => {
         item('yearly', 'tasks', Flag, { period: 'yearly' }),
         item('goals', 'goals', TrendingUp),
         item('habits', 'habits', ListChecks),
+        item('world', 'world', Mountain),
         item('journey', 'journey', Rocket),
         item('achievements', 'achievements', Award),
         item('leaderboard', 'leaderboard', Trophy),
@@ -305,6 +308,7 @@ async function signOut(): Promise<void> {
             </EmptyState>
             <!-- Keyed by language: switching it reloads the page's data, so admin-written text arrives translated. -->
             <RouterView v-else :key="`${locale}:${route.path}`" />
+            <AssistantWidget />
         </section>
     </main>
 </template>

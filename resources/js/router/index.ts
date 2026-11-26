@@ -58,6 +58,7 @@ const routes: RouteRecordRaw[] = [
                 name: 'portfolio',
                 component: () => import('../views/journey/PortfolioView.vue'),
             },
+            { path: 'world', name: 'world', component: () => import('../views/WorldView.vue') },
             { path: 'books', name: 'books', component: () => import('../views/BooksView.vue') },
             { path: 'store', name: 'store', component: () => import('../views/StoreView.vue') },
             { path: 'leaderboard', name: 'leaderboard', component: () => import('../views/LeaderboardView.vue') },

@@ -710,7 +710,7 @@ export interface PublicPortfolio {
 // ── Paid subscriptions and books ────────────────────────────────────────
 
 /** What a subscription can open for a member. */
-export type GrantType = 'lesson' | 'book' | 'store_item'
+export type GrantType = 'lesson' | 'book' | 'store_item' | 'assistant'
 
 export interface SubscriptionSheet {
     isPremium: boolean
@@ -761,4 +761,13 @@ export interface ThemeData {
     accent: string
     background: string | null
     imageUrl: string | null
+}
+
+export interface AssistantStatus {
+    /** An API key is set on the server. */
+    configured: boolean
+    /** The AI assistant is opened in this member's subscription (always for staff). */
+    allowed: boolean
+    limit: number
+    remaining: number
 }

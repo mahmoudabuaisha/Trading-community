@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionContro
 use App\Http\Controllers\Admin\ThreadController as AdminThreadController;
 use App\Http\Controllers\Admin\TranslationController as AdminTranslationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\SkillController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\VisionController;
+use App\Http\Controllers\WorldController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -90,6 +92,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::patch('categories/{category}', [CategoryController::class, 'update']);
     Route::delete('categories/{category}', [CategoryController::class, 'destroy']);
     Route::get('daily-tip', [DailyTipController::class, 'show']);
+    Route::get('world', [WorldController::class, 'show']);
+    Route::get('assistant', [AssistantController::class, 'status']);
+    Route::post('assistant', [AssistantController::class, 'ask'])->middleware('throttle:10,1');
     Route::post('daily-tip', [DailyTipController::class, 'draw'])->middleware('throttle:20,1');
 
     Route::get('insights', [JourneyController::class, 'insights']);
