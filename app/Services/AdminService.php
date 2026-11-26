@@ -190,14 +190,16 @@ class AdminService
     /**
      * @param  array<string, mixed>  $data
      */
-    public function saveStoreItem(User $admin, ?StoreItem $item, array $data, ?UploadedFile $image, bool $removeImage, ?UploadedFile $file = null, bool $removeFile = false): StoreItem
+    public function saveStoreItem(User $admin, ?StoreItem $item, array $data, ?UploadedFile $image, bool $removeImage, ?UploadedFile $file = null, bool $removeFile = false, ?UploadedFile $themeImage = null, bool $removeThemeImage = false): StoreItem
     {
         $path = $image?->store(StoreItem::IMAGE_DIRECTORY, 'public');
         // The product's file goes to the private disk: only buyers may download it.
         $filePath = $file?->store(StoreItem::FILE_DIRECTORY, 'local');
         $oldFile = $item?->file_path;
+        $themePath = $themeImage?->store(StoreItem::THEME_DIRECTORY, 'public');
+        $oldTheme = $item?->theme_image_path;
 
-        return DB::transaction(function () use ($admin, $item, $data, $path, $removeImage, $file, $filePath, $removeFile, $oldFile): StoreItem {
+        return DB::transaction(function () use ($admin, $item, $data, $path, $removeImage, $file, $filePath, $removeFile, $oldFile, $themePath, $removeThemeImage, $oldTheme): StoreItem {
             $creating = $item === null;
             $item ??= new StoreItem;
             $item->fill($data);
@@ -217,6 +219,18 @@ class AdminService
                 $item->created_by = $admin->id;
             }
             $item->save();
+            if ($themePath) {
+                $item->theme_image_path = $themePath;
+            } elseif ($removeThemeImage) {
+                $item->theme_image_path = null;
+            }
+            if ($item->kind !== 'theme') {
+                $item->theme_accent = $item->theme_background = $item->theme_image_path = null;
+            }
+            $item->save();
+            if ($oldTheme && $oldTheme !== $item->theme_image_path) {
+                Storage::disk('public')->delete($oldTheme);
+            }
             if ($oldFile && $oldFile !== $item->file_path) {
                 Storage::disk('local')->delete($oldFile);
             }

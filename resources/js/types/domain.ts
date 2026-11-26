@@ -50,7 +50,10 @@ export interface User {
     /** What the member wears, from the store items they put to use. */
     title: string | null
     frame: string
-    theme: string
+    /** The theme in use, or null for the platform's own gold. */
+    theme: ThemeData | null
+    /** Themes the member bought, for the switcher in the top bar. */
+    ownedThemes: ThemeData[]
     avatarUrl: string | null
     role: Role
     bio: string
@@ -359,7 +362,6 @@ export const STORE_KINDS = ['title', 'frame', 'theme', 'avatar', 'product'] as c
 export type StoreKind = (typeof STORE_KINDS)[number]
 /** Built-in looks an item can apply; the CSS for each lives in app.css. */
 export const FRAME_STYLES = ['bronze', 'silver', 'gold', 'royal', 'diamond'] as const
-export const THEMES = ['emerald', 'sapphire', 'ruby', 'amethyst', 'silver'] as const
 
 export interface StoreItem {
     id: number
@@ -375,6 +377,10 @@ export interface StoreItem {
     equipped?: boolean
     /** Reserved to the subscribers it was opened for. */
     isExclusive: boolean
+    /** A theme: its accent colour, optional dark base and optional picture. */
+    themeAccent: string | null
+    themeBackground: string | null
+    themeImageUrl: string | null
     /** On the member's store: whether this member may buy it. */
     allowed?: boolean
     /** The section a product sits in. */
@@ -408,6 +414,10 @@ export interface StoreItemInput {
     removeImage?: boolean
     categoryId?: number | null
     isExclusive?: boolean
+    themeAccent?: string
+    themeBackground?: string | null
+    themeImage?: File | null
+    removeThemeImage?: boolean
     link?: string
     file?: File | null
     removeFile?: boolean
@@ -476,7 +486,7 @@ export interface UserDetails {
         lastSeenAt: string | null
         title: string | null
         frame: string
-        theme: string
+        theme: ThemeData | null
     }
     points: { balance: number; earned: number }
     counts: Record<
@@ -742,4 +752,13 @@ export interface Design {
     backgroundUrl: string | null
     isActive: boolean
     owned?: boolean
+}
+
+/** A theme as the app applies it. */
+export interface ThemeData {
+    id: number
+    name: string
+    accent: string
+    background: string | null
+    imageUrl: string | null
 }

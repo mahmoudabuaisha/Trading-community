@@ -42,11 +42,11 @@ class StoreItemController extends Controller
 
     private function save(StoreItemRequest $request, AdminService $admin, ?StoreItem $item): StoreItem
     {
-        $attributes = Arr::except($request->attributesForModel(), ['image', 'remove_image', 'file', 'remove_file']);
+        $attributes = Arr::except($request->attributesForModel(), ['image', 'remove_image', 'file', 'remove_file', 'theme_image', 'remove_theme_image']);
         if (array_key_exists('description', $attributes)) {
             $attributes['description'] ??= '';
         }
 
-        return $admin->saveStoreItem($request->user(), $item, $attributes, $request->file('image'), (bool) $request->validated('removeImage'), $request->file('file'), (bool) $request->validated('removeFile'));
+        return $admin->saveStoreItem($request->user(), $item, $attributes, $request->file('image'), (bool) $request->validated('removeImage'), $request->file('file'), (bool) $request->validated('removeFile'), $request->file('themeImage'), (bool) $request->validated('removeThemeImage'));
     }
 }

@@ -1,19 +1,14 @@
 <script setup lang="ts">
 import { FileUp, FolderPlus, ImagePlus, Plus, ShoppingBag, Star, Trash2 } from 'lucide-vue-next'
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ApiError } from '../../data/http'
 import { repository } from '../../data/repository'
+import { applyTheme, themeTokens, themeWarnings } from '../../lib/theme'
+import { useAuthStore } from '../../stores/auth'
 import { t } from '../../i18n'
 import { useAdminStore } from '../../stores/admin'
 import { useUiStore } from '../../stores/ui'
-import {
-    FRAME_STYLES,
-    STORE_KINDS,
-    THEMES,
-    type StoreCategory,
-    type StoreItem,
-    type StoreKind,
-} from '../../types/domain'
+import { FRAME_STYLES, STORE_KINDS, type StoreCategory, type StoreItem, type StoreKind } from '../../types/domain'
 import ConfirmDialog from '../ConfirmDialog.vue'
 import EmptyState from '../EmptyState.vue'
 import StoreArt from '../StoreArt.vue'
@@ -21,6 +16,7 @@ import TranslateButton from './TranslateButton.vue'
 
 const admin = useAdminStore()
 const ui = useUiStore()
+const auth = useAuthStore()
 
 const blank = () => ({
     id: null as number | null,
@@ -33,6 +29,9 @@ const blank = () => ({
     categoryId: null as number | null,
     link: '',
     isExclusive: false,
+    themeAccent: '#3fc48a',
+    themeBackground: '#07080a',
+    useBackground: false,
 })
 
 // ── Sections added by the administrators ("Books", "Courses", …) ─────────
@@ -75,6 +74,38 @@ const file = ref<File | null>(null)
 const removeFile = ref(false)
 const existingFile = ref<string | null>(null)
 const productFile = ref<HTMLInputElement | null>(null)
+
+// ── A theme: colours the app derives its shades from, and an optional picture ──
+const themeImage = ref<File | null>(null)
+const themePreview = ref<string | null>(null)
+const removeThemeImage = ref(false)
+const themeInput = ref<HTMLInputElement | null>(null)
+const trying = ref(false)
+const themeBase = computed(() => (draft.useBackground ? draft.themeBackground : null))
+const warnings = computed(() => (draft.kind === 'theme' ? themeWarnings(draft.themeAccent, themeBase.value) : []))
+const previewStyle = computed(() => ({
+    ...themeTokens(draft.themeAccent, themeBase.value),
+    ...(themePreview.value && !removeThemeImage.value ? { backgroundImage: `url(${themePreview.value})` } : {}),
+}))
+function pickThemeImage(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0] ?? null
+    input.value = ''
+    if (!file) return
+    if (themePreview.value?.startsWith('blob:')) URL.revokeObjectURL(themePreview.value)
+    themeImage.value = file
+    themePreview.value = URL.createObjectURL(file)
+    removeThemeImage.value = false
+}
+/** Try the theme on the whole page; the member's own look comes back when trying stops. */
+function stopTrying(): void {
+    trying.value = false
+    applyTheme(auth.user?.theme ?? null)
+}
+watch([trying, () => draft.themeAccent, themeBase], () => {
+    if (trying.value) applyTheme({ accent: draft.themeAccent, background: themeBase.value })
+})
+onBeforeUnmount(() => trying.value && stopTrying())
 const fileInput = ref<HTMLInputElement | null>(null)
 const errors = ref<Record<string, string[]>>({})
 const saving = ref(false)
@@ -82,7 +113,7 @@ const deleting = ref<StoreItem | null>(null)
 
 /** What `value` holds depends on the kind; switching kind starts it from a sensible choice. */
 function onKind(): void {
-    draft.value = draft.kind === 'frame' ? FRAME_STYLES[2] : draft.kind === 'theme' ? THEMES[0] : ''
+    draft.value = draft.kind === 'frame' ? FRAME_STYLES[2] : ''
     if (draft.kind === 'product') draft.categoryId ??= categories.value[0]?.id ?? null
 }
 
@@ -105,6 +136,10 @@ function reset(): void {
     file.value = null
     removeFile.value = false
     existingFile.value = null
+    themeImage.value = null
+    themePreview.value = null
+    removeThemeImage.value = false
+    if (trying.value) stopTrying()
     errors.value = {}
 }
 
@@ -120,7 +155,13 @@ function edit(item: StoreItem): void {
         categoryId: item.categoryId,
         link: item.link ?? '',
         isExclusive: item.isExclusive,
+        themeAccent: item.themeAccent ?? '#3fc48a',
+        themeBackground: item.themeBackground ?? '#07080a',
+        useBackground: item.themeBackground !== null,
     })
+    themeImage.value = null
+    themePreview.value = item.themeImageUrl
+    removeThemeImage.value = false
     file.value = null
     removeFile.value = false
     existingFile.value = item.fileName
@@ -143,6 +184,14 @@ async function save(): Promise<void> {
             price: Math.max(0, Math.round(Number(input.price))),
             image: image.value,
             removeImage: removeImage.value,
+            ...(input.kind === 'theme'
+                ? {
+                      themeAccent: input.themeAccent,
+                      themeBackground: input.useBackground ? input.themeBackground : null,
+                      themeImage: themeImage.value,
+                      removeThemeImage: removeThemeImage.value,
+                  }
+                : {}),
             ...(input.kind === 'product'
                 ? {
                       categoryId: input.categoryId,
@@ -277,14 +326,86 @@ async function confirmDelete(): Promise<void> {
                         </option>
                     </select>
                 </label>
-                <label v-else-if="draft.kind === 'theme'" class="field">
-                    <span>{{ t('admin.stTheme') }}</span>
-                    <select v-model="draft.value" class="input">
-                        <option v-for="theme in THEMES" :key="theme" :value="theme">
-                            {{ t(`store.themes.${theme}`) }}
-                        </option>
-                    </select>
-                </label>
+                <template v-else-if="draft.kind === 'theme'">
+                    <label class="field">
+                        <span>{{ t('themes.accent') }}</span>
+                        <input v-model="draft.themeAccent" class="input design-editor__color" type="color" />
+                        <small class="hint">{{ t('themes.accentHint') }}</small>
+                        <small v-if="errors.themeAccent" class="field__error">{{ errors.themeAccent[0] }}</small>
+                    </label>
+                    <div class="field">
+                        <label class="check"
+                            ><input v-model="draft.useBackground" type="checkbox" /> {{ t('themes.background') }}</label
+                        >
+                        <input
+                            v-if="draft.useBackground"
+                            v-model="draft.themeBackground"
+                            class="input design-editor__color"
+                            type="color"
+                            :aria-label="t('themes.background')"
+                        />
+                        <small class="hint">{{ t('themes.backgroundHint') }}</small>
+                    </div>
+                    <div class="field field--wide">
+                        <span>{{ t('themes.image') }}</span>
+                        <div class="head-actions">
+                            <button type="button" class="btn btn--outline" @click="themeInput?.click()">
+                                {{ t(themePreview && !removeThemeImage ? 'admin.stChangeImage' : 'themes.imagePick') }}
+                            </button>
+                            <button
+                                v-if="themePreview && !removeThemeImage"
+                                type="button"
+                                class="pill"
+                                @click="((removeThemeImage = true), (themeImage = null))"
+                            >
+                                {{ t('admin.stRemoveImage') }}
+                            </button>
+                            <input
+                                ref="themeInput"
+                                class="sr-only"
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                tabindex="-1"
+                                @change="pickThemeImage"
+                            />
+                        </div>
+                        <small v-if="errors.themeImage" class="field__error">{{ errors.themeImage[0] }}</small>
+                        <small v-else class="hint">{{ t('themes.imageHint') }}</small>
+                    </div>
+                    <div class="field field--wide">
+                        <span>{{ t('admin.dsPreview') }}</span>
+                        <div class="theme-preview" :style="previewStyle">
+                            <div class="theme-preview__side">
+                                <b>SN</b>
+                                <i class="theme-preview__nav theme-preview__nav--on" />
+                                <i class="theme-preview__nav" />
+                                <i class="theme-preview__nav" />
+                            </div>
+                            <div class="theme-preview__main">
+                                <h4>{{ t('themes.previewTitle') }}</h4>
+                                <div class="theme-preview__card">
+                                    <span>{{ t('themes.previewCard') }}</span>
+                                    <div class="goal-card__bar"><i style="inline-size: 64%" /></div>
+                                    <div class="row-actions">
+                                        <span class="btn">{{ t('themes.previewButton') }}</span>
+                                        <span class="pill pill--chosen">25</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p v-for="warning in warnings" :key="warning" class="field__error">
+                            ⚠ {{ t(`themes.warn.${warning}`) }}
+                        </p>
+                        <label class="check"
+                            ><input
+                                :checked="trying"
+                                type="checkbox"
+                                @change="($event.target as HTMLInputElement).checked ? (trying = true) : stopTrying()"
+                            />
+                            {{ t('themes.tryIt') }}</label
+                        >
+                    </div>
+                </template>
                 <template v-else-if="draft.kind === 'product'">
                     <label class="field">
                         <span>{{ t('admin.stCategory') }}</span>
@@ -355,6 +476,9 @@ async function confirmDelete(): Promise<void> {
                         kind: draft.kind,
                         value: draft.value,
                         imageUrl: removeImage ? null : preview,
+                        themeAccent: draft.themeAccent,
+                        themeBackground: themeBase,
+                        themeImageUrl: removeThemeImage ? null : themePreview,
                         name: draft.name,
                     }"
                 />

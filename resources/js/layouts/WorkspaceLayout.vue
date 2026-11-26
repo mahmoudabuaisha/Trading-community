@@ -29,10 +29,12 @@ import { computed, onBeforeUnmount, onMounted, ref, watch, type Component, watch
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import BrandLogo from '../components/BrandLogo.vue'
 import EmptyState from '../components/EmptyState.vue'
+import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import NotificationBell from '../components/NotificationBell.vue'
 import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { useSiteCopy } from '../lib/content'
+import { applyTheme } from '../lib/theme'
 import { roleName } from '../lib/roles'
 import { describeError } from '../stores/ui'
 import { formatDate, locale, setLocale, t, cycleLocale } from '../i18n'
@@ -135,7 +137,7 @@ onMounted(() => {
     if (auth.user) setLocale(auth.user.language)
     stopTheme = watchEffect(() => {
         // The member's bought theme recolours the whole app; signed out, it goes back to gold.
-        document.documentElement.dataset.theme = auth.user?.theme ?? 'gold'
+        applyTheme(auth.user?.theme ?? null)
     })
     void workspace.load()
     clock = window.setInterval(() => (now.value = new Date()), 1000)
@@ -145,7 +147,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
     stopTheme()
-    delete document.documentElement.dataset.theme
+    applyTheme(null)
     window.clearInterval(clock)
     window.clearInterval(unreadPoll)
     window.removeEventListener('keydown', onKeydown)
@@ -172,7 +174,7 @@ async function signOut(): Promise<void> {
 
 <template>
     <main class="app-shell" :class="{ 'app-shell--nav-open': navOpen, 'app-shell--collapsed': collapsed }">
-        <WorkspaceBackdrop />
+        <WorkspaceBackdrop :image="auth.user?.theme?.imageUrl ?? null" />
 
         <div v-if="navOpen" class="nav-scrim" @click="navOpen = false" />
 
@@ -265,6 +267,7 @@ async function signOut(): Promise<void> {
                             <small>{{ roleLabel }}</small>
                         </span>
                     </RouterLink>
+                    <ThemeSwitcher />
                     <NotificationBell />
                     <button type="button" class="chip-btn" :aria-label="t('nav.switchLang')" @click="switchLanguage">
                         {{ locale.toUpperCase() }}

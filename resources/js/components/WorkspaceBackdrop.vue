@@ -1,4 +1,6 @@
 <script setup lang="ts">
+/** A bought theme may bring its own picture; it then takes the summit's place. */
+defineProps<{ image?: string | null }>()
 /**
  * Decorative backdrop for the signed-in workspace: night sky, the summit with
  * its flag behind the header, a halo and mist. Static apart from the flag,
@@ -9,7 +11,8 @@
 <template>
     <div class="backdrop" aria-hidden="true">
         <div class="backdrop__sky" />
-        <div class="backdrop__summit">
+        <img v-if="image" :src="image" alt="" class="backdrop__theme" />
+        <div v-else class="backdrop__summit">
             <div class="summit__arc" />
             <img
                 class="backdrop__rock"

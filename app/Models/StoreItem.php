@@ -24,15 +24,32 @@ class StoreItem extends Model
     /** Built-in frame styles and themes; their looks live in the front end's CSS. */
     public const FRAMES = ['bronze', 'silver', 'gold', 'royal', 'diamond'];
 
-    public const THEMES = ['emerald', 'sapphire', 'ruby', 'amethyst', 'silver'];
+    /** Theme pictures replace the mountain behind the pages. */
+    public const THEME_DIRECTORY = 'themes';
 
-    protected $fillable = ['name', 'description', 'kind', 'value', 'price', 'is_active', 'category_id', 'link', 'is_exclusive'];
+    protected $fillable = ['name', 'description', 'kind', 'value', 'price', 'is_active', 'category_id', 'link', 'is_exclusive', 'theme_accent', 'theme_background'];
 
     protected $attributes = ['description' => '', 'is_active' => true];
 
     protected function casts(): array
     {
         return ['price' => 'integer', 'is_active' => 'boolean', 'is_exclusive' => 'boolean'];
+    }
+
+    /** What the front end needs to dress the app in this theme. */
+    public function themeData(): ?array
+    {
+        if ($this->kind !== 'theme' || ! $this->theme_accent) {
+            return null;
+        }
+
+        return [
+            'id' => $this->id,
+            'name' => $this->tr('name'),
+            'accent' => $this->theme_accent,
+            'background' => $this->theme_background,
+            'imageUrl' => $this->theme_image_path ? '/media/'.$this->theme_image_path : null,
+        ];
     }
 
     public function imageUrl(): ?string
@@ -46,6 +63,9 @@ class StoreItem extends Model
             SubscriptionGrant::forget('store_item', $item->id);
             if ($item->image_path) {
                 Storage::disk('public')->delete($item->image_path);
+            }
+            if ($item->theme_image_path) {
+                Storage::disk('public')->delete($item->theme_image_path);
             }
             if ($item->file_path) {
                 Storage::disk('local')->delete($item->file_path);

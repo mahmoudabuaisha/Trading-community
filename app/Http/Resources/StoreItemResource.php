@@ -27,6 +27,9 @@ class StoreItemResource extends JsonResource
             'price' => $this->price,
             'isActive' => $this->is_active,
             'isExclusive' => $this->is_exclusive,
+            'themeAccent' => $this->theme_accent,
+            'themeBackground' => $this->theme_background,
+            'themeImageUrl' => $this->theme_image_path ? '/media/'.$this->theme_image_path : null,
             // On the member's store: whether this member may buy a reserved item.
             'allowed' => $this->when(isset($this->allowed), fn () => (bool) $this->allowed),
             // Present on the member's store; absent in the admin list.

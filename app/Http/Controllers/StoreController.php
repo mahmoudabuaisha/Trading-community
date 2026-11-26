@@ -52,6 +52,14 @@ class StoreController extends Controller
         return response()->download(Storage::disk('local')->path($item->file_path), $item->file_name ?: basename($item->file_path));
     }
 
+    public function themeImage(string $file): BinaryFileResponse
+    {
+        $path = StoreItem::THEME_DIRECTORY.'/'.$file;
+        abort_unless(Storage::disk('public')->exists($path), 404);
+
+        return response()->file(Storage::disk('public')->path($path), ['Cache-Control' => 'public, max-age=31536000, immutable']);
+    }
+
     public function image(string $file): BinaryFileResponse
     {
         $path = StoreItem::IMAGE_DIRECTORY.'/'.$file;

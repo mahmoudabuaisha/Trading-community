@@ -915,6 +915,28 @@ export const en: Messages = {
         sampleB: 'Practise',
         sampleC: 'Master',
     },
+    themes: {
+        switch: 'Switch theme',
+        base: 'Base theme',
+        accent: 'Main colour',
+        accentHint: 'Shades for buttons, borders and headings are derived from it automatically.',
+        background: 'Custom background colour (optional)',
+        backgroundHint: 'A very dark shade works best. Without it the current black background stays.',
+        image: 'Background picture (optional)',
+        imagePick: 'Choose a picture',
+        imageHint:
+            'Replaces the mountain picture. 1920×1080 or larger, JPG or WebP, up to 4MB. Dark, calm pictures work best.',
+        previewTitle: 'Theme preview',
+        previewCard: "Today's tasks",
+        previewButton: 'Add task',
+        tryIt: 'Try the theme on the whole platform now (only for you, not saved)',
+        warn: {
+            accentDark:
+                'The colour is too dark on the background; headings and buttons will be hard to read. Try a lighter one.',
+            backgroundLight:
+                'The background is light; the light text of the platform will be hard to read. Pick a darker shade.',
+        },
+    },
     admin: {
         dsHead: 'Map and tree designs',
         dsSub: 'Pick a built-in shape, dress it in a colour, node shape and background, then name and price it. Price 0 makes it free for everyone.',

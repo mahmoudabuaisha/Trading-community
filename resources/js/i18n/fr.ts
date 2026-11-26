@@ -942,6 +942,28 @@ export const fr: Messages = {
         sampleB: 'Pratiquer',
         sampleC: 'Maîtriser',
     },
+    themes: {
+        switch: 'Changer de thème',
+        base: 'Thème de base',
+        accent: 'Couleur principale',
+        accentHint: 'Les nuances des boutons, bordures et titres en sont dérivées automatiquement.',
+        background: 'Couleur de fond personnalisée (facultatif)',
+        backgroundHint: 'Une teinte très sombre fonctionne le mieux. Sans elle, le fond noir actuel reste.',
+        image: 'Image de fond (facultatif)',
+        imagePick: 'Choisir une image',
+        imageHint:
+            "Remplace l'image de la montagne. 1920×1080 ou plus, JPG ou WebP, jusqu'à 4 Mo. Les images sombres et calmes conviennent le mieux.",
+        previewTitle: 'Aperçu du thème',
+        previewCard: 'Tâches du jour',
+        previewButton: 'Ajouter une tâche',
+        tryIt: 'Essayer le thème sur toute la plateforme (pour vous seul, non enregistré)',
+        warn: {
+            accentDark:
+                'La couleur est trop sombre sur le fond ; titres et boutons seront peu lisibles. Essayez plus clair.',
+            backgroundLight:
+                'Le fond est clair ; les textes clairs de la plateforme seront peu lisibles. Choisissez une teinte plus sombre.',
+        },
+    },
     admin: {
         dsHead: 'Designs de la carte et de l’arbre',
         dsSub: 'Choisissez une forme prête, habillez-la d’une couleur, d’une forme de nœud et d’un fond, puis nommez-la et fixez son prix. Le prix 0 la rend gratuite pour tous.',

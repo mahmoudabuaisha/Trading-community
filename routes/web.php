@@ -22,6 +22,7 @@ Route::get('/media/'.Lesson::IMAGE_DIRECTORY.'/{file}', [LessonController::class
 Route::get('/media/'.StoreItem::IMAGE_DIRECTORY.'/{file}', [StoreController::class, 'image'])->where('file', '[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)');
 Route::get('/media/'.Book::COVER_DIRECTORY.'/{file}', [BookController::class, 'cover'])->where('file', '[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)');
 Route::get('/media/'.Design::IMAGE_DIRECTORY.'/{file}', [DesignController::class, 'background'])->where('file', '[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)');
+Route::get('/media/'.StoreItem::THEME_DIRECTORY.'/{file}', [StoreController::class, 'themeImage'])->where('file', '[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)');
 Route::get('/media/{directory}/{file}', [PortfolioController::class, 'media'])->where('directory', 'vision|portfolio|days')->where('file', '[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)');
 
 Route::view('/{any?}', 'app')->where('any', '^(?!api|sanctum|up|build|storage|media).*$');

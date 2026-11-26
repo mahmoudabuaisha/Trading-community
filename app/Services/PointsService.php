@@ -99,7 +99,7 @@ class PointsService
      * What the member currently shows, resolved from the items they have in use.
      * An item that was deleted simply stops showing.
      *
-     * @return array{title: string|null, frame: string, theme: string}
+     * @return array{title: string|null, frame: string, theme: array<string, mixed>|null, ownedThemes: list<array<string, mixed>>}
      */
     public function appearance(User $user): array
     {
@@ -109,7 +109,11 @@ class PointsService
         return [
             'title' => $items->get('title')?->tr('value'),
             'frame' => $items->get('frame')?->value ?? 'none',
-            'theme' => $items->get('theme')?->value ?? 'gold',
+            // The theme in use, or null for the platform's own gold.
+            'theme' => $items->get('theme')?->themeData(),
+            // Bought themes, for the switcher in the top bar.
+            'ownedThemes' => StoreItem::where('kind', 'theme')->whereIn('id', StorePurchase::where('user_id', $user->id)->select('store_item_id'))->orderBy('id')->get()
+                ->map(fn (StoreItem $item): ?array => $item->themeData())->filter()->values()->all(),
         ];
     }
 }

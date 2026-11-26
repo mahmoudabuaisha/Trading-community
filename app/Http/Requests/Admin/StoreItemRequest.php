@@ -16,7 +16,7 @@ class StoreItemRequest extends ApiRequest
     protected function prepareForValidation(): void
     {
         // Multipart fields arrive as strings; normalise the booleans.
-        foreach (['isActive', 'removeImage', 'removeFile', 'isExclusive'] as $flag) {
+        foreach (['isActive', 'removeImage', 'removeFile', 'isExclusive', 'removeThemeImage'] as $flag) {
             if ($this->has($flag)) {
                 $this->merge([$flag => filter_var($this->input($flag), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)]);
             }
@@ -32,7 +32,7 @@ class StoreItemRequest extends ApiRequest
         $value = match ($kind) {
             'title' => ['required', 'string', 'max:40'],
             'frame' => ['required', Rule::in(StoreItem::FRAMES)],
-            'theme' => ['required', Rule::in(StoreItem::THEMES)],
+            'theme' => ['nullable'],
             default => ['nullable'],
         };
         $valueNeeded = ! $item || $this->has('kind') || $this->has('value');
@@ -48,6 +48,11 @@ class StoreItemRequest extends ApiRequest
             'isActive' => ['sometimes', 'boolean'],
             // Reserved to the subscribers it is opened for.
             'isExclusive' => ['sometimes', 'boolean'],
+            // A theme: the accent its shades are derived from, an optional dark base, an optional picture.
+            'themeAccent' => [$kind === 'theme' && (! $item || $this->has('kind')) ? 'required' : 'sometimes', 'nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'themeBackground' => ['sometimes', 'nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'themeImage' => ['sometimes', 'file', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'removeThemeImage' => ['sometimes', 'boolean'],
             'removeImage' => ['sometimes', 'boolean'],
             // A product sits in a section and may hand over a link and/or a file once bought.
             'categoryId' => [$kind === 'product' && (! $item || $this->has('kind')) ? 'required' : 'sometimes', 'nullable', 'integer', 'exists:store_categories,id'],

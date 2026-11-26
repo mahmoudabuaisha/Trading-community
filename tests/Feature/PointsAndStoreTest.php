@@ -109,7 +109,7 @@ class PointsAndStoreTest extends TestCase
         $this->postJson("/api/store/{$frame['id']}/buy")->assertUnprocessable()->assertJsonValidationErrors('item');
         $this->putJson('/api/store/equip', ['kind' => 'frame', 'itemId' => $title['id']])->assertUnprocessable();
 
-        $this->putJson('/api/store/equip', ['kind' => 'title', 'itemId' => $title['id']])->assertOk()->assertJsonPath('user.title', 'الأسطورة')->assertJsonPath('user.frame', 'none')->assertJsonPath('user.theme', 'gold');
+        $this->putJson('/api/store/equip', ['kind' => 'title', 'itemId' => $title['id']])->assertOk()->assertJsonPath('user.title', 'الأسطورة')->assertJsonPath('user.frame', 'none')->assertJsonPath('user.theme', null);
         $this->postJson("/api/store/{$avatar['id']}/buy")->assertOk()->assertJsonPath('user.points', 10);
         $this->putJson('/api/store/equip', ['kind' => 'avatar', 'itemId' => $avatar['id']])->assertOk()->assertJsonPath('user.avatarUrl', $avatar['imageUrl']);
         // The profile form sends the photo back unchanged; a store image must pass its validation.
@@ -224,5 +224,33 @@ class PointsAndStoreTest extends TestCase
         $this->getJson('/api/admin/store-items')->assertJsonPath('items.0.categoryId', null);
         $this->deleteJson("/api/admin/store-items/{$book['id']}")->assertNoContent();
         $this->assertSame([], Storage::disk('local')->allFiles('store-files'));
+    }
+
+    public function test_admins_create_themes_from_colours_and_a_picture_and_members_switch_between_them(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['role' => 'admin']);
+        $member = User::factory()->create();
+        $this->award($member, 100);
+
+        $this->actingAs($admin)->postJson('/api/admin/store-items', ['name' => 'x', 'kind' => 'theme', 'price' => 10])->assertUnprocessable()->assertJsonValidationErrors('themeAccent');
+        $this->postJson('/api/admin/store-items', ['name' => 'x', 'kind' => 'theme', 'price' => 10, 'themeAccent' => 'green'])->assertUnprocessable()->assertJsonValidationErrors('themeAccent');
+        $night = $this->post('/api/admin/store-items', ['name' => 'ليل الصحراء', 'kind' => 'theme', 'price' => 40, 'themeAccent' => '#e0a96d', 'themeBackground' => '#0d0a14', 'themeImage' => UploadedFile::fake()->image('desert.jpg', 1920, 1080)])
+            ->assertCreated()->assertJsonPath('item.themeAccent', '#e0a96d')->json('item');
+        $this->assertStringStartsWith('/media/themes/', $night['themeImageUrl']);
+        $ocean = $this->postJson('/api/admin/store-items', ['name' => 'المحيط', 'kind' => 'theme', 'price' => 30, 'themeAccent' => '#4fb3d9'])->assertCreated()->json('item');
+
+        $this->actingAs($member)->getJson('/api/auth/me')->assertJsonPath('user.theme', null)->assertJsonCount(0, 'user.ownedThemes');
+        $this->postJson("/api/store/{$night['id']}/buy")->assertOk()->assertJsonCount(1, 'user.ownedThemes');
+        $this->postJson("/api/store/{$ocean['id']}/buy")->assertOk()->assertJsonCount(2, 'user.ownedThemes');
+        $this->putJson('/api/store/equip', ['kind' => 'theme', 'itemId' => $night['id']])->assertOk()
+            ->assertJsonPath('user.theme.accent', '#e0a96d')->assertJsonPath('user.theme.background', '#0d0a14')->assertJsonPath('user.theme.imageUrl', $night['themeImageUrl']);
+        // Back to the platform's own look.
+        $this->putJson('/api/store/equip', ['kind' => 'theme', 'itemId' => null])->assertOk()->assertJsonPath('user.theme', null);
+
+        // Editing the theme changes it for its owners; deleting it removes its picture.
+        $this->actingAs($admin)->post("/api/admin/store-items/{$night['id']}", ['themeAccent' => '#ff9966', 'removeThemeImage' => '1'])->assertOk()->assertJsonPath('item.themeImageUrl', null);
+        $this->assertSame([], Storage::disk('public')->allFiles('themes'));
+        $this->actingAs($member)->getJson('/api/auth/me')->assertJsonPath('user.ownedThemes.0.accent', '#ff9966');
     }
 }

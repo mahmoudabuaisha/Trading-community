@@ -7,16 +7,28 @@ import UserAvatar from './UserAvatar.vue'
  * The picture of a store item: its uploaded image when it has one, otherwise
  * a drawing of what it does (the frame on an avatar, the theme's colours, the title).
  */
-defineProps<{ item: Pick<StoreItem, 'kind' | 'value' | 'imageUrl' | 'name'> }>()
+defineProps<{
+    item: Pick<StoreItem, 'kind' | 'value' | 'imageUrl' | 'name'> &
+        Partial<Pick<StoreItem, 'themeAccent' | 'themeBackground' | 'themeImageUrl'>>
+}>()
 </script>
 
 <template>
     <span
         class="store-art"
         :class="`store-art--${item.kind}`"
-        :data-theme="item.kind === 'theme' ? item.value : undefined"
+        :style="
+            item.kind === 'theme' && item.themeAccent
+                ? { '--swatch': item.themeAccent, '--swatch-bg': item.themeBackground ?? '#07080a' }
+                : undefined
+        "
     >
-        <img v-if="item.imageUrl" :src="item.imageUrl" alt="" loading="lazy" />
+        <img
+            v-if="item.imageUrl ?? (item.kind === 'theme' ? item.themeImageUrl : null)"
+            :src="(item.imageUrl ?? item.themeImageUrl)!"
+            alt=""
+            loading="lazy"
+        />
         <UserAvatar v-else-if="item.kind === 'frame'" name="SN" :frame="item.value" size="lg" />
         <span v-else-if="item.kind === 'theme'" class="store-art__swatch"
             ><Palette :size="30" aria-hidden="true"
