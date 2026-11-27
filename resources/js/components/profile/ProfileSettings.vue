@@ -5,7 +5,7 @@ import { LOCALE_NAMES, t } from '../../i18n'
 import { useAuthStore } from '../../stores/auth'
 import { useUiStore } from '../../stores/ui'
 import { useWorkspaceStore } from '../../stores/workspace'
-import { LOCALES, SPECIALTIES } from '../../types/domain'
+import { GENDERS, LOCALES, SPECIALTIES, type Gender } from '../../types/domain'
 
 const auth = useAuthStore()
 const workspace = useWorkspaceStore()
@@ -19,6 +19,7 @@ const form = reactive({
     dailyFocusMinutes: user.dailyFocusMinutes,
     bio: user.bio,
     specialties: [...user.specialties],
+    gender: user.gender,
 })
 const errors = ref<Record<string, string[]>>({})
 const saving = ref(false)
@@ -63,6 +64,16 @@ async function save(): Promise<void> {
                         <option v-for="zone in timezones" :key="zone" :value="zone">{{ zone }}</option>
                     </select>
                     <small v-if="errors.timezone" class="field__error">{{ errors.timezone[0] }}</small>
+                </label>
+                <label class="field">
+                    <span>{{ t('profile.gender') }}</span>
+                    <select v-model="form.gender" class="input">
+                        <option :value="null">{{ t('profile.genders.none') }}</option>
+                        <option v-for="gender in GENDERS" :key="gender" :value="gender as Gender">
+                            {{ t(`profile.genders.${gender}`) }}
+                        </option>
+                    </select>
+                    <small class="hint">{{ t('profile.genderHint') }}</small>
                 </label>
                 <label class="field">
                     <span>{{ t('profile.weeklyGoal') }}</span>

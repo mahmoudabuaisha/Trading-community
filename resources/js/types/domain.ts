@@ -63,6 +63,8 @@ export interface User {
     role: Role
     bio: string
     specialties: Specialty[]
+    /** Null when the member prefers not to say. */
+    gender: Gender | null
     timezone: string
     language: Locale
     weeklyGoal: number
@@ -177,6 +179,7 @@ export interface GoalInput {
 
 export interface ProfileInput {
     specialties?: Specialty[]
+    gender?: Gender | null
     displayName: string
     surname: string
     nickname: string
@@ -379,6 +382,9 @@ export interface Preferences {
 /** Preset membership names, from the lightest subscription to the fullest. */
 export const TIERS = ['premium', 'silver', 'gold', 'platinum', 'elite'] as const
 
+export const GENDERS = ['male', 'female'] as const
+export type Gender = (typeof GENDERS)[number]
+
 export const STORE_KINDS = ['title', 'frame', 'emblem', 'theme', 'avatar', 'product'] as const
 export type StoreKind = (typeof STORE_KINDS)[number]
 /** Built-in looks an item can apply; the CSS for each lives in app.css. */
@@ -505,6 +511,7 @@ export interface UserDetails {
         nickname: string
         bio: string
         specialties: Specialty[]
+        gender: Gender | null
         timezone: string
         language: Locale
         lastSeenAt: string | null

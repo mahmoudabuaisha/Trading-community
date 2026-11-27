@@ -792,6 +792,13 @@ export const fr: Messages = {
         },
     },
     profile: {
+        gender: 'Genre',
+        genderHint: 'Facultatif, et non visible par les autres membres.',
+        genders: {
+            male: 'Homme',
+            female: 'Femme',
+            none: 'Je préfère ne pas le dire',
+        },
         heroStats: {
             points: 'Points',
             achievements: 'Succès',

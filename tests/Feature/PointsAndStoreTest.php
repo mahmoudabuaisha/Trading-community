@@ -198,6 +198,15 @@ class PointsAndStoreTest extends TestCase
         $this->assertSame('elite', app(PointsService::class)->appearance($member->fresh())['frame']);
     }
 
+    public function test_members_may_set_their_gender_or_leave_it_unsaid(): void
+    {
+        $member = User::factory()->create();
+        $base = ['displayName' => 'سارة', 'surname' => '', 'bio' => '', 'timezone' => 'UTC', 'language' => 'ar', 'weeklyGoal' => 10, 'dailyFocusMinutes' => 60, 'avatarUrl' => null];
+        $this->actingAs($member)->putJson('/api/profile', [...$base, 'gender' => 'female'])->assertOk()->assertJsonPath('user.gender', 'female');
+        $this->putJson('/api/profile', [...$base, 'gender' => 'other'])->assertUnprocessable();
+        $this->putJson('/api/profile', [...$base, 'gender' => null])->assertOk()->assertJsonPath('user.gender', null);
+    }
+
     public function test_admins_schedule_and_send_messages_that_members_receive_on_the_day(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

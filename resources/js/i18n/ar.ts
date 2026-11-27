@@ -772,6 +772,13 @@ export const ar = {
         cat: { growth: 'تطوير شخصي', motivation: 'دفعة تحفيز', announcement: 'رسالة المنصة' },
     },
     profile: {
+        gender: 'الجنس',
+        genderHint: 'اختياري، ولا يظهر لبقية الأعضاء.',
+        genders: {
+            male: 'ذكر',
+            female: 'أنثى',
+            none: 'لا أرغب بالتحديد',
+        },
         heroStats: {
             points: 'نقاطي',
             achievements: 'إنجازاتي',

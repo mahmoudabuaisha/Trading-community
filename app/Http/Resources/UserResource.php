@@ -34,6 +34,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'bio' => $this->bio,
             'specialties' => $this->specialties ?? [],
+            'gender' => $this->gender,
             'timezone' => $this->timezone,
             'language' => $this->language,
             'weeklyGoal' => $this->weekly_goal,

@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
  * `role` and `is_premium` are deliberately NOT fillable: they can only change through
  * App\Services\AdminService, never through mass assignment at sign-up.
  */
-#[Fillable(['display_name', 'surname', 'nickname', 'email', 'password', 'avatar_url', 'bio', 'timezone', 'language', 'weekly_goal', 'daily_focus_minutes', 'specialties'])]
+#[Fillable(['display_name', 'surname', 'nickname', 'email', 'password', 'avatar_url', 'bio', 'timezone', 'language', 'weekly_goal', 'daily_focus_minutes', 'specialties', 'gender'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -44,6 +44,9 @@ class User extends Authenticatable
         'sleepTime' => null,
         'wakeTime' => null,
     ];
+
+    /** A member may say they are male or female, or leave it unsaid (null). */
+    public const GENDERS = ['male', 'female'];
 
     /** Preset membership names, from the lightest subscription to the fullest. */
     public const TIERS = ['premium', 'silver', 'gold', 'platinum', 'elite'];

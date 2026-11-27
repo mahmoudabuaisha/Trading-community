@@ -780,6 +780,13 @@ export const en: Messages = {
         cat: { growth: 'Personal growth', motivation: 'Motivation boost', announcement: 'Platform message' },
     },
     profile: {
+        gender: 'Gender',
+        genderHint: 'Optional, and not shown to other members.',
+        genders: {
+            male: 'Male',
+            female: 'Female',
+            none: 'Prefer not to say',
+        },
         heroStats: {
             points: 'Points',
             achievements: 'Achievements',

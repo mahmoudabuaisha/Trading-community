@@ -17,6 +17,8 @@ class ProfileRequest extends ApiRequest
             'timezone' => ['required', 'string', 'timezone:all'],
             'language' => ['required', Rule::in(['ar', 'en', 'fr'])],
             'weeklyGoal' => ['required', 'integer', 'min:1', 'max:500'],
+            // Optional: null means the member prefers not to say.
+            'gender' => ['sometimes', 'nullable', Rule::in(User::GENDERS)],
             'specialties' => ['sometimes', 'array', 'max:4'],
             'specialties.*' => ['string', 'distinct', Rule::in(User::SPECIALTIES)],
             'dailyFocusMinutes' => ['required', 'integer', 'min:0', 'max:1440'],

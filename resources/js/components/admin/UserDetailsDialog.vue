@@ -66,6 +66,10 @@ const achievementTitle = (item: { key: string; title: string | null }) =>
 
                 <dl class="user-details__facts">
                     <div>
+                        <dt>{{ t('profile.gender') }}</dt>
+                        <dd>{{ t(`profile.genders.${details.user.gender ?? 'none'}`) }}</dd>
+                    </div>
+                    <div>
                         <dt>{{ t('profile.names.nickname') }}</dt>
                         <dd>{{ details.user.nickname || '—' }}</dd>
                     </div>

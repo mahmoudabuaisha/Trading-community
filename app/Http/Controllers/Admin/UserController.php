@@ -59,6 +59,7 @@ class UserController extends Controller
                 'nickname' => $user->nickname,
                 'bio' => $user->bio,
                 'specialties' => $user->specialties ?? [],
+                'gender' => $user->gender,
                 'timezone' => $user->timezone,
                 'language' => $user->language,
                 'lastSeenAt' => $user->last_seen_at?->toISOString(),
