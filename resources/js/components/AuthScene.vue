@@ -17,6 +17,16 @@
         <div class="scene__meteor" />
         <div class="scene__flare scene__flare--one" />
         <div class="scene__flare scene__flare--two" />
+        <!-- The range continues behind the card, so the landscape runs edge to edge. -->
+        <img
+            class="scene__range"
+            src="/images/summit.webp"
+            srcset="/images/summit-800.webp 800w, /images/summit.webp 1600w"
+            sizes="80vw"
+            width="1600"
+            height="932"
+            alt=""
+        />
         <img class="scene__mist" src="/images/fog-2.webp" alt="" width="1600" height="560" />
         <div class="scene__floor" />
         <div class="scene__vignette" />

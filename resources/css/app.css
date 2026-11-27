@@ -7108,3 +7108,49 @@ a.btn-metal {
 .copy-row__edit .input {
     flex: 1;
 }
+
+/* ── Whole summit in view: the flag above the peak must fit on screen ─ */
+/* The flag stands above the picture by about 6% of the picture's width. */
+.backdrop__summit {
+    top: calc(min(1500px, 112vw) * 0.062 + 14px);
+}
+@media (max-width: 980px) {
+    .backdrop__summit {
+        top: calc(150vw * 0.062 + 10px);
+    }
+}
+.scene__range {
+    display: none;
+}
+@media (min-width: 981px) {
+    .summit {
+        inset-block-start: clamp(-6px, 1vh, 14px);
+    }
+    /* A second, mirrored range behind the sign-in card, fading into the sky. */
+    .scene__range {
+        display: block;
+        right: -14vw;
+        bottom: 4vh;
+        inline-size: max(78vw, 900px);
+        block-size: auto;
+        transform: scaleX(-1);
+        opacity: 0.5;
+        filter: brightness(0.62) saturate(0.85);
+        /* A soft oval fade on every side, so the picture has no visible edge. */
+        mask: radial-gradient(62% 58% at 55% 62%, #000 40%, transparent 100%);
+    }
+}
+/* The fade belongs to the pictures: a mask on the whole layer would also hide the flag above the peak. */
+.backdrop__summit {
+    mask: none;
+}
+.backdrop__rock {
+    mask: linear-gradient(#000 62%, transparent 100%);
+}
+.backdrop__fog {
+    mask: linear-gradient(#000 30%, transparent 100%);
+}
+/* The rendered picture's own sky is not pure black, so fade its sides into the scene. */
+.summit__rock {
+    mask: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
