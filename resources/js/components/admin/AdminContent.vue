@@ -1,100 +1,168 @@
 <script setup lang="ts">
-import { Type } from 'lucide-vue-next'
-import { reactive, ref, watch } from 'vue'
-import { ApiError } from '../../data/http'
-import { t } from '../../i18n'
-import { ar } from '../../i18n/ar'
-import { en } from '../../i18n/en'
-import { useAdminStore } from '../../stores/admin'
+import { Languages, RotateCcw, Save, Search, Type } from 'lucide-vue-next'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { request } from '../../data/http'
+import { builtIn, messages, t } from '../../i18n'
+import { loadSiteCopy } from '../../lib/content'
 import { useUiStore } from '../../stores/ui'
-import { useWorkspaceStore } from '../../stores/workspace'
-import type { SiteContent } from '../../types/domain'
 
-const admin = useAdminStore()
-const workspace = useWorkspaceStore()
+/**
+ * Every phrase of the login page, the home page and the command center can
+ * be rewritten here. The administrator writes it once, in any language; it
+ * is translated for members who use the platform in another language.
+ */
 const ui = useUiStore()
+type Section = 'featured' | 'auth' | 'dash' | 'center'
+const SECTIONS: Section[] = ['featured', 'auth', 'dash', 'center']
+/** The phrases people see first, gathered at the top. */
+const FEATURED = ['dash.tagline', 'dash.welcomeSub', 'auth.tagline', 'auth.signInTitle', 'center.title', 'center.sub']
 
-const form = reactive<Record<keyof SiteContent, string>>({
-    taglineAr: '',
-    taglineEn: '',
-    welcomeSubAr: '',
-    welcomeSubEn: '',
+const section = ref<Section>('featured')
+const query = ref('')
+const saved = ref<Record<string, string>>({})
+const drafts = reactive<Record<string, string>>({})
+const autoTranslate = ref(true)
+const busy = ref<string | null>(null)
+const loaded = ref(false)
+
+/** Every phrase (string) under a part of the dictionary, as dotted keys. */
+function keysOf(root: 'auth' | 'dash' | 'center'): string[] {
+    const out: string[] = []
+    const walk = (node: unknown, path: string) => {
+        if (typeof node === 'string') out.push(path)
+        else if (node && typeof node === 'object' && !Array.isArray(node))
+            for (const [key, value] of Object.entries(node)) walk(value, `${path}.${key}`)
+    }
+    walk((messages.value as unknown as Record<string, unknown>)[root], root)
+    return out
+}
+
+const rows = computed(() => {
+    const keys = section.value === 'featured' ? FEATURED.filter((key) => builtIn(key) !== null) : keysOf(section.value)
+    const q = query.value.trim().toLowerCase()
+    return keys.filter(
+        (key) =>
+            !q || (builtIn(key) ?? '').toLowerCase().includes(q) || (saved.value[key] ?? '').toLowerCase().includes(q),
+    )
 })
-const errors = ref<Record<string, string[]>>({})
-const saving = ref(false)
+const changedCount = computed(() => Object.keys(saved.value).length)
 
-/** Each editable line, with the built-in text shown as the fallback. */
-const fields: {
-    key: keyof SiteContent
-    group: 'cTagline' | 'cWelcome'
-    lang: 'cArabic' | 'cEnglish'
-    fallback: string
-    dir: 'rtl' | 'ltr'
-}[] = [
-    { key: 'taglineAr', group: 'cTagline', lang: 'cArabic', fallback: ar.dash.tagline, dir: 'rtl' },
-    { key: 'taglineEn', group: 'cTagline', lang: 'cEnglish', fallback: en.dash.tagline, dir: 'ltr' },
-    { key: 'welcomeSubAr', group: 'cWelcome', lang: 'cArabic', fallback: ar.dash.welcomeSub, dir: 'rtl' },
-    { key: 'welcomeSubEn', group: 'cWelcome', lang: 'cEnglish', fallback: en.dash.welcomeSub, dir: 'ltr' },
-]
-
-watch(
-    () => admin.content,
-    (content) => {
-        for (const field of fields) form[field.key] = content[field.key] ?? ''
-    },
-    { immediate: true },
-)
-
-async function save(): Promise<void> {
-    saving.value = true
-    errors.value = {}
+onMounted(async () => {
     try {
-        await admin.saveContent({
-            taglineAr: form.taglineAr.trim() || null,
-            taglineEn: form.taglineEn.trim() || null,
-            welcomeSubAr: form.welcomeSubAr.trim() || null,
-            welcomeSubEn: form.welcomeSubEn.trim() || null,
-        })
-        // Show the change on this admin's own dashboard straight away.
-        workspace.content = { ...admin.content }
-        ui.success(t('admin.contentSaved'))
+        const data = await request<{ copy: Record<string, string> | unknown[]; autoTranslate: boolean }>(
+            'GET',
+            '/admin/site-copy',
+        )
+        apply(data)
     } catch (error) {
-        if (error instanceof ApiError && error.status === 422) errors.value = error.errors
-        else ui.failure(error)
+        ui.failure(error)
     } finally {
-        saving.value = false
+        loaded.value = true
+    }
+})
+
+function apply(data: { copy: Record<string, string> | unknown[]; autoTranslate: boolean }): void {
+    saved.value = Array.isArray(data.copy) ? {} : data.copy
+    autoTranslate.value = data.autoTranslate
+    for (const key of Object.keys(drafts)) delete drafts[key]
+}
+
+const draftOf = (key: string): string => drafts[key] ?? saved.value[key] ?? ''
+const dirty = (key: string): boolean => key in drafts && drafts[key].trim() !== (saved.value[key] ?? '')
+/** `{n}`-style blanks the app fills in; a rewrite must keep them. */
+function missingBlanks(key: string): string[] {
+    const text = draftOf(key)
+    if (!text.trim()) return []
+    return (builtIn(key)?.match(/\{\w+\}/g) ?? []).filter((blank) => !text.includes(blank))
+}
+
+async function save(key: string, text: string): Promise<void> {
+    busy.value = key
+    try {
+        apply(await request('PUT', '/admin/site-copy', { key, text: text.trim() }))
+        await loadSiteCopy()
+        ui.success(t(text.trim() ? 'admin.copySaved' : 'admin.copyReset'))
+    } catch (error) {
+        ui.failure(error)
+    } finally {
+        busy.value = null
     }
 }
 </script>
 
 <template>
-    <form class="panel" @submit.prevent="save">
+    <div class="stack">
         <div class="section-head">
             <div>
-                <span class="eyebrow">HOME PAGE / COPY</span>
-                <h3>{{ t('admin.contentHead') }}</h3>
-                <p>{{ t('admin.contentSub') }}</p>
+                <h3>{{ t('admin.copyHead') }}</h3>
+                <p>{{ t('admin.copySub') }}</p>
             </div>
-            <Type :size="19" class="gold" aria-hidden="true" />
+            <Type :size="18" class="gold" aria-hidden="true" />
         </div>
-        <div class="form-grid form-grid--two">
-            <label v-for="field in fields" :key="field.key" class="field">
-                <span>{{ t(`admin.${field.group}`) }} — {{ t(`admin.${field.lang}`) }}</span>
-                <input
-                    v-model="form[field.key]"
-                    class="input"
-                    maxlength="160"
-                    :dir="field.dir"
-                    :placeholder="field.fallback"
-                />
-                <small v-if="errors[field.key]" class="field__error">{{ errors[field.key][0] }}</small>
-                <small v-else class="hint">{{ t('admin.cDefault', { text: field.fallback }) }}</small>
+
+        <p class="copy-status" :class="{ 'copy-status--off': !autoTranslate }">
+            <Languages :size="16" aria-hidden="true" />
+            {{ t(autoTranslate ? 'admin.copyAutoOn' : 'admin.copyAutoOff') }}
+        </p>
+
+        <div class="head-actions">
+            <nav class="tabs" :aria-label="t('admin.copyHead')">
+                <button
+                    v-for="id in SECTIONS"
+                    :key="id"
+                    type="button"
+                    :class="{ tabs__active: section === id }"
+                    :aria-pressed="section === id"
+                    @click="section = id"
+                >
+                    {{ t(`admin.copySections.${id}`) }}
+                </button>
+            </nav>
+            <label class="copy-search">
+                <Search :size="15" aria-hidden="true" />
+                <input v-model="query" class="input" type="search" :placeholder="t('admin.copySearch')" />
             </label>
         </div>
-        <div class="actions">
-            <button type="submit" class="btn" :disabled="saving">
-                {{ saving ? t('common.saving') : t('common.save') }}
-            </button>
-        </div>
-    </form>
+        <p class="hint">{{ t('admin.copyCount', { n: changedCount }) }}</p>
+
+        <ul v-if="loaded" class="copy-list">
+            <li v-for="key in rows" :key="key" class="copy-row" :class="{ 'copy-row--changed': saved[key] }">
+                <span class="copy-row__default">{{ builtIn(key) }}</span>
+                <div class="copy-row__edit">
+                    <input
+                        :value="draftOf(key)"
+                        class="input"
+                        dir="auto"
+                        maxlength="500"
+                        :placeholder="t('admin.copyPh')"
+                        :aria-label="builtIn(key) ?? key"
+                        @input="drafts[key] = ($event.target as HTMLInputElement).value"
+                        @keydown.enter.prevent="dirty(key) && save(key, drafts[key])"
+                    />
+                    <button
+                        v-if="dirty(key)"
+                        type="button"
+                        class="btn btn--sm"
+                        :disabled="busy === key || missingBlanks(key).length > 0"
+                        @click="save(key, drafts[key])"
+                    >
+                        <Save :size="14" aria-hidden="true" /> {{ t('common.save') }}
+                    </button>
+                    <button
+                        v-else-if="saved[key]"
+                        type="button"
+                        class="pill"
+                        :disabled="busy === key"
+                        @click="save(key, '')"
+                    >
+                        <RotateCcw :size="13" aria-hidden="true" /> {{ t('admin.copyRestore') }}
+                    </button>
+                </div>
+                <small v-if="missingBlanks(key).length" class="field__error">{{
+                    t('admin.copyBlanks', { blanks: missingBlanks(key).join(' ') })
+                }}</small>
+            </li>
+            <li v-if="!rows.length" class="hint">{{ t('admin.copyNone') }}</li>
+        </ul>
+    </div>
 </template>

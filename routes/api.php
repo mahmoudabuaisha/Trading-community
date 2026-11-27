@@ -34,6 +34,7 @@ use App\Http\Controllers\MySkillController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SiteCopyController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TaskController;
@@ -44,6 +45,9 @@ use Illuminate\Support\Facades\Route;
 /*
 | Session-authenticated JSON API for the SPA (Sanctum stateful cookies).
 */
+
+// Phrases the administrators rewrote, in the visitor's language (the login page needs them too).
+Route::get('site-copy', [SiteCopyController::class, 'index']);
 
 Route::prefix('auth')->group(function (): void {
     Route::middleware('guest:web')->group(function (): void {
@@ -195,6 +199,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::patch('store-categories/{category}', [AdminStoreCategoryController::class, 'update'])->middleware('area:store');
         Route::delete('store-categories/{category}', [AdminStoreCategoryController::class, 'destroy'])->middleware('area:store');
         // Each kind of content is guarded by its own area inside the controller.
+        Route::get('site-copy', [SiteCopyController::class, 'adminIndex']);
+        Route::put('site-copy', [SiteCopyController::class, 'save']);
         Route::get('translations/{type}/{id}', [AdminTranslationController::class, 'show'])->whereNumber('id');
         Route::put('translations/{type}/{id}', [AdminTranslationController::class, 'update'])->whereNumber('id');
         Route::get('broadcasts', [AdminBroadcastController::class, 'index'])->middleware('area:growth');

@@ -38,7 +38,6 @@ import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import NotificationBell from '../components/NotificationBell.vue'
 import WorkspaceBackdrop from '../components/WorkspaceBackdrop.vue'
 import UserAvatar from '../components/UserAvatar.vue'
-import { useSiteCopy } from '../lib/content'
 import { applyTheme } from '../lib/theme'
 import { installDepth } from '../lib/depth'
 import { roleName } from '../lib/roles'
@@ -53,7 +52,6 @@ const workspace = useWorkspaceStore()
 const route = useRoute()
 const router = useRouter()
 
-const { tagline } = useSiteCopy()
 const navOpen = ref(false)
 /** Pages reached from the growth hub; they keep its sidebar entry lit. */
 const JOURNEY_PAGES = ['insights', 'timeline', 'vision', 'skills', 'portfolio']
@@ -305,7 +303,7 @@ async function signOut(): Promise<void> {
 
                 <div class="topbar__heading">
                     <h1 class="topbar__title" :class="{ 'sr-only': route.name === 'profile' }">
-                        {{ route.name === 'overview' ? tagline : pageTitle }}
+                        {{ route.name === 'overview' ? t('dash.tagline') : pageTitle }}
                     </h1>
                     <HelpTip :topic="helpTopic" />
                 </div>

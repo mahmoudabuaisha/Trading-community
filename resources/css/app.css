@@ -7045,3 +7045,66 @@ a.btn-metal {
         justify-self: center;
     }
 }
+
+/* ── Admin: interface phrases ───────────────────────────────────────── */
+.copy-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid rgb(63 196 138 / 0.4);
+    border-radius: var(--radius-md);
+    background: rgb(63 196 138 / 0.08);
+    color: var(--text-soft);
+    font-size: var(--text-sm);
+}
+.copy-status--off {
+    border-color: rgb(var(--accent-rgb) / 0.5);
+    background: rgb(var(--accent-rgb) / 0.08);
+}
+.copy-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-inline-size: 200px;
+}
+.copy-search svg {
+    position: absolute;
+    inset-inline-start: var(--space-3);
+    color: var(--text-muted);
+}
+.copy-search .input {
+    padding-inline-start: calc(var(--space-3) * 2 + 15px);
+}
+.copy-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+}
+.copy-row {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+}
+.copy-row--changed {
+    border-color: rgb(var(--accent-rgb) / 0.55);
+}
+.copy-row__default {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+.copy-row__edit {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+.copy-row__edit .input {
+    flex: 1;
+}

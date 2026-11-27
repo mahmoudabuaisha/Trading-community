@@ -1,19 +1,22 @@
-import { computed, type ComputedRef } from 'vue'
-import { locale, t } from '../i18n'
-import { useWorkspaceStore } from '../stores/workspace'
+import { watch } from 'vue'
+import { request } from '../data/http'
+import { locale, overrides } from '../i18n'
 
 /**
- * Interface copy an administrator can override. Falls back to the built-in
- * translation when no override is set for the active language.
+ * Load the phrases the administrators rewrote, in the active language, and
+ * load them again whenever the language changes. Failing quietly keeps the
+ * built-in phrases.
  */
-export function useSiteCopy(): { tagline: ComputedRef<string>; welcomeSub: ComputedRef<string> } {
-    const workspace = useWorkspaceStore()
-    const pick = (ar: string | null, en: string | null, fallbackKey: string) =>
-        (locale.value === 'ar' ? ar : en)?.trim() || t(fallbackKey)
-    return {
-        tagline: computed(() => pick(workspace.content.taglineAr, workspace.content.taglineEn, 'dash.tagline')),
-        welcomeSub: computed(() =>
-            pick(workspace.content.welcomeSubAr, workspace.content.welcomeSubEn, 'dash.welcomeSub'),
-        ),
+export async function loadSiteCopy(): Promise<void> {
+    try {
+        const { copy } = await request<{ copy: Record<string, string> | unknown[] }>('GET', '/site-copy')
+        overrides.value = Array.isArray(copy) ? {} : copy
+    } catch {
+        /* the built-in phrases stay */
     }
+}
+
+export function installSiteCopy(): void {
+    void loadSiteCopy()
+    watch(locale, () => void loadSiteCopy())
 }

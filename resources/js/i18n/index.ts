@@ -36,10 +36,22 @@ export function setLocale(next: Locale): void {
     locale.value = next
 }
 
-/** Translate a dotted key, replacing `{name}` placeholders. Returns the key itself when missing. */
-export function t(key: string, params: Record<string, string | number> = {}): string {
+/**
+ * Phrases an administrator rewrote (login and home pages), already in the
+ * active language. They take the place of the built-in phrase with the same key.
+ */
+export const overrides = ref<Record<string, string>>({})
+
+/** The built-in phrase for a key in the active language, ignoring overrides. */
+export function builtIn(key: string): string | null {
     let node: unknown = messages.value
     for (const part of key.split('.')) node = (node as Record<string, unknown> | undefined)?.[part]
+    return typeof node === 'string' ? node : null
+}
+
+/** Translate a dotted key, replacing `{name}` placeholders. Returns the key itself when missing. */
+export function t(key: string, params: Record<string, string | number> = {}): string {
+    const node = overrides.value[key] ?? builtIn(key)
     if (typeof node !== 'string') return key
     return node.replace(/\{(\w+)\}/g, (_, name) => String(params[name] ?? `{${name}}`))
 }

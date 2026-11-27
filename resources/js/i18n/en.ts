@@ -1289,6 +1289,26 @@ export const en: Messages = {
         },
     },
     admin: {
+        copyHead: 'Interface phrases',
+        copySub:
+            'Rewrite any phrase of the sign-in page, home page and command center. Write it once in any language; members see it translated into theirs.',
+        copyAutoOn: "Automatic translation is on: what you write shows in each member's language.",
+        copyAutoOff:
+            'Automatic translation is off on the server (add ANTHROPIC_API_KEY to .env); until then the phrase shows as written in every language.',
+        copySearch: 'Search phrases…',
+        copyCount: 'Rewritten phrases: {n}',
+        copyPh: 'Type the new phrase (any language), or leave empty for the original',
+        copySaved: 'Phrase saved',
+        copyReset: 'Original phrase restored',
+        copyRestore: 'Original',
+        copyBlanks: 'Keep these blanks in the text: {blanks}',
+        copyNone: 'No matching phrases.',
+        copySections: {
+            featured: 'Most seen',
+            auth: 'Sign-in page',
+            dash: 'Home',
+            center: 'Command center',
+        },
         tierHead: 'Membership name',
         tierSub: 'Pick the name the member sees under their name. Suggested from what you opened: "{name}".',
         tierSuggested: 'Suggested',

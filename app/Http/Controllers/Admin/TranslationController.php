@@ -13,6 +13,7 @@ use App\Models\DailyTip;
 use App\Models\Design;
 use App\Models\Lesson;
 use App\Models\Motivation;
+use App\Models\SiteCopy;
 use App\Models\SkillLevel;
 use App\Models\SkillPath;
 use App\Models\StoreCategory;
@@ -43,6 +44,7 @@ class TranslationController extends Controller
         'store-item' => [StoreItem::class, 'store'],
         'store-category' => [StoreCategory::class, 'store'],
         'design' => [Design::class, 'store'],
+        'site-copy' => [SiteCopy::class, 'content'],
     ];
 
     /**

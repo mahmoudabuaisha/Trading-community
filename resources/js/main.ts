@@ -15,6 +15,9 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
 import './i18n'
+import { installSiteCopy } from './lib/content'
 import { router } from './router'
 
 createApp(App).use(createPinia()).use(router).mount('#app')
+// Phrases rewritten by the administrators, in the visitor's language.
+installSiteCopy()

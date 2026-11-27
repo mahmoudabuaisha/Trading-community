@@ -35,6 +35,7 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Focus timer | 10, 25, 30 or 60 minutes or any length; the timer follows the member across pages and survives closing the app (it finishes and is logged on return), then rings a built-in or uploaded tone |
 | Membership | Admins open chosen services per member and name the membership (premium, silver, gold, platinum, elite — suggested from what is opened — or their own words) |
 | Emblems and frames | Store items include emblems worn next to the name (emoji or icon) and frames drawn by the app or from an uploaded picture; achievements can hand over any item for free |
+| Interface phrases | Admins rewrite any phrase of the sign-in page, home page and command center, once and in any language; it is translated for each member's language (with automatic translation on) |
 | Help | A "?" beside every page and command-center tool explains how to use it |
 | Backup | Members download all their data as JSON; `deploy/backup.sh` backs the database and uploads up nightly and reports its status in the app |
 | Admin center | Platform stats, user search, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log. A full administrator can appoint moderators and choose which areas each one manages; the server enforces it per area |
@@ -123,6 +124,8 @@ After pointing a domain at the server, enable HTTPS with certbot (the install sc
 With `ANTHROPIC_API_KEY` set, admin-written content is also translated automatically: every new or reworded text is translated right after it is saved, and `php artisan translations:auto` (run by `deploy/update.sh`) fills in older content. A translation an administrator writes by hand is never overwritten. `TRANSLATION_MODEL` (default `claude-haiku-5-5`) picks the model and `AUTO_TRANSLATE=false` turns it off.
 
 The AI assistant stays off until `ANTHROPIC_API_KEY` is set in `.env`. `ASSISTANT_MODEL` (default `claude-opus-5-5`) and `ASSISTANT_DAILY_LIMIT` (default 20 questions per member per day) tune it. Each question sends the member's name, today's tasks, open goals, streak and points to Anthropic's API.
+
+To serve the site on a domain instead of the IP address, point the domain's A record (and `www`) at the server, then run `DOMAIN=example.com EMAIL=you@example.com bash deploy/domain.sh`: it checks the DNS, sets nginx, issues a Let's Encrypt certificate (renewed automatically), redirects to HTTPS and updates `.env`.
 
 Password-reset emails are written to `storage/logs` until SMTP is configured (`MAIL_*` in `.env`).
 

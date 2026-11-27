@@ -1320,6 +1320,26 @@ export const fr: Messages = {
         },
     },
     admin: {
+        copyHead: "Phrases de l'interface",
+        copySub:
+            "Réécrivez n'importe quelle phrase de la connexion, de l'accueil et du centre de commande. Écrivez-la une fois, dans n'importe quelle langue ; chaque membre la voit traduite.",
+        copyAutoOn: "La traduction automatique est active : vos phrases s'affichent dans la langue de chaque membre.",
+        copyAutoOff:
+            "La traduction automatique est inactive sur le serveur (ajoutez ANTHROPIC_API_KEY dans .env) ; d'ici là la phrase s'affiche telle quelle.",
+        copySearch: 'Rechercher une phrase…',
+        copyCount: 'Phrases réécrites : {n}',
+        copyPh: "Tapez la nouvelle phrase (toute langue), ou laissez vide pour l'originale",
+        copySaved: 'Phrase enregistrée',
+        copyReset: 'Phrase originale rétablie',
+        copyRestore: 'Originale',
+        copyBlanks: 'Gardez ces champs dans le texte : {blanks}',
+        copyNone: 'Aucune phrase correspondante.',
+        copySections: {
+            featured: 'Les plus vues',
+            auth: 'Connexion',
+            dash: 'Accueil',
+            center: 'Centre de commande',
+        },
         tierHead: "Nom de l'adhésion",
         tierSub:
             'Choisissez le nom affiché sous le nom du membre. Suggestion selon ce que vous avez ouvert : « {name} ».',
