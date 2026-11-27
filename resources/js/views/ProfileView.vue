@@ -221,6 +221,20 @@ async function signOut(): Promise<void> {
                     />
                     <span class="profile-hero__camera"><Camera :size="18" aria-hidden="true" /></span>
                 </button>
+                <dl class="profile-hero__stats">
+                    <div>
+                        <dt>{{ t('profile.heroStats.points') }}</dt>
+                        <dd>{{ user.points }}</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('profile.heroStats.achievements') }}</dt>
+                        <dd>{{ workspace.achievements.length }}</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('profile.heroStats.streak') }}</dt>
+                        <dd>{{ workspace.streak }}</dd>
+                    </div>
+                </dl>
                 <input
                     ref="fileInput"
                     class="sr-only"

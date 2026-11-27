@@ -779,6 +779,11 @@ export const en: Messages = {
         cat: { growth: 'Personal growth', motivation: 'Motivation boost', announcement: 'Platform message' },
     },
     profile: {
+        heroStats: {
+            points: 'Points',
+            achievements: 'Achievements',
+            streak: 'Streak days',
+        },
         premiumUntil: 'Subscription active until {date}',
         back: 'Back',
         verified: 'Verified account',

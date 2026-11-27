@@ -771,6 +771,11 @@ export const ar = {
         cat: { growth: 'تطوير شخصي', motivation: 'دفعة تحفيز', announcement: 'رسالة المنصة' },
     },
     profile: {
+        heroStats: {
+            points: 'نقاطي',
+            achievements: 'إنجازاتي',
+            streak: 'أيام الالتزام',
+        },
         premiumUntil: 'الاشتراك فعّال حتى {date}',
         back: 'رجوع',
         verified: 'حساب موثّق',

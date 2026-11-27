@@ -791,6 +791,11 @@ export const fr: Messages = {
         },
     },
     profile: {
+        heroStats: {
+            points: 'Points',
+            achievements: 'Succès',
+            streak: 'Jours de série',
+        },
         premiumUntil: "Abonnement actif jusqu'au {date}",
         back: 'Retour',
         verified: 'Compte vérifié',
