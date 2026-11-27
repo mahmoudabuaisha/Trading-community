@@ -22,7 +22,7 @@ class StoreItem extends Model
     public const FILE_DIRECTORY = 'store-files';
 
     /** Built-in frame styles and themes; their looks live in the front end's CSS. */
-    public const FRAMES = ['bronze', 'silver', 'gold', 'royal', 'diamond'];
+    public const FRAMES = ['bronze', 'silver', 'gold', 'royal', 'elite', 'legend'];
 
     /** Theme pictures replace the mountain behind the pages. */
     public const THEME_DIRECTORY = 'themes';

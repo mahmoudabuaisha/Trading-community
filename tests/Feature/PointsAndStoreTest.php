@@ -11,6 +11,7 @@ use App\Models\StorePurchase;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\AchievementService;
+use App\Services\PointsService;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -178,6 +179,23 @@ class PointsAndStoreTest extends TestCase
         $this->actingAs($member)->putJson('/api/store/equip', ['kind' => 'emblem', 'itemId' => $emblem->id])->assertOk();
         $this->actingAs($member)->getJson('/api/auth/me')->assertJsonPath('user.emblem', '⭐');
         $this->assertSame($badge->id, $badge->fresh()->id);
+    }
+
+    public function test_the_illustrated_frames_replace_the_old_ones_and_buyers_keep_theirs(): void
+    {
+        StoreItem::where('kind', 'frame')->delete();
+        $member = User::factory()->create();
+        $diamond = StoreItem::create(['name' => 'ماسي', 'kind' => 'frame', 'value' => 'diamond', 'price' => 900]);
+        $custom = StoreItem::create(['name' => 'مخصص', 'kind' => 'frame', 'value' => 'image', 'price' => 10]);
+        StorePurchase::create(['user_id' => $member->id, 'store_item_id' => $diamond->id, 'price' => 900]);
+        $member->forceFill(['equipped' => ['frame' => $diamond->id]])->save();
+
+        (require database_path('migrations/2026_11_30_000014_replace_store_frames.php'))->up();
+
+        $this->assertSame(['bronze', 'silver', 'gold', 'royal', 'elite', 'legend'], StoreItem::where('kind', 'frame')->orderBy('price')->pluck('value')->all());
+        $this->assertSame('elite', $diamond->fresh()->value);
+        $this->assertNull($custom->fresh());
+        $this->assertSame('elite', app(PointsService::class)->appearance($member->fresh())['frame']);
     }
 
     public function test_admins_schedule_and_send_messages_that_members_receive_on_the_day(): void

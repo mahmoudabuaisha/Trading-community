@@ -30,6 +30,7 @@ import ProfileStats from '../components/profile/ProfileStats.vue'
 import { ApiError } from '../data/http'
 import { formatDate, isRtl, t } from '../i18n'
 import { fileToAvatar } from '../lib/image'
+import { frameSrc, isFrameStyle } from '../lib/frames'
 import { standingName } from '../lib/roles'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
@@ -77,6 +78,9 @@ const BackIcon = computed(() => (isRtl.value ? ChevronRight : ChevronLeft))
 const OpenIcon = computed(() => (isRtl.value ? ChevronLeft : ChevronRight))
 // The title shows on its own line, so this line is the member's standing.
 const roleLabel = computed(() => standingName(user.value))
+/** The frame picture worn over the photo, if any. */
+const heroFrame = computed(() => frameSrc(user.value.frame))
+const heroIllustrated = computed(() => isFrameStyle(user.value.frame))
 const verified = computed(() => user.value.role !== 'user' || user.value.isPremium)
 
 function goBack(): void {
@@ -201,24 +205,20 @@ async function signOut(): Promise<void> {
                 <button
                     type="button"
                     class="profile-hero__avatar"
-                    :class="
-                        user.frame.startsWith('/')
-                            ? 'profile-hero__avatar--picture'
-                            : user.frame !== 'none'
-                              ? `profile-hero__avatar--${user.frame}`
-                              : ''
-                    "
+                    :class="{
+                        'profile-hero__avatar--framed': heroIllustrated,
+                        [`profile-hero__avatar--framed-${user.frame}`]: heroIllustrated,
+                    }"
+                    :style="heroIllustrated ? { '--frame-src': `url(${heroFrame})` } : undefined"
                     :aria-label="t('profile.changeAvatar')"
                     @click="fileInput?.click()"
                 >
-                    <img v-if="user.avatarUrl" :src="user.avatarUrl" alt="" />
-                    <UserRound v-else :size="84" aria-hidden="true" />
-                    <img
-                        v-if="user.frame.startsWith('/')"
-                        :src="user.frame"
-                        alt=""
-                        class="profile-hero__frame-picture"
-                    />
+                    <span class="profile-hero__window">
+                        <img v-if="user.avatarUrl" :src="user.avatarUrl" alt="" />
+                        <UserRound v-else :size="84" aria-hidden="true" />
+                    </span>
+                    <img v-if="heroFrame" :src="heroFrame" alt="" class="profile-hero__frame-picture" />
+                    <span v-if="heroIllustrated" class="avatar__shine" aria-hidden="true" />
                     <span class="profile-hero__camera"><Camera :size="18" aria-hidden="true" /></span>
                 </button>
                 <dl class="profile-hero__stats">

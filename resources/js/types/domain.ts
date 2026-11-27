@@ -382,7 +382,7 @@ export const TIERS = ['premium', 'silver', 'gold', 'platinum', 'elite'] as const
 export const STORE_KINDS = ['title', 'frame', 'emblem', 'theme', 'avatar', 'product'] as const
 export type StoreKind = (typeof STORE_KINDS)[number]
 /** Built-in looks an item can apply; the CSS for each lives in app.css. */
-export const FRAME_STYLES = ['bronze', 'silver', 'gold', 'royal', 'diamond'] as const
+export const FRAME_STYLES = ['bronze', 'silver', 'gold', 'royal', 'elite', 'legend'] as const
 
 export interface StoreItem {
     id: number
