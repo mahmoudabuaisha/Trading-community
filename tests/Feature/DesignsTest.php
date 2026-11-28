@@ -27,7 +27,8 @@ class DesignsTest extends TestCase
         $response = $this->actingAs($member)->getJson('/api/designs')->assertOk();
         $designs = collect($response->json('designs'));
         foreach (Design::TARGETS as $target) {
-            $this->assertCount(2, $designs->where('target', $target)->where('price', 0), $target);
+            // Two free designs per target, plus the free hierarchy for skill trees.
+            $this->assertCount($target === 'skill_tree' ? 3 : 2, $designs->where('target', $target)->where('price', 0), $target);
         }
         // With nothing chosen, the first free design of each target is in use.
         $freeMap = $designs->where('target', 'goal_map')->where('price', 0)->first();
@@ -61,12 +62,20 @@ class DesignsTest extends TestCase
         $this->postJson('/api/admin/designs', ['target' => 'skill_tree', 'layout' => 'pyramid', 'name' => 'x', 'price' => 10, 'accent' => 'red', 'nodeShape' => 'blob'])
             ->assertUnprocessable()->assertJsonValidationErrors(['accent', 'nodeShape']);
         $designs = $this->post('/api/admin/designs', ['target' => 'skill_tree', 'layout' => 'pyramid', 'name' => 'هرم الليل', 'price' => 75, 'accent' => '#8fb6ff', 'nodeShape' => 'star', 'background' => UploadedFile::fake()->image('bg.jpg', 400, 300)])
-            ->assertCreated()->assertJsonPath('layouts.skill_tree', ['tree', 'pyramid', 'stairs'])->json('designs');
+            ->assertCreated()->assertJsonPath('layouts.skill_tree', ['hierarchy', 'tree', 'pyramid', 'stairs'])->json('designs');
         $new = collect($designs)->firstWhere('name', 'هرم الليل');
         $this->assertStringStartsWith('/media/designs/', $new['backgroundUrl']);
         $this->post("/api/admin/designs/{$new['id']}", ['price' => 90, 'isActive' => '0'])->assertOk();
         $this->actingAs(User::factory()->create())->getJson('/api/designs')->assertJsonMissing(['name' => 'هرم الليل']);
         $this->actingAs($admin)->deleteJson("/api/admin/designs/{$new['id']}")->assertNoContent();
         $this->assertSame([], Storage::disk('public')->allFiles('designs'));
+    }
+
+    public function test_a_goal_map_design_can_dress_a_skill_tree(): void
+    {
+        $member = User::factory()->create();
+        $map = \App\Models\Design::where('target', 'goal_map')->where('price', 0)->firstOrFail();
+        $this->actingAs($member)->putJson('/api/designs/select', ['designId' => $map->id, 'target' => 'skill_tree'])
+            ->assertOk()->assertJsonPath('selected.skill_tree', $map->id);
     }
 }

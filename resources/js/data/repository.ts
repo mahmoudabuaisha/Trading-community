@@ -134,7 +134,8 @@ export const repository = {
     adminDeleteDailyTip: (id: number) => request<void>('DELETE', `/admin/daily-tips/${id}`),
     designs: () => request<DesignsView>('GET', '/designs'),
     buyDesign: (id: number) => request<DesignsView>('POST', `/designs/${id}/buy`),
-    selectDesign: (id: number) => request<DesignsView>('PUT', '/designs/select', { designId: id }),
+    selectDesign: (id: number, target?: DesignTarget) =>
+        request<DesignsView>('PUT', '/designs/select', { designId: id, ...(target ? { target } : {}) }),
     adminDesigns: () => request<AdminDesignsView>('GET', '/admin/designs'),
     adminSaveDesign: (
         id: number | null,

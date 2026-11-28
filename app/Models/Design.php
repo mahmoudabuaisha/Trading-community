@@ -24,7 +24,7 @@ class Design extends Model
     /** The shapes each target can take; drawing them is the front end's job. */
     public const LAYOUTS = [
         'goal_map' => ['mindmap', 'branches', 'orbit'],
-        'skill_tree' => ['tree', 'pyramid', 'stairs'],
+        'skill_tree' => ['hierarchy', 'tree', 'pyramid', 'stairs'],
     ];
 
     public const NODE_SHAPES = ['circle', 'rounded', 'hexagon', 'diamond', 'star', 'apple'];

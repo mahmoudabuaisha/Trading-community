@@ -21,7 +21,14 @@ export const useDesignsStore = defineStore('designs', () => {
         if (!loaded.value) apply(await repository.designs())
     }
 
-    const forTarget = (target: DesignTarget) => designs.value.filter((design) => design.target === target)
+    /** Skill trees can also wear a goal-map design (its colour, node shape and picture), drawn as a tree. */
+    const forTarget = (target: DesignTarget) =>
+        target === 'skill_tree'
+            ? [
+                  ...designs.value.filter((design) => design.target === target),
+                  ...designs.value.filter((design) => design.target === 'goal_map'),
+              ]
+            : designs.value.filter((design) => design.target === target)
     const current = computed(
         () => (target: DesignTarget) =>
             designs.value.find((design) => design.id === selected.value[target]) ?? forTarget(target)[0] ?? null,
@@ -31,8 +38,8 @@ export const useDesignsStore = defineStore('designs', () => {
         apply(await repository.buyDesign(design.id))
     }
 
-    async function use(design: Design): Promise<void> {
-        apply(await repository.selectDesign(design.id))
+    async function use(design: Design, target?: DesignTarget): Promise<void> {
+        apply(await repository.selectDesign(design.id, target))
     }
 
     return { designs, selected, loaded, load, forTarget, current, buy, use }

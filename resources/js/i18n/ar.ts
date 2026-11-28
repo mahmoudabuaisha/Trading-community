@@ -1165,6 +1165,7 @@ export const ar = {
             branches: 'تفرّع',
             orbit: 'مدارات',
             tree: 'شجرة',
+            hierarchy: 'تسلسل هرمي',
             pyramid: 'هرم',
             stairs: 'سلّم',
         },

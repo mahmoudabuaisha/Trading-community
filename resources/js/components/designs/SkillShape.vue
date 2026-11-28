@@ -33,6 +33,31 @@ const shape = computed(() => {
     const n = Math.max(1, levels.length)
     const mirror = (x: number, width: number) => (isRtl.value ? width - x : x)
 
+    // Hierarchy: the first level at the top, each level branching into two beneath it, in order
+    // (level 1 → 2 and 3, level 2 → 4 and 5…), like an organisation chart. Goal-map designs
+    // dressing a skill tree are drawn this way too.
+    if (!['tree', 'pyramid', 'stairs'].includes(props.design.layout)) {
+        const depth = Math.max(1, Math.ceil(Math.log2(n + 1)))
+        const width = Math.max(700, Math.min(1200, 2 ** (depth - 1) * 150))
+        const rowGap = 120
+        const height = 90 + (depth - 1) * rowGap + 90
+        const nodes = levels.map((level, index) => {
+            const row = Math.floor(Math.log2(index + 1))
+            const inRow = index + 1 - 2 ** row
+            const slots = 2 ** row
+            const x = mirror(((inRow + 0.5) / slots) * width, width)
+            const y = 70 + row * rowGap
+            return { ...level, x, y, parent: { x, y }, row }
+        })
+        nodes.forEach((node, index) => {
+            if (index > 0) {
+                const parent = nodes[Math.floor((index - 1) / 2)]
+                node.parent = { x: parent.x, y: parent.y }
+            }
+        })
+        return { width, height, top: { x: width / 2, y: 30 }, nodes, kind: 'hierarchy' as const, depth, rowGap }
+    }
+
     if (props.design.layout === 'pyramid') {
         // Rows grow by one: 2, 3, 4… under the skill at the top.
         const rows: ShapeLevel[][] = []
@@ -95,27 +120,63 @@ const shape = computed(() => {
     const nodes = levels.map((level, index) => {
         const side = index % 2 === 0 ? 1 : -1
         const y = ground - 90 - index * gap
-        const reach = 150 + (index % 3) * 30
-        return { ...level, x: trunkX + side * (isRtl.value ? -reach : reach), y, parent: { x: trunkX, y: y + 30 } }
+        // One reach for every branch keeps the tree tidy and symmetrical.
+        const reach = 170
+        return { ...level, x: trunkX + side * (isRtl.value ? -reach : reach), y, parent: { x: trunkX, y: y + 26 } }
     })
     const crownTop = ground - 90 - (n - 1) * gap - 60
     return { width, height, top: { x: trunkX, y: crownTop }, nodes, kind: 'tree' as const, ground, trunkX }
 })
 
 const style = computed(() => ({ '--design-accent': props.design.accent }))
+/** A unique id for this drawing's gradient. */
+const uid = Math.random().toString(36).slice(2, 8)
 </script>
 
 <template>
     <div class="design-canvas" :class="{ 'design-canvas--compact': compact }" :style="style">
         <img v-if="design.backgroundUrl" :src="design.backgroundUrl" alt="" class="design-canvas__bg" />
         <svg :viewBox="`0 0 ${shape.width} ${shape.height}`" role="img" :aria-label="title" class="design-canvas__svg">
-            <template v-if="shape.kind === 'tree'">
+            <template v-if="shape.kind === 'hierarchy'">
+                <defs>
+                    <linearGradient :id="`hier-${uid}`" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="var(--design-accent)" stop-opacity="0.9" />
+                        <stop offset="1" stop-color="var(--design-accent)" stop-opacity="0.35" />
+                    </linearGradient>
+                </defs>
+                <!-- Faint guide lines mark each tier. -->
+                <line
+                    v-for="row in shape.depth"
+                    :key="`tier${row}`"
+                    x1="30"
+                    :x2="shape.width - 30"
+                    :y1="70 + (row - 1) * shape.rowGap"
+                    :y2="70 + (row - 1) * shape.rowGap"
+                    class="hier-tier"
+                />
+                <path
+                    v-for="node in shape.nodes.slice(1)"
+                    :key="`h${node.id}`"
+                    :d="`M${node.parent.x},${node.parent.y + 44} C${node.parent.x},${(node.parent.y + 44 + node.y) / 2} ${node.x},${(node.parent.y + 44 + node.y) / 2} ${node.x},${node.y - 24}`"
+                    class="hier-link"
+                    :class="{ 'hier-link--done': node.passed }"
+                    :stroke="`url(#hier-${uid})`"
+                />
+            </template>
+            <template v-else-if="shape.kind === 'tree'">
                 <ellipse
                     :cx="shape.trunkX"
                     :cy="(shape.top.y + shape.ground - 60) / 2"
-                    :rx="280"
+                    :rx="290"
                     :ry="(shape.ground - shape.top.y) / 2"
                     class="tree-crown"
+                />
+                <ellipse
+                    :cx="shape.trunkX"
+                    :cy="(shape.top.y + shape.ground - 60) / 2"
+                    :rx="230"
+                    :ry="(shape.ground - shape.top.y) / 2 - 30"
+                    class="tree-crown tree-crown--inner"
                 />
                 <path
                     :d="`M${shape.trunkX - 26},${shape.ground} Q${shape.trunkX - 10},${(shape.ground + shape.top.y) / 2} ${shape.trunkX - 6},${shape.top.y + 40} L${shape.trunkX + 6},${shape.top.y + 40} Q${shape.trunkX + 10},${(shape.ground + shape.top.y) / 2} ${shape.trunkX + 26},${shape.ground} Z`"

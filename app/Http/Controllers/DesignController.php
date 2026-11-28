@@ -46,13 +46,17 @@ class DesignController extends Controller
 
     public function select(Request $request): JsonResponse
     {
-        $data = $request->validate(['designId' => ['required', 'integer', Rule::exists('designs', 'id')]]);
+        $data = $request->validate([
+            'designId' => ['required', 'integer', Rule::exists('designs', 'id')],
+            // A goal-map design may dress a skill tree too (its colour, node shape and picture).
+            'target' => ['sometimes', Rule::in(Design::TARGETS)],
+        ]);
         $user = $request->user();
         $design = Design::findOrFail($data['designId']);
         if (! $this->usable($user, $design)) {
             throw ValidationException::withMessages(['designId' => __('validation.custom.store.notOwned')]);
         }
-        $user->forceFill(['designs' => [...($user->designs ?? []), $design->target => $design->id]])->save();
+        $user->forceFill(['designs' => [...($user->designs ?? []), ($data['target'] ?? $design->target) => $design->id]])->save();
 
         return $this->respond($user->refresh());
     }

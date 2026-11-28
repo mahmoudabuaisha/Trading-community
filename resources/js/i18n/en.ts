@@ -1184,6 +1184,7 @@ export const en: Messages = {
             branches: 'Branches',
             orbit: 'Orbits',
             tree: 'Tree',
+            hierarchy: 'Hierarchy',
             pyramid: 'Pyramid',
             stairs: 'Staircase',
         },

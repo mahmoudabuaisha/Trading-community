@@ -1211,6 +1211,7 @@ export const fr: Messages = {
             branches: 'Ramifications',
             orbit: 'Orbites',
             tree: 'Arbre',
+            hierarchy: 'Hiérarchie',
             pyramid: 'Pyramide',
             stairs: 'Escalier',
         },

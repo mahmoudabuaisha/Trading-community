@@ -60,7 +60,15 @@ async function run(action: () => Promise<void>, successKey: string): Promise<voi
 async function confirmBuy(): Promise<void> {
     const design = buying.value
     buying.value = null
-    if (design) await run(() => store.buy(design), 'designs.bought')
+    // A goal-map design bought from the skill tree's picker is put to use there too.
+    if (design)
+        await run(
+            () =>
+                store
+                    .buy(design)
+                    .then(() => (design.target !== props.target ? store.use(design, props.target) : undefined)),
+            'designs.bought',
+        )
 }
 </script>
 
@@ -107,7 +115,7 @@ async function confirmBuy(): Promise<void> {
                                 type="button"
                                 class="btn"
                                 :disabled="busy"
-                                @click="run(() => store.use(design), 'designs.applied')"
+                                @click="run(() => store.use(design, props.target), 'designs.applied')"
                             >
                                 {{ t('designs.use') }}
                             </button>
