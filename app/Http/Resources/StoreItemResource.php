@@ -24,6 +24,8 @@ class StoreItemResource extends JsonResource
             // What was bought is handed over to its owner only (and shown to administrators).
             'link' => ! empty($this->owned) || $request->is('api/admin/*') ? $this->link : null,
             'imageUrl' => $this->imageUrl(),
+            'audience' => $this->audience,
+            'style' => $this->style,
             'price' => $this->price,
             'isActive' => $this->is_active,
             'isExclusive' => $this->is_exclusive,

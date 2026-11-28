@@ -10,6 +10,7 @@ use App\Models\Goal;
 use App\Models\StorePurchase;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\AccountDeletion;
 use App\Services\AchievementService;
 use App\Services\AdminService;
 use App\Services\PointsService;
@@ -104,5 +105,34 @@ class UserController extends Controller
         $admin->revokeSessions($request->user(), $user);
 
         return response()->noContent();
+    }
+
+    /** Delete one member's account and all its data; staff accounts cannot be deleted here. */
+    public function destroy(Request $request, User $user, AccountDeletion $deletion, AdminService $admin): JsonResponse
+    {
+        abort_if($user->id === $request->user()->id || $user->isStaff(), 422, __('validation.custom.accounts.staff'));
+        $label = "{$user->display_name} <{$user->email}>";
+        $deletion->delete($user);
+        $admin->record($request->user(), 'account_deleted', $label);
+
+        return response()->json(['deleted' => 1]);
+    }
+
+    /**
+     * Delete every member account (staff stay), for a fresh start at launch.
+     * The administrator types the word shown to confirm.
+     */
+    public function purgeMembers(Request $request, AccountDeletion $deletion, AdminService $admin): JsonResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        $request->validate(['confirm' => ['required', 'in:DELETE']]);
+        $count = 0;
+        User::where('role', 'user')->orderBy('id')->each(function (User $user) use ($deletion, &$count): void {
+            $deletion->delete($user);
+            $count++;
+        });
+        $admin->record($request->user(), 'members_purged', (string) $count);
+
+        return response()->json(['deleted' => $count]);
     }
 }

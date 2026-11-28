@@ -186,6 +186,7 @@ return [
         'assistant' => ['off' => 'The AI assistant is not switched on yet.', 'subscribers' => 'The AI assistant is for subscribers it was opened for.', 'limit' => 'You reached the daily limit (:n questions). Come back tomorrow.', 'busy' => 'The assistant is busy right now; try again shortly.', 'refused' => 'I cannot help with that question. Try rephrasing, or ask about your tasks and goals.', 'service' => 'AI assistant'],
         'areas' => ['limit' => 'You have reached the maximum number of areas (:max).'],
         'vision' => ['boards' => 'You have reached the maximum number of boards.', 'items' => 'This board has reached its maximum number of items.'],
+        'accounts' => ['staff' => 'Staff accounts and your own account cannot be deleted here.'],
         'skills' => [
             'tooMany' => 'You reached the limit; remove some first.', 'locked' => 'Pass the earlier levels first.', 'answer' => 'The correct answer of question :n is not among its options.'],
         'portfolio' => ['limit' => 'You have reached the maximum number of projects.'],

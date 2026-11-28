@@ -99,7 +99,7 @@ class PointsService
      * What the member currently shows, resolved from the items they have in use.
      * An item that was deleted simply stops showing.
      *
-     * @return array{title: string|null, frame: string, emblem: string|null, theme: array<string, mixed>|null, ownedThemes: list<array<string, mixed>>}
+     * @return array{title: string|null, titleStyle: string|null, frame: string, emblem: string|null, theme: array<string, mixed>|null, ownedThemes: list<array<string, mixed>>}
      */
     public function appearance(User $user): array
     {
@@ -108,6 +108,8 @@ class PointsService
 
         return [
             'title' => $items->get('title')?->tr('value'),
+            // The title's illustrated look, if it has one.
+            'titleStyle' => $items->get('title')?->style,
             'frame' => $items->get('frame')?->look() ?? 'none',
             // A small badge (emoji or picture) shown next to the name.
             'emblem' => $items->get('emblem')?->look(),

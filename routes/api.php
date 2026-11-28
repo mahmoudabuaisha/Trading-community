@@ -175,6 +175,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('books/{book}', [AdminBookController::class, 'update'])->middleware('area:education');
         Route::delete('books/{book}', [AdminBookController::class, 'destroy'])->middleware('area:education');
         Route::patch('users/{user}', [AdminUserController::class, 'update'])->middleware('area:users');
+        Route::delete('users/{user}', [AdminUserController::class, 'destroy'])->middleware('area:users');
+        Route::post('members/purge', [AdminUserController::class, 'purgeMembers'])->middleware('area:users');
         Route::post('users/{user}/revoke-sessions', [AdminUserController::class, 'revokeSessions'])->middleware('area:users');
         Route::get('motivations', [AdminMotivationController::class, 'index'])->middleware('area:growth');
         Route::post('motivations', [AdminMotivationController::class, 'store'])->middleware('area:growth');

@@ -76,6 +76,9 @@ class StoreController extends Controller
         $granted = $user->grantedIds('store_item');
         $equipped = collect($user->equipped ?? [])->filter()->flip();
         $items = StoreItem::where('is_active', true)->orWhereIn('id', $owned->keys())->orderBy('price')->orderBy('id')->get()
+            // Profile pictures follow the member's gender when they gave one; what they own always shows.
+            ->reject(fn (StoreItem $item): bool => $item->kind === 'avatar' && $item->audience && $user->gender && $item->audience !== $user->gender && ! $owned->has($item->id))
+            ->values()
             ->each(function (StoreItem $item) use ($owned, $equipped, $user, $granted): void {
                 $item->allowed = ! $item->is_exclusive || $user->isStaff() || in_array($item->id, $granted, true);
                 $item->owned = $owned->has($item->id);

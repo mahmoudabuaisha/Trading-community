@@ -84,12 +84,13 @@ class LeaderboardController extends Controller
         $items = StoreItem::whereIn('id', $users->flatMap(fn (User $user) => array_filter($user->equipped ?? []))->unique())->get()->keyBy('id');
         $worn = fn (User $user, string $kind): ?string => $kind === 'title' ? $items->get($user->equipped[$kind] ?? null)?->tr('value') : $items->get($user->equipped[$kind] ?? null)?->look();
 
-        return $users->mapWithKeys(function (User $user) use ($worn): array {
+        return $users->mapWithKeys(function (User $user) use ($worn, $items): array {
             $privacy = $user->privacyValues();
 
             return [$user->id => [
                 ...$user->publicIdentity(),
                 'title' => $privacy['showTitle'] ? $worn($user, 'title') : null,
+                'titleStyle' => $privacy['showTitle'] ? $items->get($user->equipped['title'] ?? null)?->style : null,
                 'frame' => $privacy['showFrame'] ? ($worn($user, 'frame') ?? 'none') : 'none',
                 'emblem' => $privacy['showEmblem'] ? $worn($user, 'emblem') : null,
             ]];

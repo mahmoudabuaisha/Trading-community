@@ -55,6 +55,10 @@ class StoreItemRequest extends ApiRequest
             'value' => $valueNeeded ? $value : ['sometimes'],
             'price' => [$required, 'integer', 'min:0', 'max:1000000'],
             'isActive' => ['sometimes', 'boolean'],
+            // A profile picture for men, for women, or (empty) for everyone.
+            'audience' => ['sometimes', 'nullable', Rule::in(StoreItem::AUDIENCES)],
+            // A title's illustrated look.
+            'style' => ['sometimes', 'nullable', Rule::in(StoreItem::TITLE_STYLES)],
             // Reserved to the subscribers it is opened for.
             'isExclusive' => ['sometimes', 'boolean'],
             // A theme: the accent its shades are derived from, an optional dark base, an optional picture.

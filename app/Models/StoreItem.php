@@ -24,10 +24,16 @@ class StoreItem extends Model
     /** Built-in frame styles and themes; their looks live in the front end's CSS. */
     public const FRAMES = ['bronze', 'silver', 'gold', 'royal', 'elite', 'legend'];
 
+    /** Illustrated title looks (icon and colour); their pictures live in public/images/titles. */
+    public const TITLE_STYLES = ['committed', 'persistent', 'achiever', 'ambitious', 'creative', 'excellent', 'challenger', 'professional', 'wise', 'strategist', 'leader', 'legend'];
+
+    /** Who a profile picture is meant for; null is everyone. */
+    public const AUDIENCES = ['male', 'female'];
+
     /** Theme pictures replace the mountain behind the pages. */
     public const THEME_DIRECTORY = 'themes';
 
-    protected $fillable = ['name', 'description', 'kind', 'value', 'price', 'is_active', 'category_id', 'link', 'is_exclusive', 'theme_accent', 'theme_background'];
+    protected $fillable = ['name', 'description', 'kind', 'value', 'price', 'is_active', 'category_id', 'link', 'is_exclusive', 'theme_accent', 'theme_background', 'audience', 'style'];
 
     protected $attributes = ['description' => '', 'is_active' => true];
 
@@ -67,6 +73,11 @@ class StoreItem extends Model
 
     public function imageUrl(): ?string
     {
+        if ($this->image_path && str_starts_with($this->image_path, 'builtin:')) {
+            // Pictures that ship with the platform, served straight from public/images.
+            return '/images/'.substr($this->image_path, 8);
+        }
+
         return $this->image_path ? '/media/'.$this->image_path : null;
     }
 
@@ -74,7 +85,7 @@ class StoreItem extends Model
     {
         static::deleted(function (StoreItem $item): void {
             SubscriptionGrant::forget('store_item', $item->id);
-            if ($item->image_path) {
+            if ($item->image_path && ! str_starts_with($item->image_path, 'builtin:')) {
                 Storage::disk('public')->delete($item->image_path);
             }
             if ($item->theme_image_path) {
