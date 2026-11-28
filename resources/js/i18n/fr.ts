@@ -36,6 +36,9 @@ export const fr: Messages = {
         'Ne mesure pas ta journée en heures, mais en ce que tu as accompli.',
     ],
     auth: {
+        or: 'ou',
+        google: 'Continuer avec Google',
+        googleFailed: "La connexion Google n'a pas abouti. Réessayez.",
         tagline: 'De plus grands objectifs .. une vie meilleure',
         logoAlt: 'Logo SN Tasks : planifier, organiser, accomplir',
         signInTitle: 'Connexion',

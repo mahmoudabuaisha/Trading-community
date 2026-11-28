@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\TranslationController as AdminTranslationControll
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DailyTipController;
@@ -50,6 +51,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('site-copy', [SiteCopyController::class, 'index']);
 
 Route::prefix('auth')->group(function (): void {
+    Route::get('providers', [GoogleController::class, 'providers']);
     Route::middleware('guest:web')->group(function (): void {
         Route::post('register', [AuthController::class, 'register'])->middleware('throttle:10,1');
         Route::post('login', [AuthController::class, 'login'])->middleware('throttle:6,1');

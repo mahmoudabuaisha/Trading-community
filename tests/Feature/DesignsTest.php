@@ -74,7 +74,7 @@ class DesignsTest extends TestCase
     public function test_a_goal_map_design_can_dress_a_skill_tree(): void
     {
         $member = User::factory()->create();
-        $map = \App\Models\Design::where('target', 'goal_map')->where('price', 0)->firstOrFail();
+        $map = Design::where('target', 'goal_map')->where('price', 0)->firstOrFail();
         $this->actingAs($member)->putJson('/api/designs/select', ['designId' => $map->id, 'target' => 'skill_tree'])
             ->assertOk()->assertJsonPath('selected.skill_tree', $map->id);
     }

@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // "Sign in with Google": create an OAuth client in Google Cloud Console and add
+    // {APP_URL}/auth/google/callback as an authorised redirect URI.
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => rtrim((string) env('APP_URL'), '/').'/auth/google/callback',
+    ],
 ];

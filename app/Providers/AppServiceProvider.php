@@ -9,7 +9,10 @@ use App\Services\Assistant\ClaudeAssistantClient;
 use App\Services\Translation\ClaudeTextTranslator;
 use App\Services\Translation\TextTranslator;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // 300 API calls a minute per member is far above normal use; bots hitting the API stop there.
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(300)->by($request->user()?->id ?: $request->ip()));
         // Second, independent admin check behind the `role:admin` route middleware.
         Gate::define('admin', fn (User $user): bool => $user->isAdmin());
         // One area of the admin center: administrators always, moderators when granted.

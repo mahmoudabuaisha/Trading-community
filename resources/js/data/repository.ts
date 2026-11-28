@@ -83,11 +83,17 @@ type AdminDesignsView = { designs: Design[]; layouts: Record<DesignTarget, strin
 
 export const repository = {
     // Auth
+    authProviders: () => request<{ google: boolean }>('GET', '/auth/providers'),
     me: () => request<{ user: User }>('GET', '/auth/me').then((r) => r.user),
     login: (email: string, password: string, remember: boolean) =>
         request<{ user: User }>('POST', '/auth/login', { email, password, remember }).then((r) => r.user),
-    register: (displayName: string, email: string, password: string) =>
-        request<{ user: User }>('POST', '/auth/register', { displayName, email, password }).then((r) => r.user),
+    register: (displayName: string, email: string, password: string, website = '') =>
+        request<{ user: User }>('POST', '/auth/register', {
+            displayName,
+            email,
+            password,
+            ...(website ? { website } : {}),
+        }).then((r) => r.user),
     logout: () => request<void>('POST', '/auth/logout'),
     forgotPassword: (email: string) => request<{ message: string }>('POST', '/auth/forgot-password', { email }),
     resetPassword: (token: string, email: string, password: string) =>

@@ -14,6 +14,8 @@ class RegisterRequest extends ApiRequest
             'displayName' => ['required', 'string', 'max:120'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', Password::min(8), 'max:255'],
+            // A field hidden from people: sign-up bots that fill every input are turned away.
+            'website' => ['prohibited'],
         ];
     }
 }

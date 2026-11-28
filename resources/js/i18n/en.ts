@@ -36,6 +36,9 @@ export const en: Messages = {
         "Don't measure your day in hours, but in what you got done.",
     ],
     auth: {
+        or: 'or',
+        google: 'Continue with Google',
+        googleFailed: 'Google sign-in did not work. Please try again.',
         tagline: 'Bigger goals .. a better life',
         logoAlt: 'SN Tasks logo: plan, organize, achieve',
         signInTitle: 'Sign in',

@@ -40,8 +40,8 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = await repository.login(email, password, remember)
     }
 
-    async function register(displayName: string, email: string, password: string): Promise<void> {
-        user.value = await repository.register(displayName, email, password)
+    async function register(displayName: string, email: string, password: string, website = ''): Promise<void> {
+        user.value = await repository.register(displayName, email, password, website)
     }
 
     async function logout(): Promise<void> {

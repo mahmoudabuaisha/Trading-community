@@ -7580,3 +7580,39 @@ a.btn-metal {
     stroke: var(--design-accent, var(--gold-500));
     stroke-opacity: 0.18;
 }
+
+/* ── Sign in with Google ────────────────────────────────────────────── */
+.auth-or {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-block: var(--space-3) var(--space-2);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+.auth-or::before,
+.auth-or::after {
+    content: '';
+    flex: 1;
+    block-size: 1px;
+    background: var(--line);
+}
+.auth-google {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+    inline-size: 100%;
+    text-decoration: none;
+}
+.auth-google__logo {
+    inline-size: 18px;
+    block-size: 18px;
+}
+/* Hidden from people, visible to form-filling bots. */
+.auth-trap {
+    position: absolute;
+    inset-inline-start: -9999px;
+    inline-size: 1px;
+    block-size: 1px;
+    opacity: 0;
+}
