@@ -595,6 +595,14 @@ export const en: Messages = {
         emptyText: 'What you buy in the store (frames, titles, pictures…) shows here, ready to use.',
         toStore: 'Go to the store',
     },
+    links: {
+        head: 'Follow us',
+        kinds: {
+            instagram: 'Instagram',
+            telegram: 'Telegram',
+            other: 'Link',
+        },
+    },
     privacy: {
         showEmblem: 'Show my badge',
         showEmblemHint: 'The badge next to your name.',
@@ -1324,6 +1332,13 @@ export const en: Messages = {
         },
     },
     admin: {
+        linksHead: 'Official links',
+        linksSub: 'Instagram and Telegram accounts shown in the menu and on the sign-in page.',
+        linksAdd: 'Add a link',
+        linksLabel: 'Shown name',
+        linksUrl: 'Link (starts with https://)',
+        linksSaved: 'Links saved',
+        linksRemove: 'Remove',
         stTitleStyle: 'Title look',
         stTitlePlain: 'No look (plain gold title)',
         stTitleStyleHint: 'An icon, colour and animated frame shown with the title.',

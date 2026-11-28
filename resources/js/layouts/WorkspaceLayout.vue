@@ -33,6 +33,7 @@ import EmptyState from '../components/EmptyState.vue'
 import AssistantWidget from '../components/AssistantWidget.vue'
 import FocusDock from '../components/FocusDock.vue'
 import HelpTip from '../components/HelpTip.vue'
+import OfficialLinks from '../components/OfficialLinks.vue'
 import NameEmblem from '../components/NameEmblem.vue'
 import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import NotificationBell from '../components/NotificationBell.vue'
@@ -250,6 +251,8 @@ async function signOut(): Promise<void> {
                         <span>{{ t('nav.signOut') }}</span>
                     </button>
                 </nav>
+
+                <OfficialLinks compact />
 
                 <div class="sidebar__badge">
                     <Crown :size="22" aria-hidden="true" />

@@ -2,6 +2,7 @@
 import { Eye, EyeOff, Lock, LogIn, Mail, UserRound } from 'lucide-vue-next'
 import { computed, reactive, ref } from 'vue'
 import AuthScene from '../components/AuthScene.vue'
+import OfficialLinks from '../components/OfficialLinks.vue'
 import SummitArt from '../components/SummitArt.vue'
 import { usePointerParallax } from '../composables/usePointerParallax'
 import BrandLogo from '../components/BrandLogo.vue'
@@ -277,6 +278,7 @@ async function submit(): Promise<void> {
                         {{ t('auth.backToSignIn') }}
                     </button>
                 </div>
+                <OfficialLinks compact class="auth-links" />
             </div>
         </section>
     </main>

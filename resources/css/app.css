@@ -7616,3 +7616,93 @@ a.btn-metal {
     block-size: 1px;
     opacity: 0;
 }
+
+/* ── Official links ─────────────────────────────────────────────────── */
+.official-links {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+}
+.official-links__head {
+    margin: 0;
+    color: var(--gold-300);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+.official-links__group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+.official-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    color: var(--text-soft);
+    font-size: var(--text-xs);
+    text-decoration: none;
+    transition:
+        border-color var(--motion-base),
+        color var(--motion-base);
+}
+.official-link:hover,
+.official-link:focus-visible {
+    color: var(--text);
+}
+.official-link--instagram:hover,
+.official-link--instagram:focus-visible {
+    border-color: #e1306c;
+}
+.official-link--telegram:hover,
+.official-link--telegram:focus-visible {
+    border-color: #2aabee;
+}
+.official-link__icon {
+    inline-size: 15px;
+    block-size: 15px;
+    flex: none;
+}
+.official-link--instagram .official-link__icon {
+    color: #e1306c;
+}
+.official-link--telegram .official-link__icon {
+    color: #2aabee;
+}
+.sidebar .official-links {
+    margin-block: var(--space-3);
+}
+.auth-links {
+    margin-block-start: var(--space-4);
+    background: transparent;
+    border: 0;
+    border-block-start: 1px solid var(--line-soft);
+    border-radius: 0;
+    padding-inline: 0;
+    justify-items: center;
+}
+.auth-links .official-links__group {
+    justify-content: center;
+}
+.links-row {
+    display: grid;
+    grid-template-columns: auto 1fr 2fr auto;
+    gap: var(--space-2);
+    align-items: center;
+}
+.links-row small {
+    grid-column: 1 / -1;
+}
+@media (max-width: 640px) {
+    .links-row {
+        grid-template-columns: 1fr auto;
+    }
+    .links-row .input:not(.input--auto) {
+        grid-column: 1 / -1;
+    }
+}

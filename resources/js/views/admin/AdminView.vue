@@ -18,6 +18,7 @@ import {
 import { computed, onMounted, reactive, ref, watch, type Component } from 'vue'
 import AdminBadges from '../../components/admin/AdminBadges.vue'
 import AdminContent from '../../components/admin/AdminContent.vue'
+import AdminLinks from '../../components/admin/AdminLinks.vue'
 import AdminLessons from '../../components/admin/AdminLessons.vue'
 import AdminMessages from '../../components/admin/AdminMessages.vue'
 import AdminSkills from '../../components/admin/AdminSkills.vue'
@@ -424,6 +425,8 @@ function auditDetail(entry: AuditEntry): string {
                 </button>
             </form>
         </div>
+
+        <AdminLinks v-if="tab === 'content'" />
 
         <AdminContent v-if="tab === 'content'" />
 

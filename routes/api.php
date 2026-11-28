@@ -32,6 +32,7 @@ use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MySkillController;
+use App\Http\Controllers\OfficialLinksController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -49,6 +50,7 @@ use Illuminate\Support\Facades\Route;
 
 // Phrases the administrators rewrote, in the visitor's language (the login page needs them too).
 Route::get('site-copy', [SiteCopyController::class, 'index']);
+Route::get('official-links', [OfficialLinksController::class, 'index']);
 
 Route::prefix('auth')->group(function (): void {
     Route::get('providers', [GoogleController::class, 'providers']);
@@ -203,6 +205,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::patch('store-categories/{category}', [AdminStoreCategoryController::class, 'update'])->middleware('area:store');
         Route::delete('store-categories/{category}', [AdminStoreCategoryController::class, 'destroy'])->middleware('area:store');
         // Each kind of content is guarded by its own area inside the controller.
+        Route::put('official-links', [OfficialLinksController::class, 'update']);
         Route::get('site-copy', [SiteCopyController::class, 'adminIndex']);
         Route::put('site-copy', [SiteCopyController::class, 'save']);
         Route::get('translations/{type}/{id}', [AdminTranslationController::class, 'show'])->whereNumber('id');

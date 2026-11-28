@@ -599,6 +599,14 @@ export const fr: Messages = {
         emptyText: 'Vos achats en boutique (cadres, titres, images…) apparaissent ici, prêts à utiliser.',
         toStore: 'Aller à la boutique',
     },
+    links: {
+        head: 'Suivez-nous',
+        kinds: {
+            instagram: 'Instagram',
+            telegram: 'Telegram',
+            other: 'Lien',
+        },
+    },
     privacy: {
         showEmblem: 'Afficher mon badge',
         showEmblemHint: 'Le badge à côté de votre nom.',
@@ -1355,6 +1363,13 @@ export const fr: Messages = {
         },
     },
     admin: {
+        linksHead: 'Liens officiels',
+        linksSub: 'Comptes Instagram et Telegram affichés dans le menu et sur la page de connexion.',
+        linksAdd: 'Ajouter un lien',
+        linksLabel: 'Nom affiché',
+        linksUrl: 'Lien (commence par https://)',
+        linksSaved: 'Liens enregistrés',
+        linksRemove: 'Supprimer',
         stTitleStyle: 'Style du titre',
         stTitlePlain: 'Sans style (titre doré simple)',
         stTitleStyleHint: 'Une icône, une couleur et un cadre animé avec le titre.',

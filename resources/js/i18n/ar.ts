@@ -588,6 +588,14 @@ export const ar = {
         emptyText: 'ما تشتريه من المتجر (إطارات، ألقاب، صور…) يظهر هنا لتستخدمه متى شئت.',
         toStore: 'اذهب إلى المتجر',
     },
+    links: {
+        head: 'تابعنا',
+        kinds: {
+            instagram: 'إنستغرام',
+            telegram: 'تليغرام',
+            other: 'رابط',
+        },
+    },
     privacy: {
         showEmblem: 'إظهار شارتي',
         showEmblemHint: 'الشارة التي بجانب اسمك.',
@@ -1287,6 +1295,13 @@ export const ar = {
         },
     },
     admin: {
+        linksHead: 'الروابط الرسمية',
+        linksSub: 'حسابات إنستغرام وتليغرام التي تظهر في القائمة الجانبية وصفحة الدخول.',
+        linksAdd: 'إضافة رابط',
+        linksLabel: 'الاسم الظاهر',
+        linksUrl: 'الرابط (يبدأ بـ https://)',
+        linksSaved: 'تم حفظ الروابط',
+        linksRemove: 'حذف',
         stTitleStyle: 'شكل اللقب',
         stTitlePlain: 'بدون شكل (لقب ذهبي بسيط)',
         stTitleStyleHint: 'أيقونة ولون وإطار متحرك يظهر مع اللقب.',
