@@ -22,6 +22,7 @@ import AdminLessons from '../../components/admin/AdminLessons.vue'
 import AdminMessages from '../../components/admin/AdminMessages.vue'
 import AdminSkills from '../../components/admin/AdminSkills.vue'
 import TranslateButton from '../../components/admin/TranslateButton.vue'
+import { repository } from '../../data/repository'
 import UserDetailsDialog from '../../components/admin/UserDetailsDialog.vue'
 import AdminDailyTips from '../../components/admin/AdminDailyTips.vue'
 import AdminBooks from '../../components/admin/AdminBooks.vue'
@@ -51,6 +52,27 @@ import {
 
 const admin = useAdminStore()
 const auth = useAuthStore()
+
+/** After an account is deleted, refresh the list and the platform totals. */
+const reloadAfterDelete = () => run(() => Promise.all([admin.loadUsers(), admin.loadOverview()]).then(() => undefined))
+
+/** Clear every member account (staff stay) before the public launch; the admin types DELETE first. */
+const purgeWord = ref('')
+const purging = ref(false)
+async function purge(): Promise<void> {
+    if (purgeWord.value !== 'DELETE' || purging.value) return
+    purging.value = true
+    try {
+        const { deleted } = await repository.adminPurgeMembers(purgeWord.value)
+        purgeWord.value = ''
+        ui.success(t('admin.purgeDone', { n: deleted }))
+        await Promise.all([admin.loadUsers(1), admin.loadOverview()])
+    } catch (error) {
+        ui.failure(error)
+    } finally {
+        purging.value = false
+    }
+}
 const ui = useUiStore()
 
 /** Run an admin action, surfacing success or the server's refusal. */
@@ -383,6 +405,26 @@ function auditDetail(entry: AuditEntry): string {
             </div>
         </div>
 
+        <div v-if="tab === 'users' && auth.isAdmin" class="panel danger-zone danger-zone--panel">
+            <div>
+                <h3>{{ t('admin.purgeHead') }}</h3>
+                <p>{{ t('admin.purgeSub') }}</p>
+            </div>
+            <form class="row-actions" @submit.prevent="purge">
+                <input
+                    v-model="purgeWord"
+                    class="input input--auto"
+                    dir="ltr"
+                    autocomplete="off"
+                    :placeholder="t('admin.purgePh')"
+                    :aria-label="t('admin.purgePh')"
+                />
+                <button type="submit" class="btn btn--danger" :disabled="purgeWord !== 'DELETE' || purging">
+                    {{ purging ? t('common.saving') : t('admin.purgeBtn') }}
+                </button>
+            </form>
+        </div>
+
         <AdminContent v-if="tab === 'content'" />
 
         <AdminBroadcasts v-if="tab === 'growth'" />
@@ -558,6 +600,11 @@ function auditDetail(entry: AuditEntry): string {
             @saved="run(() => admin.loadUsers())"
             @close="subscriptionOf = null"
         />
-        <UserDetailsDialog v-if="detailsOf !== null" :user-id="detailsOf" @close="detailsOf = null" />
+        <UserDetailsDialog
+            v-if="detailsOf !== null"
+            :user-id="detailsOf"
+            @close="detailsOf = null"
+            @deleted="reloadAfterDelete"
+        />
     </section>
 </template>

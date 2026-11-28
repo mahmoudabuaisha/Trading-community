@@ -36,6 +36,8 @@ A bilingual (Arabic RTL / English) personal productivity workspace with an admin
 | Membership | Admins open chosen services per member and name the membership (premium, silver, gold, platinum, elite — suggested from what is opened — or their own words) |
 | Emblems and frames | Store items include emblems worn next to the name (emoji or icon) and six illustrated frames (bronze, silver, gold, royal, elite, legend) with a light sweep, a glow on the rarer ones and a slow 3D turn on the profile, or a frame from an uploaded picture; achievements can hand over any item for free |
 | Interface phrases | Admins rewrite any phrase of the sign-in page, home page and command center, once and in any language; it is translated for each member's language (with automatic translation on) |
+| Titles and portraits | Twelve illustrated titles (icon, colour, animated frame, live text in the member's language) and six animated store portraits; pictures can target men, women or everyone and follow the gender the member chose. A "My collection" section in the profile lists everything owned |
+| Account cleanup | Admins delete a member account with all its data, or (full admin) every member account at once for a fresh launch; the emails are free to sign up again |
 | Help | A "?" beside every page and command-center tool explains how to use it |
 | Backup | Members download all their data as JSON; `deploy/backup.sh` backs the database and uploads up nightly and reports its status in the app |
 | Admin center | Platform stats, user search, session revocation, editable home-page copy, motivation studio, lesson manager, member inbox, audit log. A full administrator can appoint moderators and choose which areas each one manages; the server enforces it per area |

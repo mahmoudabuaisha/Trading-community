@@ -2,6 +2,7 @@
 import { Eye, Lock } from 'lucide-vue-next'
 import { computed, reactive, ref } from 'vue'
 import NameEmblem from '../NameEmblem.vue'
+import TitleBadge from '../TitleBadge.vue'
 import UserAvatar from '../UserAvatar.vue'
 import { repository } from '../../data/repository'
 import { t } from '../../i18n'
@@ -77,7 +78,7 @@ async function save(): Promise<void> {
                 <UserAvatar :name="preview.name" :src="preview.avatar" :frame="preview.frame" size="sm" />
                 <span class="leader-row__name">
                     <b>{{ preview.name }} <NameEmblem :emblem="preview.emblem" /></b>
-                    <small v-if="preview.title">{{ preview.title }}</small>
+                    <TitleBadge v-if="preview.title" :text="preview.title" :look="user.titleStyle" size="sm" />
                 </span>
                 <span class="leader-row__value">{{ t('leaders.unitPoints', { n: user.points }) }}</span>
             </div>

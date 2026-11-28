@@ -7309,3 +7309,251 @@ a.btn-metal {
 .store-art .avatar--framed {
     transform: scale(0.74);
 }
+
+/* ── Illustrated titles ─────────────────────────────────────────────── */
+.title-badge {
+    --tone: #e2b45c;
+    --tone-soft: rgb(226 180 92 / 0.35);
+    position: relative;
+    display: inline-grid;
+    justify-items: center;
+    vertical-align: middle;
+    line-height: 1.1;
+}
+.title-badge--persistent,
+.title-badge--professional {
+    --tone: #d4d8e2;
+    --tone-soft: rgb(212 216 226 / 0.3);
+}
+.title-badge--committed {
+    --tone: #dba15a;
+    --tone-soft: rgb(219 161 90 / 0.35);
+}
+.title-badge--ambitious,
+.title-badge--legend {
+    --tone: #f2c26b;
+    --tone-soft: rgb(242 194 107 / 0.4);
+}
+.title-badge--creative,
+.title-badge--wise {
+    --tone: #b083ff;
+    --tone-soft: rgb(176 131 255 / 0.38);
+}
+.title-badge--excellent,
+.title-badge--strategist {
+    --tone: #56c8d6;
+    --tone-soft: rgb(86 200 214 / 0.35);
+}
+.title-badge--challenger,
+.title-badge--leader {
+    --tone: #e8645a;
+    --tone-soft: rgb(232 100 90 / 0.38);
+}
+.title-badge__icon {
+    position: relative;
+    z-index: 1;
+    inline-size: 2.6em;
+    block-size: 2.6em;
+    margin-block-end: -0.7em;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px var(--tone-soft));
+    animation: title-float 4.5s ease-in-out infinite;
+}
+.title-badge__plate {
+    position: relative;
+    display: inline-block;
+    padding: 0.32em 1.1em 0.38em;
+    border: 1px solid var(--tone);
+    border-radius: 999px;
+    background: radial-gradient(120% 140% at 50% 120%, var(--tone-soft), transparent 60%), rgba(8, 7, 6, 0.75);
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.6) inset,
+        0 0 12px var(--tone-soft);
+    animation: title-glow 3.4s ease-in-out infinite;
+}
+/* The small diamond under the frame, as in the artwork. */
+.title-badge__plate::after {
+    content: '';
+    position: absolute;
+    inset-block-end: -0.32em;
+    inset-inline-start: 50%;
+    inline-size: 0.55em;
+    block-size: 0.55em;
+    translate: -50% 0;
+    rotate: 45deg;
+    border: 1px solid var(--tone);
+    background: #0b0a08;
+    box-shadow: 0 0 6px var(--tone-soft);
+}
+.title-badge__text {
+    font-weight: 700;
+    background: linear-gradient(100deg, var(--tone) 0%, var(--tone) 40%, #fffaf0 50%, var(--tone) 60%, var(--tone) 100%)
+        0 0 / 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: title-shine 4.8s ease-in-out infinite;
+}
+.title-badge--sm {
+    font-size: var(--text-xs);
+}
+.title-badge--sm .title-badge__plate {
+    padding: 0.18em 0.75em 0.22em;
+}
+.title-badge--sm .title-badge__plate::after {
+    display: none;
+}
+.title-badge--md {
+    font-size: var(--text-sm);
+}
+.title-badge--lg {
+    font-size: var(--text-lg);
+}
+.title-badge--plain .title-badge__plate {
+    animation: none;
+}
+@keyframes title-shine {
+    0% {
+        background-position: 120% 0;
+    }
+    45%,
+    100% {
+        background-position: -20% 0;
+    }
+}
+@keyframes title-glow {
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.6) inset,
+            0 0 8px var(--tone-soft);
+    }
+    50% {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.6) inset,
+            0 0 18px var(--tone-soft);
+    }
+}
+@keyframes title-float {
+    0%,
+    100% {
+        translate: 0 0;
+    }
+    50% {
+        translate: 0 -3px;
+    }
+}
+
+/* ── Animated portraits from the store ──────────────────────────────── */
+.portrait-live {
+    position: relative;
+    overflow: hidden;
+}
+.portrait-live > img:first-child {
+    animation: portrait-breathe 9s ease-in-out infinite;
+    transform-origin: 50% 35%;
+}
+.portrait-live::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 40%, rgb(255 255 255 / 0.28) 50%, transparent 60%) no-repeat;
+    background-size: 260% 100%;
+    background-position: 160% 0;
+    mix-blend-mode: screen;
+    animation: frame-shine 6s ease-in-out infinite;
+}
+@keyframes portrait-breathe {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.07) translateY(-1.5%);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .title-badge__icon,
+    .title-badge__plate,
+    .title-badge__text,
+    .portrait-live > img:first-child,
+    .portrait-live::after {
+        animation: none;
+    }
+}
+
+/* ── Collection, danger zone ────────────────────────────────────────── */
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: var(--space-3);
+}
+.collection-card {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-3);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+    text-align: center;
+}
+.collection-card--on {
+    border-color: rgb(var(--accent-rgb) / 0.65);
+    box-shadow: var(--shadow-glow);
+}
+.btn--danger {
+    border-color: rgb(232 86 111 / 0.7);
+    background: rgb(232 86 111 / 0.14);
+    color: #ffb4c0;
+}
+.btn--danger:hover:not(:disabled) {
+    background: rgb(232 86 111 / 0.24);
+}
+.danger-zone {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-block-start: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid rgb(232 86 111 / 0.4);
+    border-radius: var(--radius-md);
+    background: rgb(232 86 111 / 0.05);
+}
+.danger-zone p {
+    margin: var(--space-1) 0 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    max-inline-size: 60ch;
+}
+.danger-zone--panel {
+    margin-block-start: 0;
+}
+/* A live portrait inside a frame window keeps the window's own placement. */
+.avatar__window.portrait-live,
+.profile-hero__window.portrait-live {
+    position: absolute;
+}
+/* Title previews in the store's small picture boxes. */
+.store-art--title {
+    display: grid;
+    place-items: center;
+}
+.store-art .title-badge {
+    font-size: 0.7rem;
+}
+.store-art .title-badge__icon {
+    inline-size: 3.4em;
+    block-size: 3.4em;
+}
+.store-art .title-badge {
+    font-size: 0.78rem;
+}
+.store-art .title-badge__icon {
+    inline-size: 4.6em;
+    block-size: 4.6em;
+    margin-block-end: -1em;
+}

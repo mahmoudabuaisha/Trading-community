@@ -348,6 +348,8 @@ export const repository = {
         request<{ notice: string }>('GET', '/admin/subscription-notice').then((r) => r.notice),
     adminSaveSubscriptionNotice: (notice: string) =>
         request<{ notice: string }>('PUT', '/admin/subscription-notice', { notice }).then((r) => r.notice),
+    adminDeleteUser: (id: number) => request<{ deleted: number }>('DELETE', `/admin/users/${id}`),
+    adminPurgeMembers: (confirm: string) => request<{ deleted: number }>('POST', '/admin/members/purge', { confirm }),
     adminUserDetails: (id: number) => request<UserDetails>('GET', `/admin/users/${id}`),
     adminBroadcastSchedules: () =>
         request<{ timezone: string; schedules: BroadcastSchedule[] }>('GET', '/admin/broadcast-schedules'),

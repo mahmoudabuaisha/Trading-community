@@ -7,6 +7,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Crown,
+    Gem,
     Gift,
     House,
     Lock,
@@ -21,6 +22,9 @@ import {
 import { computed, nextTick, reactive, ref, type Component } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import NameEmblem from '../components/NameEmblem.vue'
+import TitleBadge from '../components/TitleBadge.vue'
+import { isLivePortrait } from '../lib/portraits'
+import ProfileCollection from '../components/profile/ProfileCollection.vue'
 import ProfileNotifications from '../components/profile/ProfileNotifications.vue'
 import ProfilePrivacy from '../components/profile/ProfilePrivacy.vue'
 import ProfileRewards from '../components/profile/ProfileRewards.vue'
@@ -43,7 +47,7 @@ const route = useRoute()
 const router = useRouter()
 
 const user = computed(() => auth.user!)
-type Section = 'settings' | 'notifications' | 'privacy' | 'security' | 'stats' | 'rewards'
+type Section = 'settings' | 'notifications' | 'privacy' | 'security' | 'stats' | 'rewards' | 'collection'
 const section = computed(() => (route.params.section || null) as Section | null)
 /** Grouped the way most apps do: how the app behaves, then the member's own record. */
 const groups: { id: string; items: { id: Section; icon: Component }[] }[] = [
@@ -59,6 +63,7 @@ const groups: { id: string; items: { id: Section; icon: Component }[] }[] = [
     {
         id: 'record',
         items: [
+            { id: 'collection', icon: Gem },
             { id: 'stats', icon: BarChart3 },
             { id: 'rewards', icon: Gift },
         ],
@@ -71,6 +76,7 @@ const panels: Record<Section, Component> = {
     security: ProfileSecurity,
     stats: ProfileStats,
     rewards: ProfileRewards,
+    collection: ProfileCollection,
 }
 
 /** "Back" points against the reading direction; rows open in the reading direction. */
@@ -185,7 +191,13 @@ async function signOut(): Promise<void> {
                         {{ user.displayName }}
                         <NameEmblem :emblem="user.emblem" />
                     </h3>
-                    <p v-if="user.title" class="profile-hero__title">{{ user.title }}</p>
+                    <TitleBadge
+                        v-if="user.title"
+                        :text="user.title"
+                        :look="user.titleStyle"
+                        size="lg"
+                        class="profile-hero__title"
+                    />
                     <p>
                         <Mail :size="20" aria-hidden="true" /> <bdi>{{ user.email }}</bdi>
                     </p>
@@ -213,7 +225,7 @@ async function signOut(): Promise<void> {
                     :aria-label="t('profile.changeAvatar')"
                     @click="fileInput?.click()"
                 >
-                    <span class="profile-hero__window">
+                    <span class="profile-hero__window" :class="{ 'portrait-live': isLivePortrait(user.avatarUrl) }">
                         <img v-if="user.avatarUrl" :src="user.avatarUrl" alt="" />
                         <UserRound v-else :size="84" aria-hidden="true" />
                     </span>

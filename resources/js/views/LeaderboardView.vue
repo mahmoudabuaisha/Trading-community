@@ -2,6 +2,7 @@
 import { CalendarCheck, CircleCheckBig, Crown, Flame, Star, Trophy, Zap } from 'lucide-vue-next'
 import { computed, onMounted, ref, type Component } from 'vue'
 import NameEmblem from '../components/NameEmblem.vue'
+import TitleBadge from '../components/TitleBadge.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { repository } from '../data/repository'
 import { t } from '../i18n'
@@ -59,7 +60,12 @@ onMounted(async () => {
                     <div class="leader-star__text">
                         <span class="eyebrow">{{ t('leaders.featured') }}</span>
                         <h3>{{ nameOf(featured) }} <NameEmblem :emblem="featured.emblem" /></h3>
-                        <small v-if="featured.title">{{ featured.title }}</small>
+                        <TitleBadge
+                            v-if="featured.title"
+                            :text="featured.title"
+                            :look="featured.titleStyle"
+                            size="md"
+                        />
                         <p>
                             <CircleCheckBig :size="16" aria-hidden="true" />
                             {{ t('leaders.unitTasks', { n: featured.value }) }}
@@ -118,7 +124,12 @@ onMounted(async () => {
                                         />
                                         <span class="leader-row__name">
                                             <b>{{ nameOf(row) }} <NameEmblem :emblem="row.emblem" /></b>
-                                            <small v-if="row.title">{{ row.title }}</small>
+                                            <TitleBadge
+                                                v-if="row.title"
+                                                :text="row.title"
+                                                :look="row.titleStyle"
+                                                size="sm"
+                                            />
                                         </span>
                                     </span>
                                     <span v-else class="hint">{{ t('leaders.open') }}</span>

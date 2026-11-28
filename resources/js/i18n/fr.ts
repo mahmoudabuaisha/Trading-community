@@ -302,6 +302,20 @@ export const fr: Messages = {
         equipped: 'Utilisé',
     },
     store: {
+        titleStyles: {
+            committed: "L'Engagé",
+            persistent: 'Le Persévérant',
+            achiever: 'Le Bâtisseur',
+            ambitious: "L'Ambitieux",
+            creative: 'Le Créatif',
+            excellent: "L'Excellent",
+            challenger: 'Le Challenger',
+            professional: 'Le Professionnel',
+            wise: 'Le Sage',
+            strategist: 'Le Stratège',
+            leader: 'Le Leader',
+            legend: 'La Légende',
+        },
         subscribersOnly: 'Réservé aux abonnés',
         download: 'Télécharger',
         open: 'Ouvrir le lien',
@@ -574,6 +588,14 @@ export const fr: Messages = {
             text: "Des suggestions instantanées tirées de vos données.\n• Pour vos questions, utilisez le bouton d'assistant flottant.",
         },
     },
+    collection: {
+        count: '{n} articles',
+        inUse: 'Utilisé',
+        open: 'Ouvrir dans la boutique',
+        emptyTitle: 'Aucun article pour le moment',
+        emptyText: 'Vos achats en boutique (cadres, titres, images…) apparaissent ici, prêts à utiliser.',
+        toStore: 'Aller à la boutique',
+    },
     privacy: {
         showEmblem: 'Afficher mon badge',
         showEmblemHint: 'Le badge à côté de votre nom.',
@@ -811,6 +833,7 @@ export const fr: Messages = {
         photoSaved: 'Photo de profil mise à jour',
         names: { displayName: 'Nom complet', nickname: 'Surnom', surname: 'Nom de famille' },
         section: {
+            collection: 'Ma collection',
             stats: 'Statistiques du compte',
             rewards: 'Mes points et récompenses',
             settings: 'Préférences générales',
@@ -1328,6 +1351,28 @@ export const fr: Messages = {
         },
     },
     admin: {
+        stTitleStyle: 'Style du titre',
+        stTitlePlain: 'Sans style (titre doré simple)',
+        stTitleStyleHint: 'Une icône, une couleur et un cadre animé avec le titre.',
+        stAudience: 'Pour qui est cette image ?',
+        stAudienceHint:
+            'La boutique affiche les images selon le genre du membre ; sans genre indiqué, il voit toutes les images.',
+        deleteAccount: 'Supprimer le compte',
+        deleteAccountHint:
+            'Supprime définitivement le compte et toutes ses données (tâches, objectifs, habitudes, achats, messages, images). La personne peut se réinscrire avec le même e-mail.',
+        deleteConfirm: 'Oui, supprimer définitivement le compte de {name}',
+        accountDeleted: 'Le compte et ses données ont été supprimés',
+        purgeHead: 'Supprimer tous les comptes membres',
+        purgeSub:
+            "Pour repartir à zéro au lancement : supprime définitivement tous les comptes membres et leurs données (l'équipe reste) ; chacun peut se réinscrire. Tapez DELETE pour confirmer.",
+        purgePh: 'Tapez DELETE',
+        purgeBtn: 'Supprimer tous les comptes',
+        purgeDone: '{n} comptes supprimés',
+        audience: {
+            all: 'Tout le monde',
+            male: 'Hommes',
+            female: 'Femmes',
+        },
         copyHead: "Phrases de l'interface",
         copySub:
             "Réécrivez n'importe quelle phrase de la connexion, de l'accueil et du centre de commande. Écrivez-la une fois, dans n'importe quelle langue ; chaque membre la voit traduite.",

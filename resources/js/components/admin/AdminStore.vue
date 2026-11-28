@@ -8,7 +8,14 @@ import { useAuthStore } from '../../stores/auth'
 import { t } from '../../i18n'
 import { useAdminStore } from '../../stores/admin'
 import { useUiStore } from '../../stores/ui'
-import { FRAME_STYLES, STORE_KINDS, type StoreCategory, type StoreItem, type StoreKind } from '../../types/domain'
+import {
+    FRAME_STYLES,
+    STORE_KINDS,
+    TITLE_STYLES,
+    type StoreCategory,
+    type StoreItem,
+    type StoreKind,
+} from '../../types/domain'
 import ConfirmDialog from '../ConfirmDialog.vue'
 import EmptyState from '../EmptyState.vue'
 import StoreArt from '../StoreArt.vue'
@@ -29,6 +36,8 @@ const blank = () => ({
     categoryId: null as number | null,
     link: '',
     isExclusive: false,
+    style: '',
+    audience: '',
     themeAccent: '#3fc48a',
     themeBackground: '#07080a',
     useBackground: false,
@@ -155,6 +164,8 @@ function edit(item: StoreItem): void {
         categoryId: item.categoryId,
         link: item.link ?? '',
         isExclusive: item.isExclusive,
+        style: item.style ?? '',
+        audience: item.audience ?? '',
         themeAccent: item.themeAccent ?? '#3fc48a',
         themeBackground: item.themeBackground ?? '#07080a',
         useBackground: item.themeBackground !== null,
@@ -181,6 +192,8 @@ async function save(): Promise<void> {
             name: input.name.trim(),
             description: input.description.trim(),
             value: input.value.trim(),
+            style: input.kind === 'title' ? input.style : '',
+            audience: input.kind === 'avatar' ? input.audience : '',
             price: Math.max(0, Math.round(Number(input.price))),
             image: image.value,
             removeImage: removeImage.value,
@@ -318,7 +331,26 @@ async function confirmDelete(): Promise<void> {
                     />
                     <small v-if="errors.value" class="field__error">{{ errors.value[0] }}</small>
                 </label>
-                <label v-else-if="draft.kind === 'frame'" class="field">
+                <label v-if="draft.kind === 'title'" class="field">
+                    <span>{{ t('admin.stTitleStyle') }}</span>
+                    <select v-model="draft.style" class="input">
+                        <option value="">{{ t('admin.stTitlePlain') }}</option>
+                        <option v-for="look in TITLE_STYLES" :key="look" :value="look">
+                            {{ t(`store.titleStyles.${look}`) }}
+                        </option>
+                    </select>
+                    <small class="hint">{{ t('admin.stTitleStyleHint') }}</small>
+                </label>
+                <label v-if="draft.kind === 'avatar'" class="field">
+                    <span>{{ t('admin.stAudience') }}</span>
+                    <select v-model="draft.audience" class="input">
+                        <option value="">{{ t('admin.audience.all') }}</option>
+                        <option value="male">{{ t('admin.audience.male') }}</option>
+                        <option value="female">{{ t('admin.audience.female') }}</option>
+                    </select>
+                    <small class="hint">{{ t('admin.stAudienceHint') }}</small>
+                </label>
+                <label v-if="draft.kind === 'frame'" class="field">
                     <span>{{ t('admin.stFrameStyle') }}</span>
                     <select v-model="draft.value" class="input">
                         <option v-for="style in FRAME_STYLES" :key="style" :value="style">
@@ -491,6 +523,7 @@ async function confirmDelete(): Promise<void> {
                         themeBackground: themeBase,
                         themeImageUrl: removeThemeImage ? null : themePreview,
                         name: draft.name,
+                        style: draft.style || null,
                     }"
                 />
                 <button type="button" class="btn btn--outline" @click="fileInput?.click()">

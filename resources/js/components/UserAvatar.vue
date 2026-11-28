@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { frameSrc, isFrameStyle } from '../lib/frames'
+import { isLivePortrait } from '../lib/portraits'
 
 /**
  * A member's photo (or initial). With a frame, the photo sits in the frame's
@@ -11,6 +12,7 @@ const props = defineProps<{ name: string; src?: string | null; size?: 'sm' | 'md
 const picture = computed(() => frameSrc(props.frame))
 /** The six illustrated frames share one cut; uploaded frames use their own proportions. */
 const illustrated = computed(() => isFrameStyle(props.frame))
+const live = computed(() => isLivePortrait(props.src))
 </script>
 
 <template>
@@ -19,10 +21,11 @@ const illustrated = computed(() => isFrameStyle(props.frame))
         :class="[
             `avatar--${size ?? 'md'}`,
             picture ? (illustrated ? `avatar--framed avatar--framed-${frame}` : 'avatar--frame-picture') : '',
+            { 'portrait-live': live && !(picture && illustrated) },
         ]"
         :style="picture && illustrated ? { '--frame-src': `url(${picture})` } : undefined"
     >
-        <span v-if="picture && illustrated" class="avatar__window">
+        <span v-if="picture && illustrated" class="avatar__window" :class="{ 'portrait-live': live }">
             <img v-if="src" :src="src" alt="" class="avatar__photo" />
             <template v-else>{{ name.trim().slice(0, 1).toUpperCase() || '?' }}</template>
         </span>

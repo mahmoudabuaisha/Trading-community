@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Award, CircleCheckBig, Flame, ListTodo, ShoppingBag, Star, Target, Timer, X } from 'lucide-vue-next'
+import { Award, CircleCheckBig, Flame, ListTodo, ShoppingBag, Star, Target, Timer, Trash2, X } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { repository } from '../../data/repository'
 import { formatDate, messages, t } from '../../i18n'
@@ -10,7 +10,7 @@ import UserAvatar from '../UserAvatar.vue'
 
 /** Everything about one account, read-only. Private messages are deliberately not part of it. */
 const props = defineProps<{ userId: number }>()
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; deleted: [] }>()
 const ui = useUiStore()
 
 const dialog = ref<HTMLDialogElement | null>(null)
@@ -26,6 +26,23 @@ onMounted(async () => {
         emit('close')
     }
 })
+
+/** Deleting asks once more, naming the account, then removes it with all its data. */
+const confirming = ref(false)
+const deleting = ref(false)
+async function remove(): Promise<void> {
+    deleting.value = true
+    try {
+        await repository.adminDeleteUser(props.userId)
+        ui.success(t('admin.accountDeleted'))
+        emit('deleted')
+        emit('close')
+    } catch (error) {
+        ui.failure(error)
+    } finally {
+        deleting.value = false
+    }
+}
 
 const date = (iso: string | null) => (iso ? formatDate(iso, { dateStyle: 'medium' }) : '—')
 const dateTime = (iso: string | null) => (iso ? formatDate(iso, { dateStyle: 'medium', timeStyle: 'short' }) : '—')
@@ -223,6 +240,23 @@ const achievementTitle = (item: { key: string; title: string | null }) =>
                     </ul>
                 </section>
                 <p class="hint">{{ t('admin.udPrivacy') }}</p>
+                <section v-if="details.user.role === 'user'" class="danger-zone">
+                    <div>
+                        <b>{{ t('admin.deleteAccount') }}</b>
+                        <p>{{ t('admin.deleteAccountHint') }}</p>
+                    </div>
+                    <button v-if="!confirming" type="button" class="btn btn--danger" @click="confirming = true">
+                        <Trash2 :size="15" aria-hidden="true" /> {{ t('admin.deleteAccount') }}
+                    </button>
+                    <div v-else class="row-actions">
+                        <button type="button" class="btn btn--outline" @click="confirming = false">
+                            {{ t('common.cancel') }}
+                        </button>
+                        <button type="button" class="btn btn--danger" :disabled="deleting" @click="remove">
+                            {{ t('admin.deleteConfirm', { name: details.user.displayName }) }}
+                        </button>
+                    </div>
+                </section>
             </template>
             <p v-else class="hint">{{ t('common.loading') }}</p>
         </div>

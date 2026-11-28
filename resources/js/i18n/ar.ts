@@ -296,6 +296,20 @@ export const ar = {
         equipped: 'مستخدم',
     },
     store: {
+        titleStyles: {
+            committed: 'الملتزم',
+            persistent: 'المثابر',
+            achiever: 'المنجز',
+            ambitious: 'الطموح',
+            creative: 'المبدع',
+            excellent: 'المتفوق',
+            challenger: 'المتحدي',
+            professional: 'المحترف',
+            wise: 'الحكيم',
+            strategist: 'الاستراتيجي',
+            leader: 'القائد',
+            legend: 'الأسطورة',
+        },
         subscribersOnly: 'للمشتركين فقط',
         download: 'تنزيل',
         open: 'فتح الرابط',
@@ -563,6 +577,14 @@ export const ar = {
             text: 'اقتراحات فورية من بياناتك.\n• وللأسئلة استخدم زر المساعد العائم أسفل الشاشة.',
         },
     },
+    collection: {
+        count: '{n} عنصر',
+        inUse: 'مستخدم الآن',
+        open: 'افتح في المتجر',
+        emptyTitle: 'لا مقتنيات بعد',
+        emptyText: 'ما تشتريه من المتجر (إطارات، ألقاب، صور…) يظهر هنا لتستخدمه متى شئت.',
+        toStore: 'اذهب إلى المتجر',
+    },
     privacy: {
         showEmblem: 'إظهار شارتي',
         showEmblemHint: 'الشارة التي بجانب اسمك.',
@@ -791,6 +813,7 @@ export const ar = {
         photoSaved: 'تم تحديث الصورة الشخصية',
         names: { displayName: 'الاسم الكامل', nickname: 'اللقب', surname: 'اسم العائلة' },
         section: {
+            collection: 'مقتنياتي',
             stats: 'إحصائيات الحساب',
             rewards: 'نقاطي ومكافآتي',
             settings: 'التفضيلات العامة',
@@ -1260,6 +1283,27 @@ export const ar = {
         },
     },
     admin: {
+        stTitleStyle: 'شكل اللقب',
+        stTitlePlain: 'بدون شكل (لقب ذهبي بسيط)',
+        stTitleStyleHint: 'أيقونة ولون وإطار متحرك يظهر مع اللقب.',
+        stAudience: 'لمن هذه الصورة؟',
+        stAudienceHint: 'تظهر الصورة في المتجر حسب جنس العضو؛ من لم يحدد جنسه يرى كل الصور.',
+        deleteAccount: 'حذف الحساب',
+        deleteAccountHint:
+            'يحذف الحساب وكل بياناته (المهام والأهداف والعادات والمشتريات والرسائل والصور) نهائياً، ويستطيع صاحبه التسجيل من جديد بنفس الإيميل.',
+        deleteConfirm: 'نعم، احذف حساب {name} نهائياً',
+        accountDeleted: 'تم حذف الحساب وكل بياناته',
+        purgeHead: 'حذف كل حسابات الأعضاء',
+        purgeSub:
+            'للبدء من جديد عند الإطلاق: يحذف كل حسابات الأعضاء وبياناتهم نهائياً (حسابات الإدارة تبقى)، ويستطيع الجميع التسجيل من جديد. اكتب DELETE للتأكيد.',
+        purgePh: 'اكتب DELETE',
+        purgeBtn: 'حذف كل الحسابات',
+        purgeDone: 'تم حذف {n} حساب',
+        audience: {
+            all: 'للجميع',
+            male: 'للذكور',
+            female: 'للإناث',
+        },
         copyHead: 'عبارات الواجهة',
         copySub:
             'غيّر أي عبارة في صفحة الدخول والرئيسية ومركز القيادة. اكتبها مرة واحدة بأي لغة، وتُترجم تلقائياً للعضو حسب لغة الموقع.',

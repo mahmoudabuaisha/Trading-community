@@ -52,6 +52,8 @@ export interface User {
     pointsEarned: number
     /** What the member wears, from the store items they put to use. */
     title: string | null
+    /** The worn title's illustrated look. */
+    titleStyle: string | null
     frame: string
     /** An emoji or picture worn next to the name. */
     emblem: string | null
@@ -385,6 +387,22 @@ export const TIERS = ['premium', 'silver', 'gold', 'platinum', 'elite'] as const
 export const GENDERS = ['male', 'female'] as const
 export type Gender = (typeof GENDERS)[number]
 
+/** Illustrated title looks; their icons live in public/images/titles. */
+export const TITLE_STYLES = [
+    'committed',
+    'persistent',
+    'achiever',
+    'ambitious',
+    'creative',
+    'excellent',
+    'challenger',
+    'professional',
+    'wise',
+    'strategist',
+    'leader',
+    'legend',
+] as const
+
 export const STORE_KINDS = ['title', 'frame', 'emblem', 'theme', 'avatar', 'product'] as const
 export type StoreKind = (typeof STORE_KINDS)[number]
 /** Built-in looks an item can apply; the CSS for each lives in app.css. */
@@ -398,6 +416,10 @@ export interface StoreItem {
     /** The title's text, or the key of a frame style or theme. */
     value: string | null
     imageUrl: string | null
+    /** A profile picture meant for men or women; null is everyone. */
+    audience: Gender | null
+    /** A title's illustrated look. */
+    style: string | null
     price: number
     isActive: boolean
     owned?: boolean
@@ -431,6 +453,8 @@ export interface TranslationSheet {
 }
 
 export interface StoreItemInput {
+    audience?: string
+    style?: string
     name: string
     description: string
     kind: StoreKind
@@ -458,6 +482,7 @@ export interface LeaderboardRow {
     title: string | null
     frame: string
     emblem?: string | null
+    titleStyle?: string | null
     value: number
     /** Today's board: every daily task of the day is done. */
     allDone?: boolean

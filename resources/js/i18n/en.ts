@@ -298,6 +298,20 @@ export const en: Messages = {
         equipped: 'In use',
     },
     store: {
+        titleStyles: {
+            committed: 'The Committed',
+            persistent: 'The Persistent',
+            achiever: 'The Achiever',
+            ambitious: 'The Ambitious',
+            creative: 'The Creative',
+            excellent: 'The Excellent',
+            challenger: 'The Challenger',
+            professional: 'The Professional',
+            wise: 'The Wise',
+            strategist: 'The Strategist',
+            leader: 'The Leader',
+            legend: 'The Legend',
+        },
         subscribersOnly: 'Subscribers only',
         download: 'Download',
         open: 'Open link',
@@ -570,6 +584,14 @@ export const en: Messages = {
             text: 'Instant suggestions from your data.\n• For questions, use the floating assistant button at the bottom.',
         },
     },
+    collection: {
+        count: '{n} items',
+        inUse: 'In use',
+        open: 'Open in the store',
+        emptyTitle: 'Nothing collected yet',
+        emptyText: 'What you buy in the store (frames, titles, pictures…) shows here, ready to use.',
+        toStore: 'Go to the store',
+    },
     privacy: {
         showEmblem: 'Show my badge',
         showEmblemHint: 'The badge next to your name.',
@@ -799,6 +821,7 @@ export const en: Messages = {
         photoSaved: 'Profile photo updated',
         names: { displayName: 'Full name', nickname: 'Nickname', surname: 'Family name' },
         section: {
+            collection: 'My collection',
             stats: 'Account statistics',
             rewards: 'My points and rewards',
             settings: 'General preferences',
@@ -1297,6 +1320,27 @@ export const en: Messages = {
         },
     },
     admin: {
+        stTitleStyle: 'Title look',
+        stTitlePlain: 'No look (plain gold title)',
+        stTitleStyleHint: 'An icon, colour and animated frame shown with the title.',
+        stAudience: 'Who is this picture for?',
+        stAudienceHint: "The store shows pictures by the member's gender; members who gave none see every picture.",
+        deleteAccount: 'Delete account',
+        deleteAccountHint:
+            'Deletes the account and all its data (tasks, goals, habits, purchases, messages and pictures) for good. The person can sign up again with the same email.',
+        deleteConfirm: "Yes, delete {name}'s account for good",
+        accountDeleted: 'The account and all its data were deleted',
+        purgeHead: 'Delete every member account',
+        purgeSub:
+            'For a fresh start at launch: deletes every member account and its data for good (staff accounts stay); everyone can sign up again. Type DELETE to confirm.',
+        purgePh: 'Type DELETE',
+        purgeBtn: 'Delete every account',
+        purgeDone: '{n} accounts deleted',
+        audience: {
+            all: 'Everyone',
+            male: 'Men',
+            female: 'Women',
+        },
         copyHead: 'Interface phrases',
         copySub:
             'Rewrite any phrase of the sign-in page, home page and command center. Write it once in any language; members see it translated into theirs.',

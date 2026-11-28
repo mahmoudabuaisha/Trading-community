@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { Package, Palette, Tag, UserRound } from 'lucide-vue-next'
+import { Package, Palette, UserRound } from 'lucide-vue-next'
 import type { StoreItem } from '../types/domain'
+import TitleBadge from './TitleBadge.vue'
 import UserAvatar from './UserAvatar.vue'
+import { isLivePortrait } from '../lib/portraits'
 
 /**
  * The picture of a store item: its uploaded image when it has one, otherwise
@@ -9,6 +11,7 @@ import UserAvatar from './UserAvatar.vue'
  */
 defineProps<{
     item: Pick<StoreItem, 'kind' | 'value' | 'imageUrl' | 'name'> &
+        Partial<Pick<StoreItem, 'style'>> &
         Partial<Pick<StoreItem, 'themeAccent' | 'themeBackground' | 'themeImageUrl'>>
 }>()
 </script>
@@ -16,7 +19,10 @@ defineProps<{
 <template>
     <span
         class="store-art"
-        :class="`store-art--${item.kind}`"
+        :class="[
+            `store-art--${item.kind}`,
+            { 'portrait-live': item.kind === 'avatar' && isLivePortrait(item.imageUrl) },
+        ]"
         :style="
             item.kind === 'theme' && item.themeAccent
                 ? { '--swatch': item.themeAccent, '--swatch-bg': item.themeBackground ?? '#07080a' }
@@ -40,9 +46,7 @@ defineProps<{
             ><Palette :size="30" aria-hidden="true"
         /></span>
         <span v-else-if="item.kind === 'emblem'" class="store-art__emblem">{{ item.value || '✦' }}</span>
-        <span v-else-if="item.kind === 'title'" class="store-art__title"
-            ><Tag :size="18" aria-hidden="true" /> {{ item.value }}</span
-        >
+        <TitleBadge v-else-if="item.kind === 'title'" :text="item.value ?? ''" :look="item.style" size="md" />
         <Package v-else-if="item.kind === 'product'" :size="40" aria-hidden="true" />
         <UserRound v-else :size="40" aria-hidden="true" />
     </span>
